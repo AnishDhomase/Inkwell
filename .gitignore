@@ -1,0 +1,5 @@
+backend/node_modules
+backend/.env
+backend/wrangler.toml
+common/node_modules
+common/dist
