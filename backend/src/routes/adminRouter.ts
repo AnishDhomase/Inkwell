@@ -2,25 +2,20 @@ import { Hono } from "hono";
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { sign, verify } from "hono/jwt";
-import {
-  signupInput,
-  signinInput,
-  profileDescription,
-  profileTopics,
-} from "@anishdhomase/blog_app";
+import { signupInput, signinInput } from "@anishdhomase/blog_app";
 
-const userRouter = new Hono<{
+const adminRouter = new Hono<{
   Bindings: {
     DATABASE_URL: string;
     JWT_SECRET: string;
+    ADMIN_SECRET: string;
   };
   Variables: {
     userId: string;
   };
 }>();
 
-// Signup, Signin
-userRouter.post("/signup", async function (c) {
+adminRouter.post("/signup", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
@@ -32,7 +27,11 @@ userRouter.post("/signup", async function (c) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
-    const newUser = await prisma.user.create({
+    if (body.password !== c.env.ADMIN_SECRET) {
+      c.status(400);
+      return c.json({ success: false, error: "Unauthorized!" });
+    }
+    const newAdmin = await prisma.admin.create({
       data: {
         name: body.name,
         username: body.username,
@@ -40,8 +39,11 @@ userRouter.post("/signup", async function (c) {
         password: body.password,
       },
     });
-    const token = await sign({ userId: newUser.id }, c.env?.JWT_SECRET);
-    return c.json({ success: true, data: { token: `Bearer ${token}` } });
+    const token = await sign(
+      { adminId: newAdmin.id, permission: "admin" },
+      c.env.JWT_SECRET
+    );
+    return c.json({ success: true, token: `Bearer ${token}` });
   } catch {
     return c.json({
       success: false,
@@ -49,7 +51,7 @@ userRouter.post("/signup", async function (c) {
     });
   }
 });
-userRouter.post("/signin", async function (c) {
+adminRouter.post("/signin", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
@@ -65,21 +67,24 @@ userRouter.post("/signin", async function (c) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
-    const foundUser = await prisma.user.findFirst({
+    const foundAdmin = await prisma.admin.findFirst({
       where: {
         email: body.email,
         password: body.password,
       },
     });
-    if (!foundUser) {
+    if (!foundAdmin) {
       c.status(400);
       return c.json({
         success: false,
-        error: "No such user found!",
+        error: "No such admin found!",
       });
     }
-    const token = await sign({ userId: foundUser.id }, c.env?.JWT_SECRET);
-    return c.json({ success: true, data: { token: `Bearer ${token}` } });
+    const token = await sign(
+      { adminId: foundAdmin.id, permission: "admin" },
+      c.env?.JWT_SECRET
+    );
+    return c.json({ success: true, token: `Bearer ${token}` });
   } catch {
     return c.json({
       success: false,
@@ -89,7 +94,7 @@ userRouter.post("/signin", async function (c) {
 });
 
 // Auth Middleware
-userRouter.use(async (c, next) => {
+adminRouter.use(async (c, next) => {
   const jwt = c.req.header("Authorization");
   if (!jwt) {
     c.status(400);
@@ -102,109 +107,101 @@ userRouter.use(async (c, next) => {
       c.status(400);
       return c.json({ success: false, error: "Unauthorized!" });
     }
-    c.set("jwtPayload", payload.userId);
+    c.set("jwtPayload", payload.adminId);
     await next();
   } catch {
     c.status(401);
     return c.json({ success: false, error: "Unauthorized!" });
   }
 });
-
-// Update Description
-userRouter.post("/:userId/description", async function (c) {
+adminRouter.post("/:adminId/topics", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
 
-  const userId = c.get("jwtPayload");
   const body = await c.req.json();
-  const { success } = profileDescription.safeParse(body);
-  if (!success) {
+  if (!body) {
     c.status(400);
     return c.json({ success: false, error: "Your Inputs are not valid!" });
   }
-  const updatedUser = await prisma.user.update({
-    where: {
-      id: userId,
-    },
-    data: {
-      description: body.description,
-    },
-  });
-  return c.json({ success: true });
-});
-// Update Favorite Topics
-userRouter.post("/:userId/topics", async function (c) {
-  const prisma = new PrismaClient({
-    datasourceUrl: c.env?.DATABASE_URL,
-  }).$extends(withAccelerate());
   try {
-    const userId = c.get("jwtPayload");
-    const body = await c.req.json();
-    const { success } = profileTopics.safeParse(body);
-    if (!success) {
+    if (!body.topic) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
-    const updatedUser = await prisma.user.update({
-      where: {
-        id: userId,
-      },
+    let formattedTopic = body.topic.toLowerCase();
+    formattedTopic = formattedTopic[0].toUpperCase() + formattedTopic.slice(1);
+    await prisma.topic.create({
       data: {
-        favoriteTopics: {
-          set: body.favoriteTopics.map((id: Number) => ({ id })),
-        },
+        name: formattedTopic,
       },
     });
     return c.json({ success: true });
-  } catch (e) {
+  } catch {
     return c.json({
       success: false,
       error: "Something went wrong! Your Inputs are not correct!",
     });
   }
 });
-// Get User Details
-userRouter.get("/:userId/details", async function (c) {
+adminRouter.put("/:adminId/topics", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
+
+  const body = await c.req.json();
+  if (!body) {
+    c.status(400);
+    return c.json({ success: false, error: "Your Inputs are not valid!" });
+  }
   try {
-    const userId = c.get("jwtPayload");
-    const userDetails = await prisma.user.findFirst({
+    if (!body.topicId || !body.topic) {
+      c.status(400);
+      return c.json({ success: false, error: "Your Inputs are not valid!" });
+    }
+    await prisma.topic.updateMany({
       where: {
-        id: userId,
+        id: Number(body.topicId),
       },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        name: true,
-        password: true,
-        profilePic: true,
-        description: true,
-        createdAt: true,
-
-        // Actions
-        blogs: true,
-        savedBlogs: true,
-        likedBlogs: true,
-        comments: true,
-        followers: true,
-        following: true,
-        notifications: true,
-
-        // Preferences
-        favoriteTopics: true,
+      data: {
+        name: body.topic,
       },
     });
-    return c.json({ success: true, data: userDetails });
-  } catch (e) {
+    return c.json({ success: true });
+  } catch {
     return c.json({
       success: false,
-      e,
-      error: "Something went wrong!",
+      error: "Something went wrong! Your Inputs are not correct!",
     });
   }
 });
-export default userRouter;
+adminRouter.delete("/:adminId/topics", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  const body = await c.req.json();
+  if (!body) {
+    c.status(400);
+    return c.json({ success: false, error: "Your Inputs are not valid!" });
+  }
+  try {
+    if (!body.topicId) {
+      c.status(400);
+      return c.json({ success: false, error: "Your Inputs are not valid!" });
+    }
+    await prisma.topic.deleteMany({
+      where: {
+        id: Number(body.topicId),
+      },
+    });
+    return c.json({ success: true });
+  } catch {
+    return c.json({
+      success: false,
+      error: "Something went wrong! Your Inputs are not correct!",
+    });
+  }
+});
+
+export default adminRouter;

@@ -59,13 +59,22 @@ model Comment {
   author         User     @relation(fields: [authorId], references: [id])
   blog           Blog     @relation(fields: [blogId], references: [id])
 }
-
 model Topic {
-  //Primary
   id             Int      @id @default(autoincrement())
   name           String   @unique
 
   // Relations
   userTopics   User[]   @relation("UserTopics")
   blogTopics   Blog[]   @relation("BlogTopics")
+}
+
+model Admin {
+  //Primary
+  id             Int      @id @default(autoincrement())
+  username       String   @unique
+  email          String   @unique
+  name           String
+  password       String
+  profilePic     String?
+  createdAt      DateTime @default(now())
 }
