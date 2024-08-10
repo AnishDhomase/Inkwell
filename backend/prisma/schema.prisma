@@ -16,6 +16,7 @@ model User {
   password       String
   profilePic     String?
   description    String?
+  favoriteTopics Topic[]  @relation("UserTopics")
   createdAt      DateTime @default(now())
 
   // Actions
@@ -27,24 +28,27 @@ model User {
   following      User[]   @relation("UserFollows")
   notifications  String[] 
 
-  // Preferences
-  favoriteTopics Topic[]  @relation("UserTopics")
+  // admin
+  active         Boolean  @default(true)
 }
 
 model Blog {
   //Primary
   id             Int      @id @default(autoincrement())
-  title          String
-  content        String
+  title          String   @unique
+  content        String   @unique
   authorId       Int
   comments       Comment[]
   topics         Topic[]  @relation("BlogTopics")
   createdAt      DateTime @default(now())
 
   // Relations
-  author         User     @relation(fields: [authorId], references: [id])
+  author         User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   savedByUsers   User[]   @relation("UserSavedBlogs")
   likedByUsers   User[]   @relation("UserLikedBlogs")
+
+  // admin
+  active         Boolean  @default(true)
 }
 
 model Comment {
@@ -56,8 +60,11 @@ model Comment {
   createdAt      DateTime @default(now())
 
   // Relations
-  author         User     @relation(fields: [authorId], references: [id])
-  blog           Blog     @relation(fields: [blogId], references: [id])
+  author         User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  blog           Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  // admin
+  active         Boolean  @default(true)
 }
 model Topic {
   id             Int      @id @default(autoincrement())

@@ -114,7 +114,8 @@ adminRouter.use(async (c, next) => {
     return c.json({ success: false, error: "Unauthorized!" });
   }
 });
-adminRouter.post("/:adminId/topics", async function (c) {
+// Topics
+adminRouter.post("/topics", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
@@ -144,7 +145,7 @@ adminRouter.post("/:adminId/topics", async function (c) {
     });
   }
 });
-adminRouter.put("/:adminId/topics", async function (c) {
+adminRouter.put("/topics", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
@@ -175,24 +176,20 @@ adminRouter.put("/:adminId/topics", async function (c) {
     });
   }
 });
-adminRouter.delete("/:adminId/topics", async function (c) {
+adminRouter.delete("/topics", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
 
   const body = await c.req.json();
-  if (!body) {
+  if (!body || !body.topicId || typeof body.topicId !== "number") {
     c.status(400);
     return c.json({ success: false, error: "Your Inputs are not valid!" });
   }
   try {
-    if (!body.topicId) {
-      c.status(400);
-      return c.json({ success: false, error: "Your Inputs are not valid!" });
-    }
-    await prisma.topic.deleteMany({
+    await prisma.topic.delete({
       where: {
-        id: Number(body.topicId),
+        id: body.topicId,
       },
     });
     return c.json({ success: true });
@@ -200,6 +197,171 @@ adminRouter.delete("/:adminId/topics", async function (c) {
     return c.json({
       success: false,
       error: "Something went wrong! Your Inputs are not correct!",
+    });
+  }
+});
+// Blogs
+adminRouter.delete("/blog", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const body = await c.req.json();
+    if (!body || !body.blogId || typeof body.blogId !== "number") {
+      c.status(400);
+      return c.json({ success: false, error: "Your Inputs are not valid!" });
+    }
+    const blogToDelete = await prisma.blog.findFirst({
+      where: {
+        id: body.blogId,
+      },
+      select: {
+        authorId: true,
+        title: true,
+      },
+    });
+    if (!blogToDelete) {
+      c.status(400);
+      return c.json({ success: false, error: "No such blog found!" });
+    }
+    const userWhosBlogToDelete = await prisma.user.findFirst({
+      where: {
+        id: blogToDelete.authorId,
+      },
+      select: {
+        id: true,
+      },
+    });
+    await prisma.blog.delete({
+      where: {
+        id: body.blogId,
+      },
+    });
+    // await prisma.blog.update({
+    //   where: {
+    //     id: body.blogId,
+    //   },
+    //   data: {
+    //     active: false,
+    //   },
+    // });
+    const newNotification = `Admin deleted your ${blogToDelete?.title} blog!`;
+    await prisma.user.update({
+      where: {
+        id: userWhosBlogToDelete?.id,
+      },
+      data: {
+        notifications: {
+          push: newNotification,
+        },
+      },
+    });
+    return c.json({ success: true });
+  } catch (e) {
+    c.status(400);
+    return c.json({
+      success: false,
+      e,
+      error: "Something went wrong! Unable to delete blog!",
+    });
+  }
+});
+// Comment
+adminRouter.delete("/comment", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const body = await c.req.json();
+    if (!body || !body.commentId || typeof body.commentId !== "number") {
+      c.status(400);
+      return c.json({ success: false, error: "Your Inputs are not valid!" });
+    }
+    const commentToDelete = await prisma.comment.findFirst({
+      where: {
+        id: body.commentId,
+      },
+      select: {
+        authorId: true,
+        content: true,
+      },
+    });
+    if (!commentToDelete) {
+      c.status(400);
+      return c.json({ success: false, error: "No such comment found!" });
+    }
+    const userWhosCommentToDelete = await prisma.user.findFirst({
+      where: {
+        id: commentToDelete.authorId,
+      },
+      select: {
+        id: true,
+      },
+    });
+    await prisma.comment.delete({
+      where: {
+        id: body.commentId,
+      },
+    });
+    // await prisma.comment.update({
+    //   where: {
+    //     id: body.commentId,
+    //   },
+    //   data: {
+    //     active: false,
+    //   },
+    // });
+    const newNotification = `Admin deleted your '${commentToDelete?.content}' Comment!`;
+    await prisma.user.update({
+      where: {
+        id: userWhosCommentToDelete?.id,
+      },
+      data: {
+        notifications: {
+          push: newNotification,
+        },
+      },
+    });
+    return c.json({ success: true });
+  } catch (e) {
+    c.status(400);
+    return c.json({
+      success: false,
+      e,
+      error: "Something went wrong! Unable to delete comment!",
+    });
+  }
+});
+// User
+adminRouter.delete("/user", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const body = await c.req.json();
+    if (!body || !body.userId || typeof body.userId !== "number") {
+      c.status(400);
+      return c.json({ success: false, error: "Your Inputs are not valid!" });
+    }
+    await prisma.user.delete({
+      where: {
+        id: Number(body.userId),
+      },
+    });
+    // await prisma.user.update({
+    //   where: {
+    //     id: body.userId,
+    //   },
+    //   data: {
+    //     active: false,
+    //   },
+    // });
+    return c.json({ success: true });
+  } catch (e) {
+    c.status(400);
+    return c.json({
+      success: false,
+      error: "Something went wrong! Unable to delete user!",
     });
   }
 });
