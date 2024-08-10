@@ -9,6 +9,11 @@ import {
   blogInput,
   commentInput,
   commentEditInput,
+  authorDetailsInput,
+  userDescriptionInput,
+  userFollowInput,
+  deleteBlogInput,
+  commentDeleteInput,
 } from "@anishdhomase/blog_app";
 
 const userRouter = new Hono<{
@@ -27,8 +32,8 @@ userRouter.post("/signup", async function (c) {
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
 
-  const body = await c.req.json();
   try {
+    const body = await c.req.json();
     const { success } = signupInput.safeParse(body);
     if (!success) {
       c.status(400);
@@ -42,12 +47,12 @@ userRouter.post("/signup", async function (c) {
         password: body.password,
       },
     });
-    const token = await sign({ userId: newUser.id }, c.env?.JWT_SECRET);
+    const token = await sign({ userId: newUser.id }, c.env.JWT_SECRET);
     return c.json({ success: true, data: { token: `Bearer ${token}` } });
   } catch {
     return c.json({
       success: false,
-      error: "Something went wrong! Your Inputs are not correct!",
+      error: "Something went wrong! Unable to create new account!",
     });
   }
 });
@@ -73,7 +78,7 @@ userRouter.post("/signin", async function (c) {
       c.status(400);
       return c.json({
         success: false,
-        error: "No such user found!",
+        error: "No such account found!",
       });
     }
     const token = await sign({ userId: foundUser.id }, c.env?.JWT_SECRET);
@@ -81,25 +86,26 @@ userRouter.post("/signin", async function (c) {
   } catch {
     return c.json({
       success: false,
-      error: "Something went wrong! Your Inputs are not correct!",
+      error: "Something went wrong! Unable to signin!",
     });
   }
 });
 // Get author details
-userRouter.get("/details/:userId", async function (c) {
+userRouter.get("/details", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
   try {
-    const authorId = c.req.param("userId");
-    if (!authorId) {
+    const body = await c.req.json();
+    const { success } = authorDetailsInput.safeParse(body);
+    if (!success) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
 
     const authorDetails = await prisma.user.findFirst({
       where: {
-        id: Number(authorId),
+        id: body.authorId,
       },
       select: {
         id: true,
@@ -143,28 +149,29 @@ userRouter.get("/details/:userId", async function (c) {
   }
 });
 
-// Auth Middleware
+// 🟢 Auth Middleware 🟢
 userRouter.use(async (c, next) => {
   const jwt = c.req.header("Authorization");
   if (!jwt) {
     c.status(400);
-    return c.json({ success: false, error: "Unauthorized!" });
+    return c.json({ success: false, error: "You are Unauthorized!" });
   }
   try {
     const token = jwt.split(" ")[1];
     const payload = await verify(token, c.env.JWT_SECRET);
     if (!payload) {
       c.status(400);
-      return c.json({ success: false, error: "Unauthorized!" });
+      return c.json({ success: false, error: "You are Unauthorized!" });
     }
     c.set("jwtPayload", payload.userId);
     await next();
   } catch {
     c.status(401);
-    return c.json({ success: false, error: "Unauthorized!" });
+    return c.json({ success: false, error: "You are Unauthorized!" });
   }
 });
 
+// 🚹 User Related Routes 🚹
 // Get User Details
 userRouter.get("/details", async function (c) {
   const prisma = new PrismaClient({
@@ -219,7 +226,7 @@ userRouter.get("/details", async function (c) {
   } catch (e) {
     return c.json({
       success: false,
-      error: "Something went wrong!",
+      error: "Something went wrong! Unable to get your details!",
     });
   }
 });
@@ -228,22 +235,32 @@ userRouter.post("/description", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
-  const body = await c.req.json();
-  if (!body || !body.description) {
-    c.status(400);
-    return c.json({ success: false, error: "Your Inputs are not valid!" });
-  }
-  const userId = c.get("jwtPayload");
+  try {
+    const body = await c.req.json();
+    const { success } = userDescriptionInput.safeParse(body);
 
-  const updatedUser = await prisma.user.update({
-    where: {
-      id: userId,
-    },
-    data: {
-      description: body.description,
-    },
-  });
-  return c.json({ success: true });
+    if (!success) {
+      c.status(400);
+      return c.json({ success: false, error: "Your Inputs are not valid!" });
+    }
+
+    const userId = c.get("jwtPayload");
+
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        description: body.description,
+      },
+    });
+    return c.json({ success: true });
+  } catch (e) {
+    return c.json({
+      success: false,
+      error: "Something went wrong! Unable to add description!",
+    });
+  }
 });
 // Edit Favorite Topics
 userRouter.post("/topics", async function (c) {
@@ -272,7 +289,7 @@ userRouter.post("/topics", async function (c) {
   } catch (e) {
     return c.json({
       success: false,
-      error: "Something went wrong! Your Inputs are not correct!",
+      error: "Something went wrong! Unable to set favourite topics!",
     });
   }
 });
@@ -284,7 +301,8 @@ userRouter.post("/follow", async function (c) {
   try {
     const userId = c.get("jwtPayload");
     const body = await c.req.json();
-    if (!body || !body.followId || typeof body.followId !== "number") {
+    const { success } = userFollowInput.safeParse(body);
+    if (!success) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
@@ -328,7 +346,8 @@ userRouter.put("/unfollow", async function (c) {
   try {
     const userId = c.get("jwtPayload");
     const body = await c.req.json();
-    if (!body || !body.unfollowId || typeof body.unfollowId !== "number") {
+    const { success } = userFollowInput.safeParse(body);
+    if (!success) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
@@ -338,21 +357,7 @@ userRouter.put("/unfollow", async function (c) {
       },
       data: {
         following: {
-          disconnect: { id: body.unfollowId },
-        },
-      },
-      select: {
-        username: true,
-      },
-    });
-    const newNotification = `${updatedUser.username} unfollowed you!`;
-    await prisma.user.update({
-      where: {
-        id: body.unfollowId,
-      },
-      data: {
-        notifications: {
-          push: newNotification,
+          disconnect: { id: body.followId },
         },
       },
     });
@@ -365,6 +370,32 @@ userRouter.put("/unfollow", async function (c) {
     });
   }
 });
+// Clear all notifications
+userRouter.delete("/notifications", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const userId = c.get("jwtPayload");
+    await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        notifications: [],
+      },
+    });
+    return c.json({ success: true });
+  } catch (e) {
+    c.status(400);
+    return c.json({
+      success: false,
+      error: "Something went wrong! Unable to clear notifications!",
+    });
+  }
+});
+
+// 🗒️ Blog Related Routes 🗒️
 // Read, Post, Edit, Delete Blog
 userRouter.get("/blogs", async function (c) {
   const prisma = new PrismaClient({
@@ -460,7 +491,7 @@ userRouter.put("/blog", async function (c) {
     return c.json({
       success: false,
       e,
-      error: "Something went wrong! Unable to create blog!",
+      error: "Something went wrong! Unable to update the blog!",
     });
   }
 });
@@ -470,14 +501,15 @@ userRouter.delete("/blog", async function (c) {
   }).$extends(withAccelerate());
   try {
     const body = await c.req.json();
-    if (!body || !body.blogid || typeof body.blogid !== "number") {
+    const { success } = deleteBlogInput.safeParse(body);
+    if (!success) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
     const userId = c.get("jwtPayload");
     const blogToDelete = await prisma.blog.findFirst({
       where: {
-        id: body.blogid,
+        id: body.blogId,
         authorId: userId,
       },
     });
@@ -487,12 +519,12 @@ userRouter.delete("/blog", async function (c) {
     }
     await prisma.blog.delete({
       where: {
-        id: body.blogid,
+        id: body.blogId,
       },
     });
     // await prisma.blog.update({
     //   where: {
-    //     id: body.blogid,
+    //     id: body.blogId,
     //   },
     //   data: {
     //     active: false,
@@ -504,7 +536,7 @@ userRouter.delete("/blog", async function (c) {
     return c.json({
       success: false,
       e,
-      error: "Something went wrong! Unable to create blog!",
+      error: "Something went wrong! Unable to delete the blog!",
     });
   }
 });
@@ -516,7 +548,8 @@ userRouter.post("/blog/save", async function (c) {
   try {
     const userId = c.get("jwtPayload");
     const body = await c.req.json();
-    if (!body || !body.blogId || typeof body.blogId !== "number") {
+    const { success } = deleteBlogInput.safeParse(body);
+    if (!success) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
@@ -546,7 +579,8 @@ userRouter.put("/blog/unsave", async function (c) {
   try {
     const userId = c.get("jwtPayload");
     const body = await c.req.json();
-    if (!body || !body.blogId || typeof body.blogId !== "number") {
+    const { success } = deleteBlogInput.safeParse(body);
+    if (!success) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
@@ -576,7 +610,8 @@ userRouter.post("/blog/like", async function (c) {
   try {
     const userId = c.get("jwtPayload");
     const body = await c.req.json();
-    if (!body || !body.blogId || typeof body.blogId !== "number") {
+    const { success } = deleteBlogInput.safeParse(body);
+    if (!success) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
@@ -631,7 +666,8 @@ userRouter.put("/blog/unlike", async function (c) {
   try {
     const userId = c.get("jwtPayload");
     const body = await c.req.json();
-    if (!body || !body.blogId || typeof body.blogId !== "number") {
+    const { success } = deleteBlogInput.safeParse(body);
+    if (!success) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
@@ -662,7 +698,7 @@ userRouter.put("/blog/unlike", async function (c) {
     c.status(400);
     return c.json({
       success: false,
-      error: "Something went wrong! Unable to unlike blog!",
+      error: "Something went wrong! Unable to unlike the blog!",
     });
   }
 });
@@ -721,7 +757,7 @@ userRouter.post("/blog/comment", async function (c) {
     c.status(400);
     return c.json({
       success: false,
-      error: "Something went wrong! Unable to like blog!",
+      error: "Something went wrong! Unable to comment on blog!",
     });
   }
 });
@@ -751,7 +787,7 @@ userRouter.put("/blog/comment", async function (c) {
     c.status(400);
     return c.json({
       success: false,
-      error: "Something went wrong! Unable to update comment!",
+      error: "Something went wrong! Unable to edit the comment!",
     });
   }
 });
@@ -762,7 +798,8 @@ userRouter.delete("/blog/comment", async function (c) {
   try {
     const userId = c.get("jwtPayload");
     const body = await c.req.json();
-    if (!body || !body.commentId || typeof body.commentId !== "number") {
+    const { success } = commentDeleteInput.safeParse(body);
+    if (!success) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
@@ -787,31 +824,7 @@ userRouter.delete("/blog/comment", async function (c) {
     c.status(400);
     return c.json({
       success: false,
-      error: "Something went wrong! Unable to delete comment!",
-    });
-  }
-});
-// Clear all notifications
-userRouter.delete("/notifications", async function (c) {
-  const prisma = new PrismaClient({
-    datasourceUrl: c.env?.DATABASE_URL,
-  }).$extends(withAccelerate());
-  try {
-    const userId = c.get("jwtPayload");
-    await prisma.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        notifications: [],
-      },
-    });
-    return c.json({ success: true });
-  } catch (e) {
-    c.status(400);
-    return c.json({
-      success: false,
-      error: "Something went wrong! Unable to clear notifications!",
+      error: "Something went wrong! Unable to delete the comment!",
     });
   }
 });

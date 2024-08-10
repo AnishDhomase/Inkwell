@@ -1,7 +1,6 @@
 generator client {
   provider = "prisma-client-js"
 }
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -31,7 +30,6 @@ model User {
   // admin
   active         Boolean  @default(true)
 }
-
 model Blog {
   //Primary
   id             Int      @id @default(autoincrement())
@@ -50,7 +48,6 @@ model Blog {
   // admin
   active         Boolean  @default(true)
 }
-
 model Comment {
   //Primary
   id             Int      @id @default(autoincrement())
@@ -71,10 +68,9 @@ model Topic {
   name           String   @unique
 
   // Relations
-  userTopics   User[]   @relation("UserTopics")
-  blogTopics   Blog[]   @relation("BlogTopics")
+  userTopics     User[]   @relation("UserTopics")
+  blogTopics     Blog[]   @relation("BlogTopics")
 }
-
 model Admin {
   //Primary
   id             Int      @id @default(autoincrement())

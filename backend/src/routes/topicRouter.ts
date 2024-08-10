@@ -5,7 +5,6 @@ import { sign, verify } from "hono/jwt";
 import {
   signupInput,
   signinInput,
-  profileDescription,
   profileTopics,
 } from "@anishdhomase/blog_app";
 
@@ -29,7 +28,7 @@ topicRouter.get("/", async function (c) {
   } catch {
     return c.json({
       success: false,
-      error: "Something went wrong! Unable to fetch topics!",
+      error: "Something went wrong! Unable to fetch the topics!",
     });
   }
 });

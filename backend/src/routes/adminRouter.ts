@@ -2,7 +2,16 @@ import { Hono } from "hono";
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { sign, verify } from "hono/jwt";
-import { signupInput, signinInput } from "@anishdhomase/blog_app";
+import {
+  signupInput,
+  signinInput,
+  adminTopicAddInput,
+  adminTopicEditInput,
+  adminTopicDeleteInput,
+  deleteBlogInput,
+  commentDeleteInput,
+  adminUserDeleteInput,
+} from "@anishdhomase/blog_app";
 
 const adminRouter = new Hono<{
   Bindings: {
@@ -20,8 +29,8 @@ adminRouter.post("/signup", async function (c) {
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
 
-  const body = await c.req.json();
   try {
+    const body = await c.req.json();
     const { success } = signupInput.safeParse(body);
     if (!success) {
       c.status(400);
@@ -29,7 +38,7 @@ adminRouter.post("/signup", async function (c) {
     }
     if (body.password !== c.env.ADMIN_SECRET) {
       c.status(400);
-      return c.json({ success: false, error: "Unauthorized!" });
+      return c.json({ success: false, error: "You are Unauthorized!" });
     }
     const newAdmin = await prisma.admin.create({
       data: {
@@ -43,11 +52,11 @@ adminRouter.post("/signup", async function (c) {
       { adminId: newAdmin.id, permission: "admin" },
       c.env.JWT_SECRET
     );
-    return c.json({ success: true, token: `Bearer ${token}` });
+    return c.json({ success: true, data: { token: `Bearer ${token}` } });
   } catch {
     return c.json({
       success: false,
-      error: "Something went wrong! Your Inputs are not correct!",
+      error: "Something went wrong! Unable to create admin!",
     });
   }
 });
@@ -56,12 +65,8 @@ adminRouter.post("/signin", async function (c) {
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
 
-  const body = await c.req.json();
-  if (!body) {
-    c.status(400);
-    return c.json({ success: false, error: "Your Inputs are not valid!" });
-  }
   try {
+    const body = await c.req.json();
     const { success } = signinInput.safeParse(body);
     if (!success) {
       c.status(400);
@@ -84,49 +89,46 @@ adminRouter.post("/signin", async function (c) {
       { adminId: foundAdmin.id, permission: "admin" },
       c.env?.JWT_SECRET
     );
-    return c.json({ success: true, token: `Bearer ${token}` });
+    return c.json({ success: true, data: { token: `Bearer ${token}` } });
   } catch {
     return c.json({
       success: false,
-      error: "Something went wrong! Your Inputs are not correct!",
+      error: "Something went wrong! Unable to signin!",
     });
   }
 });
 
-// Auth Middleware
+// 🟢 Auth Middleware 🟢
 adminRouter.use(async (c, next) => {
   const jwt = c.req.header("Authorization");
   if (!jwt) {
     c.status(400);
-    return c.json({ success: false, error: "Unauthorized!" });
+    return c.json({ success: false, error: "You are Unauthorized!" });
   }
   try {
     const token = jwt.split(" ")[1];
     const payload = await verify(token, c.env.JWT_SECRET);
-    if (!payload) {
+    if (!payload || payload.permission !== "admin") {
       c.status(400);
-      return c.json({ success: false, error: "Unauthorized!" });
+      return c.json({ success: false, error: "You are Unauthorized!" });
     }
     c.set("jwtPayload", payload.adminId);
     await next();
   } catch {
     c.status(401);
-    return c.json({ success: false, error: "Unauthorized!" });
+    return c.json({ success: false, error: "You are Unauthorized!" });
   }
 });
+
 // Topics
-adminRouter.post("/topics", async function (c) {
+adminRouter.post("/topic", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
-
-  const body = await c.req.json();
-  if (!body) {
-    c.status(400);
-    return c.json({ success: false, error: "Your Inputs are not valid!" });
-  }
   try {
-    if (!body.topic) {
+    const body = await c.req.json();
+    const { success } = adminTopicAddInput.safeParse(body);
+    if (!success) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
@@ -141,28 +143,24 @@ adminRouter.post("/topics", async function (c) {
   } catch {
     return c.json({
       success: false,
-      error: "Something went wrong! Your Inputs are not correct!",
+      error: "Something went wrong! Unable to create new topic!",
     });
   }
 });
-adminRouter.put("/topics", async function (c) {
+adminRouter.put("/topic", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
-
-  const body = await c.req.json();
-  if (!body) {
-    c.status(400);
-    return c.json({ success: false, error: "Your Inputs are not valid!" });
-  }
   try {
-    if (!body.topicId || !body.topic) {
+    const body = await c.req.json();
+    const { success } = adminTopicEditInput.safeParse(body);
+    if (!success) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
-    await prisma.topic.updateMany({
+    await prisma.topic.update({
       where: {
-        id: Number(body.topicId),
+        id: body.topicId,
       },
       data: {
         name: body.topic,
@@ -172,21 +170,21 @@ adminRouter.put("/topics", async function (c) {
   } catch {
     return c.json({
       success: false,
-      error: "Something went wrong! Your Inputs are not correct!",
+      error: "Something went wrong! Unable to edit the topic!",
     });
   }
 });
-adminRouter.delete("/topics", async function (c) {
+adminRouter.delete("/topic", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
-
-  const body = await c.req.json();
-  if (!body || !body.topicId || typeof body.topicId !== "number") {
-    c.status(400);
-    return c.json({ success: false, error: "Your Inputs are not valid!" });
-  }
   try {
+    const body = await c.req.json();
+    const { success } = adminTopicDeleteInput.safeParse(body);
+    if (!success) {
+      c.status(400);
+      return c.json({ success: false, error: "Your Inputs are not valid!" });
+    }
     await prisma.topic.delete({
       where: {
         id: body.topicId,
@@ -196,7 +194,7 @@ adminRouter.delete("/topics", async function (c) {
   } catch {
     return c.json({
       success: false,
-      error: "Something went wrong! Your Inputs are not correct!",
+      error: "Something went wrong! Unable to delete the topic!",
     });
   }
 });
@@ -207,7 +205,8 @@ adminRouter.delete("/blog", async function (c) {
   }).$extends(withAccelerate());
   try {
     const body = await c.req.json();
-    if (!body || !body.blogId || typeof body.blogId !== "number") {
+    const { success } = deleteBlogInput.safeParse(body);
+    if (!success) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
@@ -262,7 +261,7 @@ adminRouter.delete("/blog", async function (c) {
     return c.json({
       success: false,
       e,
-      error: "Something went wrong! Unable to delete blog!",
+      error: "Something went wrong! Unable to delete the blog!",
     });
   }
 });
@@ -273,7 +272,8 @@ adminRouter.delete("/comment", async function (c) {
   }).$extends(withAccelerate());
   try {
     const body = await c.req.json();
-    if (!body || !body.commentId || typeof body.commentId !== "number") {
+    const { success } = commentDeleteInput.safeParse(body);
+    if (!success) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
@@ -328,7 +328,7 @@ adminRouter.delete("/comment", async function (c) {
     return c.json({
       success: false,
       e,
-      error: "Something went wrong! Unable to delete comment!",
+      error: "Something went wrong! Unable to delete the comment!",
     });
   }
 });
@@ -339,13 +339,14 @@ adminRouter.delete("/user", async function (c) {
   }).$extends(withAccelerate());
   try {
     const body = await c.req.json();
-    if (!body || !body.userId || typeof body.userId !== "number") {
+    const { success } = adminUserDeleteInput.safeParse(body);
+    if (!success) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
     await prisma.user.delete({
       where: {
-        id: Number(body.userId),
+        id: body.userId,
       },
     });
     // await prisma.user.update({
@@ -361,7 +362,7 @@ adminRouter.delete("/user", async function (c) {
     c.status(400);
     return c.json({
       success: false,
-      error: "Something went wrong! Unable to delete user!",
+      error: "Something went wrong! Unable to delete the user!",
     });
   }
 });

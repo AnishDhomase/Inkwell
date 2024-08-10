@@ -21,7 +21,7 @@ blogRouter.get("/", async function (c) {
   } catch {
     return c.json({
       success: false,
-      error: "Something went wrong! Unable to fetch blogs!",
+      error: "Something went wrong! Unable to fetch the blogs!",
     });
   }
 });
