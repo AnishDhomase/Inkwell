@@ -14,6 +14,8 @@ import {
   userFollowInput,
   deleteBlogInput,
   commentDeleteInput,
+  photoInput,
+  updateUserDetailsInput,
 } from "@anishdhomase/blog_app";
 
 const userRouter = new Hono<{
@@ -91,7 +93,7 @@ userRouter.post("/signin", async function (c) {
   }
 });
 // Get author details
-userRouter.get("/details", async function (c) {
+userRouter.get("/details/author", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
@@ -111,7 +113,7 @@ userRouter.get("/details", async function (c) {
         id: true,
         username: true,
         name: true,
-        profilePic: true,
+        profilePicURL: true,
         description: true,
 
         // Actions
@@ -121,7 +123,7 @@ userRouter.get("/details", async function (c) {
             id: true,
             username: true,
             name: true,
-            profilePic: true,
+            profilePicURL: true,
             description: true,
           },
         },
@@ -130,7 +132,7 @@ userRouter.get("/details", async function (c) {
             id: true,
             username: true,
             name: true,
-            profilePic: true,
+            profilePicURL: true,
             description: true,
           },
         },
@@ -189,7 +191,7 @@ userRouter.get("/details", async function (c) {
         email: true,
         name: true,
         password: true,
-        profilePic: true,
+        profilePicURL: true,
         description: true,
         createdAt: true,
 
@@ -203,7 +205,7 @@ userRouter.get("/details", async function (c) {
             id: true,
             username: true,
             name: true,
-            profilePic: true,
+            profilePicURL: true,
             description: true,
           },
         },
@@ -212,7 +214,7 @@ userRouter.get("/details", async function (c) {
             id: true,
             username: true,
             name: true,
-            profilePic: true,
+            profilePicURL: true,
             description: true,
           },
         },
@@ -262,6 +264,35 @@ userRouter.post("/description", async function (c) {
     });
   }
 });
+// Edit Profile photo
+userRouter.post("/photo", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const body = await c.req.json();
+    const { success } = photoInput.safeParse(body);
+    if (!success) {
+      c.status(400);
+      return c.json({ success: false, error: "Your Inputs are not valid!" });
+    }
+    const userId = c.get("jwtPayload");
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        profilePicURL: body.url,
+      },
+    });
+    return c.json({ success: true });
+  } catch (e) {
+    return c.json({
+      success: false,
+      error: "Something went wrong! Unable to upload Profile photo!",
+    });
+  }
+});
 // Edit Favorite Topics
 userRouter.post("/topics", async function (c) {
   const prisma = new PrismaClient({
@@ -290,6 +321,63 @@ userRouter.post("/topics", async function (c) {
     return c.json({
       success: false,
       error: "Something went wrong! Unable to set favourite topics!",
+    });
+  }
+});
+// Clear all notifications
+userRouter.delete("/notifications", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const userId = c.get("jwtPayload");
+    await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        notifications: [],
+      },
+    });
+    return c.json({ success: true });
+  } catch (e) {
+    c.status(400);
+    return c.json({
+      success: false,
+      error: "Something went wrong! Unable to clear notifications!",
+    });
+  }
+});
+// Update user details
+userRouter.put("/details", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  try {
+    const body = await c.req.json();
+    const { success } = updateUserDetailsInput.safeParse(body);
+    if (!success) {
+      c.status(400);
+      return c.json({ success: false, error: "Your Inputs are not valid!" });
+    }
+    const userId = c.get("jwtPayload");
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        ...body,
+        favoriteTopics: {
+          set: body.favoriteTopics.map((id: Number) => ({ id })),
+        },
+      },
+    });
+    return c.json({ success: true });
+  } catch (e) {
+    return c.json({
+      success: false,
+      error: "Something went wrong! Unable to edit user details!",
     });
   }
 });
@@ -370,30 +458,6 @@ userRouter.put("/unfollow", async function (c) {
     });
   }
 });
-// Clear all notifications
-userRouter.delete("/notifications", async function (c) {
-  const prisma = new PrismaClient({
-    datasourceUrl: c.env?.DATABASE_URL,
-  }).$extends(withAccelerate());
-  try {
-    const userId = c.get("jwtPayload");
-    await prisma.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        notifications: [],
-      },
-    });
-    return c.json({ success: true });
-  } catch (e) {
-    c.status(400);
-    return c.json({
-      success: false,
-      error: "Something went wrong! Unable to clear notifications!",
-    });
-  }
-});
 
 // 🗒️ Blog Related Routes 🗒️
 // Read, Post, Edit, Delete Blog
@@ -429,12 +493,13 @@ userRouter.post("/blog", async function (c) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
-    const { title, content, topics } = body;
+    const { title, content, topics, imageURL } = body;
     const newBlog = await prisma.blog.create({
       data: {
         title,
         content,
         authorId: userId,
+        blogImageURL: imageURL,
         topics: {
           connect: body.topics.map((id: Number) => ({ id })),
         },
@@ -445,7 +510,6 @@ userRouter.post("/blog", async function (c) {
     c.status(400);
     return c.json({
       success: false,
-      e,
       error: "Something went wrong! Unable to create blog!",
     });
   }
@@ -462,24 +526,16 @@ userRouter.put("/blog", async function (c) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });
     }
-    const { id, title, content, topics } = body;
-    const blogToUpdate = await prisma.blog.findFirst({
+    const { id, title, content, topics, imageURL } = body;
+    await prisma.blog.update({
       where: {
         id,
         authorId: userId,
       },
-    });
-    if (!blogToUpdate) {
-      c.status(400);
-      return c.json({ success: false, error: "You can't edit this blog!" });
-    }
-    await prisma.blog.update({
-      where: {
-        id,
-      },
       data: {
         title,
         content,
+        blogImageURL: imageURL,
         topics: {
           set: body.topics.map((id: Number) => ({ id })),
         },
@@ -491,7 +547,7 @@ userRouter.put("/blog", async function (c) {
     return c.json({
       success: false,
       e,
-      error: "Something went wrong! Unable to update the blog!",
+      error: "Something went wrong! Unable to edit the blog!",
     });
   }
 });

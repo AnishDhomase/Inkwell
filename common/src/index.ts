@@ -17,12 +17,14 @@ export const blogInput = z.object({
   title: z.string().max(100),
   content: z.string().max(1000),
   topics: z.array(z.number()),
+  imageURL: z.string().optional(),
 });
 export const blogUpdateInput = z.object({
   id: z.number(),
   title: z.string().max(100),
   content: z.string().max(1000),
   topics: z.array(z.number()),
+  imageURL: z.string().optional(),
 });
 export const commentInput = z.object({
   blogId: z.number(),
@@ -47,7 +49,6 @@ export const deleteBlogInput = z.object({
 export const commentDeleteInput = z.object({
   commentId: z.number(),
 });
-
 export const adminTopicAddInput = z.object({
   topic: z.string().max(30),
 });
@@ -61,7 +62,19 @@ export const adminTopicDeleteInput = z.object({
 export const adminUserDeleteInput = z.object({
   userId: z.number(),
 });
+export const photoInput = z.object({
+  url: z.string(),
+});
+export const updateUserDetailsInput = z.object({
+  name: z.string().optional(),
+  password: z.string().min(6),
+  profilePicURL: z.string().optional(),
+  description: z.string().max(1000).optional(),
+  favoriteTopics: z.array(z.number()).optional(),
+});
 
+export type updateUserDetailsInputType = z.infer<typeof updateUserDetailsInput>;
+export type photoInputType = z.infer<typeof photoInput>;
 export type adminUserDeleteInputType = z.infer<typeof adminUserDeleteInput>;
 export type adminTopicDeleteInputType = z.infer<typeof adminTopicDeleteInput>;
 export type adminTopicEditInputType = z.infer<typeof adminTopicEditInput>;

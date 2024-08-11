@@ -11,6 +11,7 @@ import {
   deleteBlogInput,
   commentDeleteInput,
   adminUserDeleteInput,
+  photoInput,
 } from "@anishdhomase/blog_app";
 
 const adminRouter = new Hono<{
@@ -119,7 +120,64 @@ adminRouter.use(async (c, next) => {
     return c.json({ success: false, error: "You are Unauthorized!" });
   }
 });
-
+// Edit Profile photo
+adminRouter.post("/photo", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const body = await c.req.json();
+    const { success } = photoInput.safeParse(body);
+    if (!success) {
+      c.status(400);
+      return c.json({ success: false, error: "Your Inputs are not valid!" });
+    }
+    const adminId = c.get("jwtPayload");
+    const updatedAdmin = await prisma.admin.update({
+      where: {
+        id: adminId,
+      },
+      data: {
+        profilePicURL: body.url,
+      },
+    });
+    return c.json({ success: true });
+  } catch (e) {
+    return c.json({
+      success: false,
+      error: "Something went wrong! Unable to upload Profile photo!",
+    });
+  }
+});
+// Get User Details
+adminRouter.get("/details", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const adminId = c.get("jwtPayload");
+    const adminDetails = await prisma.admin.findFirst({
+      where: {
+        id: adminId,
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        name: true,
+        password: true,
+        profilePicURL: true,
+        createdAt: true,
+      },
+    });
+    return c.json({ success: true, data: adminDetails });
+  } catch (e) {
+    return c.json({
+      success: false,
+      error: "Something went wrong! Unable to get your details!",
+    });
+  }
+});
 // Topics
 adminRouter.post("/topic", async function (c) {
   const prisma = new PrismaClient({
