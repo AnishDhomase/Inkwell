@@ -72,7 +72,16 @@ export const updateUserDetailsInput = z.object({
   description: z.string().max(1000).optional(),
   favoriteTopics: z.array(z.number()).optional(),
 });
+export const blogSearchInput = z.object({
+  query: z.string().min(1),
+  currentPage: z.number(),
+});
+export const pageInput = z.object({
+  currentPage: z.number(),
+});
 
+export type pageInputType = z.infer<typeof pageInput>;
+export type blogSearchInputType = z.infer<typeof blogSearchInput>;
 export type updateUserDetailsInputType = z.infer<typeof updateUserDetailsInput>;
 export type photoInputType = z.infer<typeof photoInput>;
 export type adminUserDeleteInputType = z.infer<typeof adminUserDeleteInput>;

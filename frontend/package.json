@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-react-app": "^7.0.1",
+    "vite-plugin-eslint": "^1.8.1"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.13.0",
+    "@emotion/styled": "^11.13.0",
+    "@mui/material": "^5.16.7",
+    "react-hot-toast": "^2.4.1",
+    "react-router-dom": "^6.26.0"
+  }
+}

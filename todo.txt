@@ -1,0 +1,7 @@
+1.  Adds
+2.  Theme and preference saving(Mode, Text Size)
+3.  Post detection(Abusing, Hate) and admin Alert
+4.  Subscription to see primium posts and remove Adds
+6.  Payment integration
+5.  Multiple images for a blog
+6.  Pagination for blogs and users

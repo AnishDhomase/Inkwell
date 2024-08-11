@@ -16,12 +16,16 @@ import {
   commentDeleteInput,
   photoInput,
   updateUserDetailsInput,
+  blogSearchInput,
+  pageInput,
 } from "@anishdhomase/blog_app";
 
 const userRouter = new Hono<{
   Bindings: {
     DATABASE_URL: string;
     JWT_SECRET: string;
+    pageContentLimitForUsers: number;
+    pageContentLimitForBlogs: number;
   };
   Variables: {
     userId: string;
@@ -89,6 +93,36 @@ userRouter.post("/signin", async function (c) {
     return c.json({
       success: false,
       error: "Something went wrong! Unable to signin!",
+    });
+  }
+});
+// Search User
+userRouter.get("/search", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const body = await c.req.json();
+    const { success } = blogSearchInput.safeParse(body);
+    if (!success) {
+      c.status(400);
+      return c.json({ success: false, error: "Invalid input!" });
+    }
+    const queriedUsers = await prisma.user.findMany({
+      where: {
+        OR: [
+          { username: { contains: body.query, mode: "insensitive" } },
+          { name: { contains: body.query, mode: "insensitive" } },
+        ],
+      },
+      skip: (body.currentPage - 1) * c.env?.pageContentLimitForUsers,
+      take: c.env?.pageContentLimitForUsers,
+    });
+    return c.json({ success: true, data: queriedUsers });
+  } catch {
+    return c.json({
+      success: false,
+      error: "Something went wrong! Unable to fetch the users!",
     });
   }
 });
@@ -466,13 +500,21 @@ userRouter.get("/blogs", async function (c) {
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
   try {
+    const body = await c.req.json();
+    const { success } = pageInput.safeParse(body);
+    if (!success) {
+      c.status(400);
+      return c.json({ success: false, error: "Invalid input!" });
+    }
     const userId = c.get("jwtPayload");
-    const allBlog = await prisma.blog.findMany({
+    const allBlogs = await prisma.blog.findMany({
       where: {
         authorId: userId,
       },
+      skip: (body.currentPage - 1) * c.env?.pageContentLimitForBlogs,
+      take: c.env?.pageContentLimitForBlogs,
     });
-    return c.json({ success: true, data: allBlog });
+    return c.json({ success: true, data: allBlogs });
   } catch (e) {
     c.status(400);
     return c.json({
