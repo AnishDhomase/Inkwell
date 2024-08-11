@@ -5,10 +5,14 @@
     "vite-plugin-eslint": "^1.8.1"
   },
   "dependencies": {
+    "@anishdhomase/blog_app": "^1.0.17",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^5.16.7",
     "@mui/material": "^5.16.7",
+    "axios": "^1.7.3",
     "react-hot-toast": "^2.4.1",
-    "react-router-dom": "^6.26.0"
+    "react-router-dom": "^6.26.0",
+    "styled-components": "^6.1.12"
   }
 }
