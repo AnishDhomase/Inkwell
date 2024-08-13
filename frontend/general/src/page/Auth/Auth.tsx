@@ -1,5 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import { LoginSignup } from "./LoginSignup";
+import { Description } from "./Description";
+import FavTopic from "./FavTopic";
 
 const OuterBox = styled.div`
   min-height: 100vh;
@@ -213,181 +217,163 @@ const Button = styled.button<ButtonProps>`
     }
   }
 `;
-const InputBox = styled.div`
-  position: relative;
-  border-radius: 10px;
+const StepperBox = styled.div`
   width: 100%;
-  max-width: 400px;
-  background-color: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  @media (min-width: 1250px) {
-    & {
-      max-width: 600px;
-    }
-  }
-`;
-const Input = styled.input`
-  border-radius: 10px;
-  padding: 12px 18px;
-  width: 100%;
-  max-width: 400px;
-  background-color: transparent;
-  border: 1px solid gray;
-  outline: none;
-  color: #ff7738;
-  font-size: 18px;
-  &:focus {
-    border: 1px solid #ff7738;
-  }
-  @media (min-width: 1250px) {
-    & {
-      max-width: 600px;
-      font-size: 25px;
-      padding: 15px 20px;
-    }
-  }
-`;
-const Form = styled.form`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  margin: 30px 0;
-`;
-const B = styled.b`
-  cursor: pointer;
-`;
-const EyeIcon = styled.div`
   position: absolute;
+  top: 5%;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+const Stepper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+
+  @media (min-width: 1250px) {
+    & {
+      max-width: 600px;
+    }
+  }
+  @media (max-width: 420px) {
+    & {
+      margin: 0 5px;
+    }
+  }
+`;
+interface StepBoxProps {
+  bgClr: string;
+  txtClr: string;
+  borderClr: string;
+}
+const StepBox = styled.span<StepBoxProps>`
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  background-color: ${(props) => props.bgClr};
+  border: 1px solid ${(props) => props.borderClr};
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: ${(props) => props.txtClr};
+  font-size: 20px;
+  font-weight: 900;
+`;
+const ProgressBar = styled.div`
+  position: absolute;
+  z-index: -1;
   top: 0;
   bottom: 0;
   margin: auto;
-  right: 12px;
+  left: 0;
+  height: 5px;
+  width: 100%;
+  background-color: #e6dddd;
+`;
+interface ProgressProps {
+  width?: string;
+}
+const Progress = styled.div<ProgressProps>`
+  height: 100%;
+  width: ${(props) => props.width || "0%"};
+  background-color: #57bb8d;
+`;
+const Skip = styled.div`
+  width: 100%;
+  position: absolute;
+  bottom: 5%;
+  left: 0;
+  right: 0;
   display: flex;
+  justify-content: center;
   align-items: center;
-  cursor: pointer;
-  color: gray;
+  padding: 0 5px;
+  @media (min-width: 820px) {
+    & {
+      display: none;
+    }
+  }
 `;
 
 export default function Auth() {
   const [step, setStep] = useState(1);
+  const pageMap = [
+    { Component: <LoginSignup setStep={setStep} /> },
+    { Component: <Description setStep={setStep} /> },
+    { Component: <FavTopic setStep={setStep} /> },
+    // { Component: <p>Profile Photo</p> },
+  ];
+  const navigate = useNavigate();
+
+  function getProgressWidth(): string {
+    return `${((step - 1) / (pageMap.length - 1)) * 100}%`;
+  }
+  function getBgClr(index: number) {
+    if (index + 1 < step) return "#57bb8d";
+    if (index + 1 === step) return "#ff7738";
+    return "white";
+  }
+  function getTxtClr(index: number) {
+    if (index + 1 <= step || index + 1 === step) return "white";
+    return "#ff7738";
+  }
+  function getBorderClr(index: number) {
+    if (index + 1 < step) return "#57bb8d";
+    return "#ff7738";
+  }
   return (
     <OuterBox>
       <LeftBox>
         <Row>
           <Logo width="60px" alt="logo" src="../../public/logoWhite.png" />
         </Row>
+
         <Heading mt="30px">Start Your Learning Journey With Inkwell.</Heading>
         <Text fontSz="20px">
           Discover the world's best community of freelancers and phylosophers
         </Text>
-        <Button width="1000px">Skip</Button>
+        <Button width="1000px" onClick={() => navigate("/")}>
+          Skip
+        </Button>
       </LeftBox>
       <RightBox>
-        <Row>
-          <Logo width="45px" alt="logo" src="../../public/logoWhite.png" />
-        </Row>
-        {step === 1 && <LoginSignup />}
-        <Row>
-          <Button width="400px" mt="10px">
+        <StepperBox>
+          <Stepper>
+            {pageMap.map((_, index) => (
+              <StepBox
+                key={index}
+                bgClr={getBgClr(index)}
+                txtClr={getTxtClr(index)}
+                borderClr={getBorderClr(index)}
+              >
+                {index + 1}
+              </StepBox>
+            ))}
+
+            <ProgressBar>
+              <Progress width={getProgressWidth()} />
+            </ProgressBar>
+          </Stepper>
+        </StepperBox>
+        {step === 1 && (
+          <Row>
+            <Logo width="45px" alt="logo" src="../../public/logoWhite.png" />
+          </Row>
+        )}
+
+        {pageMap[step - 1].Component}
+
+        <Skip>
+          <Button width="400px" mt="10px" onClick={() => navigate("/")}>
             Skip
           </Button>
-        </Row>
+        </Skip>
       </RightBox>
     </OuterBox>
-  );
-}
-import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import { signIn } from "../apis/api";
-export function LoginSignup() {
-  const [login, setLogin] = useState(true);
-  const [seePassword, setSeePassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    name: "",
-    username: "",
-  });
-  async function handleSubmit() {
-    if (login) {
-      const success = await signIn({
-        email: formData.email,
-        password: formData.password,
-      });
-      console.log(success ? "success" : "error");
-    } else {
-      // signup
-    }
-  }
-  return (
-    <>
-      <Heading mt="20px" sz="32px" align="center">
-        Welcome {login && "back"}
-      </Heading>
-      <Text align="center" fontSz="18px">
-        Please enter your details to sign {login ? "in" : "up"}.
-      </Text>
-      {/* Progress Bar */}
-      <Form onSubmit={handleSubmit}>
-        {!login && (
-          <>
-            <Input
-              type="text"
-              placeholder="Name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-            />
-            <Input
-              type="text"
-              placeholder="Username"
-              value={formData.username}
-              onChange={(e) =>
-                setFormData({ ...formData, username: e.target.value })
-              }
-            />
-          </>
-        )}
-        <Input
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-        />
-        <InputBox>
-          <Input
-            type={seePassword ? `text` : "password"}
-            placeholder="Password"
-            maxLength={25}
-            value={formData.password}
-            onChange={(e) =>
-              setFormData({ ...formData, password: e.target.value })
-            }
-          />
-          <EyeIcon onClick={() => setSeePassword(!seePassword)}>
-            {!seePassword ? <RemoveRedEyeIcon /> : <VisibilityOffIcon />}
-          </EyeIcon>
-        </InputBox>
-      </Form>
-      <Button
-        color="#ff7738"
-        textColor="white"
-        width="400px"
-        onClick={handleSubmit}
-      >
-        Sign {login ? "In" : "Up"}
-      </Button>
-      <Row pad="15px" fontSz="18px">
-        <p>
-          {login ? `Don't have an account yet?` : `Already have an account?`}{" "}
-        </p>
-        <B onClick={() => setLogin(!login)}>Sign {!login ? "In" : "Up"}</B>
-      </Row>
-    </>
   );
 }
