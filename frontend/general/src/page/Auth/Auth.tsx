@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { LoginSignup } from "./LoginSignup";
 import { Description } from "./Description";
 import FavTopic from "./FavTopic";
+import ProfilePhoto from "./ProfilePhoto";
 
 const OuterBox = styled.div`
   min-height: 100vh;
@@ -61,9 +62,7 @@ const RightBox = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  & img {
-    display: none;
-  }
+
   & h1,
   & h6 {
     color: #ffab72;
@@ -128,6 +127,9 @@ const Row = styled.div<RowProps>`
   align-items: center;
   font-size: ${(props) => props.fontSz || "18px"};
   padding: ${(props) => props.pad || "0px"};
+  /* & img {
+    display: none;
+  } */
   & b {
     margin-left: 5px;
   }
@@ -135,6 +137,9 @@ const Row = styled.div<RowProps>`
     & button {
       display: none;
     }
+    /* & img {
+      display: block;
+    } */
   }
 `;
 interface LogoProps {
@@ -301,12 +306,12 @@ const Skip = styled.div`
 `;
 
 export default function Auth() {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(4);
   const pageMap = [
     { Component: <LoginSignup setStep={setStep} /> },
+    { Component: <ProfilePhoto setStep={setStep} /> },
     { Component: <Description setStep={setStep} /> },
     { Component: <FavTopic setStep={setStep} /> },
-    // { Component: <p>Profile Photo</p> },
   ];
   const navigate = useNavigate();
 
@@ -360,11 +365,11 @@ export default function Auth() {
             </ProgressBar>
           </Stepper>
         </StepperBox>
-        {step === 1 && (
+        {/* {step === 1 && (
           <Row>
             <Logo width="45px" alt="logo" src="../../public/logoWhite.png" />
           </Row>
-        )}
+        )} */}
 
         {pageMap[step - 1].Component}
 

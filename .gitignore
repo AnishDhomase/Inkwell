@@ -5,3 +5,4 @@ common/node_modules
 common/dist
 frontend/node_modules
 frontend/general/node_modules
+frontend/general/.env

@@ -67,17 +67,20 @@ const SelectedTopicBox = styled.span`
     }
   }
 `;
-const TopicsWrapper = styled.div`
+interface TopicsWrapperProps {
+  blog?: boolean;
+}
+const TopicsWrapper = styled.div<TopicsWrapperProps>`
   width: 100%;
-  max-width: 400px;
+  max-width: ${(props) => (props.blog ? "none" : "400px")};
   display: flex;
   gap: 10px;
   justify-content: center;
   flex-wrap: wrap;
-  padding: 35px 0;
+  padding: ${(props) => (props.blog ? "0" : "35px 0")};
   @media (min-width: 1250px) {
     & {
-      max-width: 600px;
+      max-width: ${(props) => (props.blog ? "none" : "400px")};
       font-size: 25px;
     }
   }
@@ -128,14 +131,6 @@ export default function FavTopic({ setStep }: { setStep: any }) {
     }
     fetchTopics();
   }, []);
-  function addTopic(topic: Topic) {
-    setSelectedTopics([...selectedTopics, topic]);
-    setTopics(topics.filter((t) => t.id !== topic.id));
-  }
-  function removeTopic(topic: Topic) {
-    setTopics([...topics, topic]);
-    setSelectedTopics(selectedTopics.filter((t) => t.id !== topic.id));
-  }
   async function handleTopicsSubmit() {
     setLoading(() => true);
     const favoriteTopics = selectedTopics.map((topic) => topic.id);
@@ -148,7 +143,14 @@ export default function FavTopic({ setStep }: { setStep: any }) {
       <Heading align="center" sz="30px">
         Select Your Favorite Topics
       </Heading>
-      <TopicsWrapper>
+      <TopicSelector
+        setSelectedTopics={setSelectedTopics}
+        selectedTopics={selectedTopics}
+        topics={topics}
+        setTopics={setTopics}
+        blog={false}
+      />
+      {/* <TopicsWrapper>
         {selectedTopics.map((topic) => (
           <SelectedTopicBox key={topic.name} onClick={() => removeTopic(topic)}>
             <span>{topic.name}</span>
@@ -162,7 +164,7 @@ export default function FavTopic({ setStep }: { setStep: any }) {
             {topic.name}
           </TopicBox>
         ))}
-      </TopicsWrapper>
+      </TopicsWrapper> */}
       <Button
         color="#ff7738"
         textColor="white"
@@ -172,6 +174,48 @@ export default function FavTopic({ setStep }: { setStep: any }) {
       >
         {!loading ? "Next" : <CircularProgress size={20} thickness={6} />}
       </Button>
+    </>
+  );
+}
+
+export function TopicSelector({
+  setSelectedTopics,
+  selectedTopics,
+  topics,
+  setTopics,
+  blog,
+}: {
+  setSelectedTopics: any;
+  selectedTopics: Topic[];
+  topics: Topic[];
+  setTopics: any;
+  blog?: boolean;
+}) {
+  function addTopic(topic: Topic) {
+    setSelectedTopics([...selectedTopics, topic]);
+    setTopics(topics.filter((t) => t.id !== topic.id));
+  }
+  function removeTopic(topic: Topic) {
+    setTopics([...topics, topic]);
+    setSelectedTopics(selectedTopics.filter((t) => t.id !== topic.id));
+  }
+  return (
+    <>
+      <TopicsWrapper blog={blog}>
+        {selectedTopics.map((topic) => (
+          <SelectedTopicBox key={topic.name} onClick={() => removeTopic(topic)}>
+            <span>{topic.name}</span>
+            <CancelIcon />
+          </SelectedTopicBox>
+        ))}
+      </TopicsWrapper>
+      <TopicsWrapper blog={blog}>
+        {topics.map((topic) => (
+          <TopicBox key={topic.name} onClick={() => addTopic(topic)}>
+            {topic.name}
+          </TopicBox>
+        ))}
+      </TopicsWrapper>
     </>
   );
 }

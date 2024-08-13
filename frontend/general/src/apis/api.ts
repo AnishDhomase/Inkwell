@@ -3,6 +3,8 @@ import {
   SignupType,
   userDescriptionInputType,
   profileTopicsType,
+  photoInputType,
+  blogInputType,
 } from "@anishdhomase/blog_app";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -92,6 +94,67 @@ export async function setFavouriteTopics(payload: profileTopicsType) {
     });
     if (res.data.success) {
       toast.success("Successfully Added Favourite Topics");
+      return true;
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return false;
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return false;
+  }
+}
+export async function getCloudinaryFileURL(file: File | null) {
+  if (!file) {
+    toast.error("Please select a file");
+    return "";
+  }
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append(
+      "upload_preset",
+      import.meta.env.VITE_CLOUDINARY_upload_preset as string
+    );
+    const response = await axios.post(
+      import.meta.env.VITE_CLOUDINARY_url as string,
+      formData
+    );
+    return response.data.secure_url;
+  } catch {
+    toast.error("Error in uploading file");
+    return "";
+  }
+}
+export async function setProfilePhoto(file: File | null) {
+  try {
+    const fileUrl = await getCloudinaryFileURL(file);
+    if (!fileUrl) return false;
+    const payload = { url: fileUrl } as photoInputType;
+    const res = await axios.post(`${BASE_URL}/user/photo`, payload, {
+      headers: getHeaders(),
+    });
+    if (res.data.success) {
+      toast.success("Successfully Uploaded Profile Photo");
+      return true;
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return false;
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return false;
+  }
+}
+export async function createPost(payload: blogInputType) {
+  try {
+    const res = await axios.post(`${BASE_URL}/user/blog`, payload, {
+      headers: getHeaders(),
+    });
+    if (res.data.success) {
+      toast.success("Successfully Posted Blog");
       return true;
     } else {
       toast.error("Something went wrong, Try Again");
