@@ -143,13 +143,21 @@ export default function FavTopic({ setStep }: { setStep: any }) {
       <Heading align="center" sz="30px">
         Select Your Favorite Topics
       </Heading>
-      <TopicSelector
-        setSelectedTopics={setSelectedTopics}
-        selectedTopics={selectedTopics}
-        topics={topics}
-        setTopics={setTopics}
-        blog={false}
-      />
+      {topics.length ? (
+        <TopicSelector
+          setSelectedTopics={setSelectedTopics}
+          selectedTopics={selectedTopics}
+          topics={topics}
+          setTopics={setTopics}
+          blog={false}
+        />
+      ) : (
+        <CircularProgress
+          size={60}
+          thickness={2}
+          style={{ margin: "50px 0" }}
+        />
+      )}
       {/* <TopicsWrapper>
         {selectedTopics.map((topic) => (
           <SelectedTopicBox key={topic.name} onClick={() => removeTopic(topic)}>

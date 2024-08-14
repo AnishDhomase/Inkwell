@@ -5,6 +5,7 @@ import {
   profileTopicsType,
   photoInputType,
   blogInputType,
+  pageInputType,
 } from "@anishdhomase/blog_app";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -164,5 +165,29 @@ export async function createPost(payload: blogInputType) {
     if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
     else toast.error(e.response?.data?.error);
     return false;
+  }
+}
+export interface Blog {
+  id: number;
+  title: string;
+  content: string;
+  authorId: number;
+  blogImageURL: string;
+  createdAt: string;
+  active: boolean;
+}
+export async function getAllBlogs(payload: pageInputType): Promise<Blog[]> {
+  try {
+    const res = await axios.post(`${BASE_URL}/blog`, payload);
+    if (res.data.success) {
+      return res.data.data;
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return [];
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return [];
   }
 }

@@ -222,7 +222,10 @@ const Button = styled.button<ButtonProps>`
     }
   }
 `;
-const StepperBox = styled.div`
+interface StepperBoxProps {
+  heightAdjust: boolean;
+}
+const StepperBox = styled.div<StepperBoxProps>`
   width: 100%;
   position: absolute;
   top: 5%;
@@ -231,6 +234,10 @@ const StepperBox = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  @media (max-height: 800px) {
+    position: ${(props) => (props.heightAdjust ? "relative" : "absolute")};
+    margin-bottom: 60px;
+  }
 `;
 const Stepper = styled.div`
   display: flex;
@@ -288,7 +295,10 @@ const Progress = styled.div<ProgressProps>`
   width: ${(props) => props.width || "0%"};
   background-color: #57bb8d;
 `;
-const Skip = styled.div`
+interface SkipProps {
+  heightAdjust: boolean;
+}
+const Skip = styled.div<SkipProps>`
   width: 100%;
   position: absolute;
   bottom: 5%;
@@ -303,10 +313,13 @@ const Skip = styled.div`
       display: none;
     }
   }
+  @media (max-height: 800px) {
+    position: ${(props) => (props.heightAdjust ? "relative" : "absolute")};
+  }
 `;
 
 export default function Auth() {
-  const [step, setStep] = useState(4);
+  const [step, setStep] = useState(1);
   const pageMap = [
     { Component: <LoginSignup setStep={setStep} /> },
     { Component: <ProfilePhoto setStep={setStep} /> },
@@ -347,7 +360,7 @@ export default function Auth() {
         </Button>
       </LeftBox>
       <RightBox>
-        <StepperBox>
+        <StepperBox heightAdjust={step === 4}>
           <Stepper>
             {pageMap.map((_, index) => (
               <StepBox
@@ -373,7 +386,7 @@ export default function Auth() {
 
         {pageMap[step - 1].Component}
 
-        <Skip>
+        <Skip heightAdjust={step === 4}>
           <Button width="400px" mt="10px" onClick={() => navigate("/")}>
             Skip
           </Button>

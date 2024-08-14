@@ -265,6 +265,7 @@ const BackButton = styled.span`
   }
 `;
 
+// TODO: Clear post for new post
 export default function CreateBlog() {
   const [preview, setPreview] = useState<string | null>();
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -308,6 +309,7 @@ export default function CreateBlog() {
       setContent("");
       setSelectedTopics([]);
       setPreview(null);
+      setFile(null);
     }
     setLoading(() => false);
   }
@@ -352,7 +354,7 @@ export default function CreateBlog() {
                 alignItems: "center",
               }}
             >
-              {topics ? (
+              {topics.length ? (
                 <TopicSelector
                   setSelectedTopics={setSelectedTopics}
                   selectedTopics={selectedTopics}
@@ -361,7 +363,11 @@ export default function CreateBlog() {
                   blog={true}
                 />
               ) : (
-                <CircularProgress size={40} thickness={6} />
+                <CircularProgress
+                  size={60}
+                  thickness={2}
+                  style={{ margin: "50px 0" }}
+                />
               )}
             </div>
           </RightBox>

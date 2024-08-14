@@ -13,7 +13,7 @@ const blogRouter = new Hono<{
   };
 }>();
 
-blogRouter.get("/", async function (c) {
+blogRouter.post("/", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
