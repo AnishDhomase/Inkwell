@@ -18,7 +18,7 @@ const OuterBox = styled.div`
   padding: 10px;
   display: flex;
   justify-content: center;
-  @media (max-width: 480px) {
+  @media (max-width: 700px) {
     & {
       padding: 0;
     }
@@ -34,6 +34,22 @@ const InnerBox = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
+  @media (max-width: 800px) {
+    & {
+      padding: 20px;
+    }
+  }
+  @media (max-width: 700px) {
+    & {
+      padding: 10px;
+      border-radius: 0;
+    }
+  }
+  @media (max-width: 450px) {
+    & {
+      padding: 5px;
+    }
+  }
 `;
 
 const Button = styled.button`
@@ -51,9 +67,15 @@ const Button = styled.button`
   &:active {
     opacity: 0.8;
   }
+  @media (min-width: 1250px) {
+    & {
+      font-size: 25px;
+    }
+  }
 `;
 
 const Input = styled.input`
+  font-weight: 700;
   border-radius: 10px;
   padding: 12px 18px;
   width: 100%;
@@ -66,6 +88,11 @@ const Input = styled.input`
   font-size: 18px;
   &:focus {
     border: 1px solid #ff7738;
+  }
+  @media (min-width: 1250px) {
+    & {
+      font-size: 25px;
+    }
   }
 `;
 const TextArea = styled.textarea`
@@ -83,6 +110,11 @@ const TextArea = styled.textarea`
   font-size: 18px;
   &:focus {
     border: 1px solid #ff7738;
+  }
+  @media (min-width: 1250px) {
+    & {
+      font-size: 25px;
+    }
   }
 `;
 
@@ -106,12 +138,21 @@ const FileInputBox = styled.div`
   padding: 10px;
   border-radius: 10px;
   cursor: pointer;
+  @media (min-width: 1250px) {
+    & {
+      border: 3px dashed #ff7738;
+      font-size: 25px;
+    }
+  }
 `;
 const Row = styled.div`
   display: flex;
   gap: 20px;
   justify-content: space-between;
-  align-items: stretch;
+  align-items: start;
+  @media (max-width: 1000px) {
+    flex-direction: column;
+  }
 `;
 const LeftBox = styled.div`
   border: 1px solid gray;
@@ -123,6 +164,15 @@ const LeftBox = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
+
+  @media (max-width: 1000px) {
+    width: 100%;
+  }
+  @media (max-width: 480px) {
+    border-radius: 15px;
+    padding: 5px;
+    gap: 10px;
+  }
 `;
 const RightBox = styled.div`
   border: 1px solid gray;
@@ -135,18 +185,36 @@ const RightBox = styled.div`
   & div {
     width: 100%;
   }
+  @media (max-width: 1000px) {
+    width: 100%;
+  }
+  @media (max-width: 480px) {
+    border-radius: 15px;
+    padding: 5px;
+  }
 `;
 const H1 = styled.h1`
   color: #ff7738;
   font-size: 35px;
   margin-bottom: 20px;
   text-align: center;
+  @media (min-width: 1250px) {
+    & {
+      font-size: 50px;
+    }
+  }
 `;
 const H3 = styled.h3`
   color: #ffa176;
   font-size: 25px;
   margin-bottom: 20px;
   text-align: center;
+  padding: 10px 0px;
+  @media (min-width: 1250px) {
+    & {
+      font-size: 30px;
+    }
+  }
 `;
 const BackButton = styled.span`
   position: absolute;
@@ -163,6 +231,37 @@ const BackButton = styled.span`
   cursor: pointer;
   &:hover {
     scale: 1.05;
+  }
+  @media (min-width: 1250px) {
+    & {
+      top: 20px;
+      scale: 1.5;
+    }
+  }
+  @media (max-width: 1130px) and (min-width: 1070px) {
+    top: 53px;
+    left: 90px;
+    border: 1px solid #ff7738;
+  }
+  @media (max-width: 1070px) {
+    top: 53px;
+    left: 50px;
+    border: 1px solid #ff7738;
+  }
+  @media (max-width: 800px) {
+    top: 33px;
+    left: 30px;
+    border: 1px solid #ff7738;
+  }
+  @media (max-width: 700px) {
+    top: 13px;
+    left: 10px;
+    border: 1px solid #ff7738;
+  }
+  @media (max-width: 450px) {
+    top: 8px;
+    left: 5px;
+    border: 1px solid #ff7738;
   }
 `;
 
@@ -244,20 +343,26 @@ export default function CreateBlog() {
                 ? "Select Topics from below"
                 : "Selected Topic(s)"}
             </H3>
+
             <div
               style={{
                 display: "flex",
                 gap: "20px",
                 flexDirection: "column",
+                alignItems: "center",
               }}
             >
-              <TopicSelector
-                setSelectedTopics={setSelectedTopics}
-                selectedTopics={selectedTopics}
-                topics={topics}
-                setTopics={setTopics}
-                blog={true}
-              />
+              {topics ? (
+                <TopicSelector
+                  setSelectedTopics={setSelectedTopics}
+                  selectedTopics={selectedTopics}
+                  topics={topics}
+                  setTopics={setTopics}
+                  blog={true}
+                />
+              ) : (
+                <CircularProgress size={40} thickness={6} />
+              )}
             </div>
           </RightBox>
         </Row>
