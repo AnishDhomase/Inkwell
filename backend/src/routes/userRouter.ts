@@ -208,7 +208,7 @@ userRouter.use(async (c, next) => {
 });
 
 // 🚹 User Related Routes 🚹
-// Get User Details
+// Get Self Details
 userRouter.get("/details", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,

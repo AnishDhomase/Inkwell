@@ -1,5 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { Blog, getAllBlogs, getAllTopics, Topic } from "../../apis/api";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Blog,
+  clearNotifications,
+  getAllBlogs,
+  getAllTopics,
+  getBlogsOfTopic,
+  getSelfDetails,
+  Topic,
+} from "../../apis/api";
 import PersonIcon from "@mui/icons-material/Person";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import Badge from "@mui/material/Badge";
@@ -10,6 +18,8 @@ import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import CommentIcon from "@mui/icons-material/Comment";
+import { motion, AnimatePresence } from "framer-motion";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const Nav = styled.nav`
   padding: 10px 20px;
@@ -101,15 +111,19 @@ const TopicBtn = styled.button<TopicBtnProps>`
 const ScrollContainer = styled.div`
   width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
   -webkit-overflow-scrolling: touch;
   &::-webkit-scrollbar {
     display: none;
   }
   scrollbar-width: none;
+  position: relative;
 `;
 const TopicBtnWrapper = styled.div`
   display: inline-flex;
   flex-wrap: nowrap;
+  width: max-content;
 `;
 const Sort = styled.div`
   /* padding: 5px 20px; */
@@ -212,37 +226,139 @@ const StatChip = styled.div`
     font-size: 18px;
   }
 `;
+interface NotificationPanelProps {
+  noNotifactions: boolean;
+}
+const NotificationPanel = styled(motion.div)<NotificationPanelProps>`
+  min-width: ${(props) => (props.noNotifactions ? "160px" : "300px")};
+  position: absolute;
+  border: 1px solid #c4bfbf;
+  right: 20px;
+  border-radius: 10px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  align-items: ${(props) => (props.noNotifactions ? "center" : "flex-start")};
+  gap: 10px;
+`;
+const Button = styled.button`
+  width: 100%;
+  padding: 5px 10px;
+  background-color: #ff7738;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  &:hover {
+    cursor: pointer;
+    scale: 1.015;
+  }
+  &:active {
+    opacity: 0.8;
+  }
+`;
+const Notification = styled.div`
+  width: 100%;
+  border-bottom: 1px solid #e9e2e2;
+`;
+
+type SortOption = "newest" | "oldest" | "popular";
+function sortBlogsBy(sortBy: SortOption, blogs: Blog[]) {
+  if (sortBy === "newest") {
+    return blogs.sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  } else if (sortBy === "oldest") {
+    return blogs.sort((a, b) => {
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    });
+  } else {
+    return blogs.sort((a, b) => {
+      return b._count.likedByUsers - a._count.likedByUsers;
+    });
+  }
+}
 
 export default function Home() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [activeTopic, setActiveTopic] = useState<number>(-1);
-  const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest");
+  const [sortBy, setSortBy] = useState<SortOption>("newest");
+  const [selfDetails, setSelfDetails] = useState<object>({});
+  const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [notifications, setNotifications] = useState<string[]>([]);
+
+  const sortBlogs = sortBlogsBy(sortBy, blogs);
+
+  // Fetching all topics and blogs
   useEffect(() => {
-    async function fetchTopics() {
-      const topicsArr = await getAllTopics();
-      setTopics(topicsArr);
-    }
-    fetchTopics();
-  }, []);
-  useEffect(() => {
-    async function fetchAllBlogs() {
-      const blogArr = await getAllBlogs({ currentPage: 1 });
-      console.log("blogArr", blogArr);
+    async function fetchBlogs() {
+      let blogArr = [];
+      if (activeTopic === -1) {
+        blogArr = await getAllBlogs({
+          currentPage: 1,
+        });
+      } else {
+        blogArr = await getBlogsOfTopic(
+          {
+            currentPage: 1,
+          },
+          topics[activeTopic].name
+        );
+      }
       setBlogs(blogArr);
     }
-    fetchAllBlogs();
+    fetchBlogs();
+  }, [activeTopic, topics]);
+  useEffect(() => {
+    async function fetchAllTopics() {
+      const topicArr = await getAllTopics();
+      setTopics(topicArr);
+    }
+    fetchAllTopics();
   }, []);
-  const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
-    const container = event.currentTarget;
-    const scrollSpeed = 4;
-    const scrollAmount = event.deltaY * scrollSpeed;
-    container.scrollTo({
-      left: container.scrollLeft + scrollAmount,
-      behavior: "smooth",
-    });
-    event.preventDefault();
-  };
+  //   Fetch self details
+  useEffect(() => {
+    async function fetchSelfDetails() {
+      const details = await getSelfDetails();
+      setSelfDetails(details);
+      setNotifications(details.notifications);
+    }
+    fetchSelfDetails();
+  }, []);
+
+  // Horizontal scroll when mouse wheel is used in ScrollContainer
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const handleWheel = (event: WheelEvent) => {
+        event.preventDefault();
+        const scrollSpeed = 0.8;
+        container.scrollLeft += event.deltaY * scrollSpeed;
+      };
+
+      container.addEventListener("wheel", handleWheel, { passive: false });
+
+      return () => {
+        container.removeEventListener("wheel", handleWheel);
+      };
+    }
+  }, []);
+
+  //   Clear notifications
+  async function handleClearNotifications() {
+    setLoading(() => true);
+    const success = await clearNotifications();
+    setLoading(() => false);
+    if (success) {
+      setTimeout(() => {
+        setNotifications([]);
+      }, 1000);
+    }
+  }
+
   return (
     <div>
       <Nav>
@@ -250,25 +366,80 @@ export default function Home() {
         <RightBox>
           <CircleBorder>
             <IconButton aria-label="delete">
-              <Badge badgeContent={1} max={9} color="primary">
+              <Badge badgeContent={0} max={9} color="primary">
                 <PersonIcon color="action" />
               </Badge>
             </IconButton>
           </CircleBorder>
-          <CircleBorder>
+          <CircleBorder
+            onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+          >
             <IconButton aria-label="delete">
-              <Badge badgeContent={10} max={9} color="primary">
+              <Badge
+                badgeContent={notifications.length}
+                max={9}
+                color="primary"
+              >
                 <NotificationsIcon color="action" />
               </Badge>
             </IconButton>
           </CircleBorder>
+          <AnimatePresence mode="popLayout">
+            {isNotificationOpen && (
+              <NotificationPanel
+                initial={{
+                  opacity: 0,
+                  scale: 0,
+                  y: -50,
+                  x: 130,
+                }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  y: 60,
+                  x: 0,
+                }}
+                exit={{
+                  opacity: 0,
+                  scale: 0,
+                  y: -50,
+                  x: 130,
+                }}
+                transition={{
+                  duration: 1,
+                  ease: "backInOut",
+                }}
+                noNotifactions={notifications.length == 0}
+              >
+                {notifications.length ? (
+                  <>
+                    {notifications.map((content, ind) => (
+                      <Notification>{content}</Notification>
+                    ))}
+                    <Button
+                      disabled={loading}
+                      onClick={handleClearNotifications}
+                    >
+                      {!loading ? (
+                        "Clear All"
+                      ) : (
+                        <CircularProgress size={20} thickness={6} />
+                      )}
+                    </Button>
+                  </>
+                ) : (
+                  "No notifications!"
+                )}
+              </NotificationPanel>
+            )}
+          </AnimatePresence>
         </RightBox>
       </Nav>
       <Main>
         <LeftSec>
           <Explore>
             <h1>Explore</h1>
-            <ScrollContainer onWheel={handleWheel}>
+            <ScrollContainer ref={scrollContainerRef}>
               <TopicBtnWrapper>
                 <TopicBtn
                   active={activeTopic === -1}
@@ -301,8 +472,14 @@ export default function Home() {
             >
               Oldest First
             </SortOption>
+            <SortOption
+              onClick={() => setSortBy("popular")}
+              active={sortBy === "popular"}
+            >
+              Most Popular
+            </SortOption>
           </Sort>
-          <Blogs blogs={blogs} />
+          <Blogs blogs={sortBlogs} />
         </LeftSec>
         <RightSec>ewfwef</RightSec>
       </Main>

@@ -27,6 +27,19 @@ blogRouter.post("/", async function (c) {
     const allBlogs = await prisma.blog.findMany({
       skip: (body.currentPage - 1) * c.env?.pageContentLimitForBlogs,
       take: c.env?.pageContentLimitForBlogs,
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        blogImageURL: true,
+        authorId: true,
+        comments: true,
+        topics: true,
+        createdAt: true,
+        _count: {
+          select: { likedByUsers: true },
+        },
+      },
     });
     return c.json({ success: true, data: allBlogs });
   } catch {
@@ -61,6 +74,61 @@ blogRouter.get("/search", async function (c) {
       },
       skip: (body.currentPage - 1) * c.env?.pageContentLimitForBlogs,
       take: c.env?.pageContentLimitForBlogs,
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        blogImageURL: true,
+        authorId: true,
+        comments: true,
+        topics: true,
+        createdAt: true,
+        _count: {
+          select: { likedByUsers: true },
+        },
+      },
+    });
+    return c.json({ success: true, data: queriedBlogs });
+  } catch {
+    return c.json({
+      success: false,
+      error: "Something went wrong! Unable to fetch the blogs!",
+    });
+  }
+});
+blogRouter.post("/:topic", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const body = await c.req.json();
+    const { success } = pageInput.safeParse(body);
+    if (!success) {
+      c.status(400);
+      return c.json({ success: false, error: "Invalid input!" });
+    }
+    const topic = c.req.param("topic");
+    const queriedBlogs = await prisma.blog.findMany({
+      where: {
+        topics: {
+          some: { name: { contains: topic, mode: "insensitive" } },
+        },
+      },
+      skip: (body.currentPage - 1) * c.env?.pageContentLimitForBlogs,
+      take: c.env?.pageContentLimitForBlogs,
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        blogImageURL: true,
+        authorId: true,
+        comments: true,
+        topics: true,
+        createdAt: true,
+        _count: {
+          select: { likedByUsers: true },
+        },
+      },
     });
     return c.json({ success: true, data: queriedBlogs });
   } catch {

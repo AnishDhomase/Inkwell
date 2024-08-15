@@ -11,6 +11,7 @@
     "@mui/icons-material": "^5.16.7",
     "@mui/material": "^5.16.7",
     "axios": "^1.7.3",
+    "framer-motion": "^11.3.28",
     "react-drag-drop-files": "^2.3.10",
     "react-hot-toast": "^2.4.1",
     "react-markdown": "^9.0.1",
