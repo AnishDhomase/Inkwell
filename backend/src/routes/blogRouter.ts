@@ -13,6 +13,23 @@ const blogRouter = new Hono<{
   };
 }>();
 
+type SortOption = "newest" | "oldest" | "popular";
+function sortBlogsBy(sortBy: SortOption) {
+  if (sortBy === "newest") {
+    return (a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    };
+  } else if (sortBy === "oldest") {
+    return (a, b) => {
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    };
+  } else if (sortBy === "popular") {
+    return (a, b) => {
+      return b._count.likedByUsers - a._count.likedByUsers;
+    };
+  }
+}
+
 blogRouter.post("/", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
@@ -41,7 +58,9 @@ blogRouter.post("/", async function (c) {
         },
       },
     });
-    return c.json({ success: true, data: allBlogs });
+    await allBlogs.sort(sortBlogsBy(body.sortBy));
+    const totalBlogs = await prisma.blog.count();
+    return c.json({ success: true, data: { allBlogs, totalBlogs } });
   } catch {
     return c.json({
       success: false,
@@ -129,6 +148,18 @@ blogRouter.post("/:topic", async function (c) {
           select: { likedByUsers: true },
         },
       },
+    });
+    await queriedBlogs.sort(sortBlogsBy(body.sortBy));
+    const totalBlogs = await prisma.blog.count({
+      where: {
+        topics: {
+          some: { name: { contains: topic, mode: "insensitive" } },
+        },
+      },
+    });
+    return c.json({
+      success: true,
+      data: { allBlogs: queriedBlogs, totalBlogs },
     });
     return c.json({ success: true, data: queriedBlogs });
   } catch {

@@ -6,7 +6,11 @@ import {
   getAllTopics,
   getBlogsOfTopic,
   getSelfDetails,
+  likeBlog,
+  saveBlog,
   Topic,
+  unlikeBlog,
+  unsaveBlog,
 } from "../../apis/api";
 import PersonIcon from "@mui/icons-material/Person";
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -20,6 +24,9 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import CommentIcon from "@mui/icons-material/Comment";
 import { motion, AnimatePresence } from "framer-motion";
 import CircularProgress from "@mui/material/CircularProgress";
+
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 
 const Nav = styled.nav`
   padding: 10px 20px;
@@ -261,23 +268,45 @@ const Notification = styled.div`
   width: 100%;
   border-bottom: 1px solid #e9e2e2;
 `;
+const TextButton = styled.button`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #ff7738;
+  width: auto;
+  margin: 0 auto;
+  margin-top: 20px;
+  font-size: 18px;
+  border: none;
+  background-color: transparent;
+  b {
+    transform: translateY(-5px);
+  }
+  &:hover {
+    cursor: pointer;
+    color: #3856ff;
+  }
+  &:hover b {
+    transform: translateY(0px);
+  }
+`;
 
 type SortOption = "newest" | "oldest" | "popular";
-function sortBlogsBy(sortBy: SortOption, blogs: Blog[]) {
-  if (sortBy === "newest") {
-    return blogs.sort((a, b) => {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
-  } else if (sortBy === "oldest") {
-    return blogs.sort((a, b) => {
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    });
-  } else {
-    return blogs.sort((a, b) => {
-      return b._count.likedByUsers - a._count.likedByUsers;
-    });
-  }
-}
+// function sortBlogsBy(sortBy: SortOption, blogs: Blog[]): Blog[] {
+//   if (sortBy === "newest") {
+//     return blogs.sort((a, b) => {
+//       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+//     });
+//   } else if (sortBy === "oldest") {
+//     return blogs.sort((a, b) => {
+//       return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+//     });
+//   } else {
+//     return blogs.sort((a, b) => {
+//       return b._count.likedByUsers - a._count.likedByUsers;
+//     });
+//   }
+// }
 
 export default function Home() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -288,29 +317,46 @@ export default function Home() {
   const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<string[]>([]);
+  const [activePageNumber, setActivePageNumber] = useState<number>(1);
+  const [totalAvlBlogsCount, setTotalAvlBlogsCount] = useState<number>(0);
+  const [mouseOnReadmore, setMouseOnReadmore] = useState<boolean>(false);
 
-  const sortBlogs = sortBlogsBy(sortBy, blogs);
+  // const sortBlogs = sortBlogsBy(sortBy, blogs);
+  const isThereMoreBlogsToLoad = totalAvlBlogsCount > blogs.length;
+
+  // When sortBy/activeTopic changes, reset activePageNumber to 1
+  useEffect(() => {
+    setActivePageNumber(1);
+  }, [sortBy, activeTopic]);
 
   // Fetching all topics and blogs
   useEffect(() => {
     async function fetchBlogs() {
-      let blogArr = [];
+      let blogArray = [],
+        countOfAvlBlogs = 0;
       if (activeTopic === -1) {
-        blogArr = await getAllBlogs({
+        const { blogArr, totalBlogsCount } = await getAllBlogs({
           currentPage: 1,
+          sortBy,
         });
+        blogArray = blogArr;
+        countOfAvlBlogs = totalBlogsCount;
       } else {
-        blogArr = await getBlogsOfTopic(
+        const { blogArr, totalBlogsCount } = await getBlogsOfTopic(
           {
             currentPage: 1,
+            sortBy,
           },
           topics[activeTopic].name
         );
+        blogArray = blogArr;
+        countOfAvlBlogs = totalBlogsCount;
       }
-      setBlogs(blogArr);
+      setBlogs(blogArray);
+      setTotalAvlBlogsCount(countOfAvlBlogs);
     }
     fetchBlogs();
-  }, [activeTopic, topics]);
+  }, [activeTopic, topics, sortBy]);
   useEffect(() => {
     async function fetchAllTopics() {
       const topicArr = await getAllTopics();
@@ -347,6 +393,29 @@ export default function Home() {
     }
   }, []);
 
+  //  Read more button
+  async function handleReadMore() {
+    let blogArray = [];
+    if (activeTopic === -1) {
+      const { blogArr } = await getAllBlogs({
+        currentPage: activePageNumber + 1,
+        sortBy,
+      });
+      blogArray = blogArr;
+    } else {
+      const { blogArr } = await getBlogsOfTopic(
+        {
+          currentPage: 1,
+          sortBy,
+        },
+        topics[activeTopic].name
+      );
+      blogArray = blogArr;
+    }
+    setBlogs((prev) => [...prev, ...blogArray]);
+    setActivePageNumber((prev) => prev + 1);
+  }
+
   //   Clear notifications
   async function handleClearNotifications() {
     setLoading(() => true);
@@ -358,6 +427,10 @@ export default function Home() {
       }, 1000);
     }
   }
+  const userBlogs = {
+    liked: selfDetails?.likedBlogs?.map((blog: Blog) => blog.id) || [],
+    saved: selfDetails?.savedBlogs?.map((blog: Blog) => blog.id) || [],
+  };
 
   return (
     <div>
@@ -479,27 +552,108 @@ export default function Home() {
               Most Popular
             </SortOption>
           </Sort>
-          <Blogs blogs={sortBlogs} />
+          <Blogs blogs={blogs} userBlogs={userBlogs} />
+
+          {isThereMoreBlogsToLoad && (
+            <TextButton
+              onMouseEnter={() => setMouseOnReadmore(true)}
+              onMouseLeave={() => setMouseOnReadmore(false)}
+              onClick={handleReadMore}
+            >
+              <span>Read More</span>
+              <b>
+                {mouseOnReadmore ? (
+                  <KeyboardDoubleArrowDownIcon />
+                ) : (
+                  <KeyboardArrowDownIcon />
+                )}
+              </b>
+            </TextButton>
+          )}
         </LeftSec>
         <RightSec>ewfwef</RightSec>
       </Main>
     </div>
   );
 }
-
-function Blogs({ blogs }: { blogs: Blog[] }) {
+function Blogs({ blogs, userBlogs }: { blogs: Blog[]; userBlogs: any }) {
   return (
     <BlogBox>
-      {blogs.map((blog) => (
-        <Card key={blog.id} blog={blog} />
-      ))}
+      {blogs.map((blog) => {
+        let liked = false;
+        let saved = false;
+        if (userBlogs?.liked?.includes(blog.id)) {
+          liked = true;
+        }
+        if (userBlogs?.saved?.includes(blog.id)) {
+          saved = true;
+        }
+        return (
+          <Card
+            key={blog.id}
+            blog={blog}
+            // userBlogs={userBlogs}
+            isLikedByUser={liked}
+            isSavedByUser={saved}
+          />
+        );
+      })}
     </BlogBox>
   );
 }
 
-function Card({ blog }: { blog: Blog }) {
+function Card({
+  blog,
+  isLikedByUser,
+  isSavedByUser,
+}: {
+  blog: Blog;
+  isLikedByUser: boolean;
+  isSavedByUser: boolean;
+}) {
   const [liked, setLiked] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(false);
+  useEffect(() => {
+    setLiked(isLikedByUser);
+    setSaved(isSavedByUser);
+  }, [isLikedByUser, isSavedByUser]);
+  async function handleBlogLike(
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) {
+    event.stopPropagation();
+    if (liked) {
+      // unlike
+      const success = await unlikeBlog({ blogId: blog.id });
+      if (success) {
+        setLiked(false);
+      }
+    } else {
+      // like
+      const success = await likeBlog({ blogId: blog.id });
+      if (success) {
+        setLiked(true);
+      }
+    }
+  }
+  async function handleBlogSave(
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) {
+    event.stopPropagation();
+    if (saved) {
+      // unsave
+      const success = await unsaveBlog({ blogId: blog.id });
+      if (success) {
+        setSaved(false);
+      }
+    } else {
+      // save
+      const success = await saveBlog({ blogId: blog.id });
+      if (success) {
+        setSaved(true);
+      }
+    }
+  }
+
   //   const { width } = useViewportWidth();
   //   const getShortTitle = (title: string) => {
   //     if (width > 1250)
@@ -520,14 +674,14 @@ function Card({ blog }: { blog: Blog }) {
         }
       >
         {/* <img src={blog.blogImageURL} alt="blog" /> */}
-        <Like onClick={() => setLiked(!liked)}>
+        <Like onClick={handleBlogLike}>
           {!liked ? (
             <FavoriteBorderIcon color="action" />
           ) : (
             <FavoriteIcon color="error" />
           )}
         </Like>
-        <Save onClick={() => setSaved(!saved)}>
+        <Save onClick={handleBlogSave}>
           {!saved ? (
             <BookmarkBorderIcon color="action" />
           ) : (
@@ -537,18 +691,18 @@ function Card({ blog }: { blog: Blog }) {
       </LeftBlogSec>
       <RightBlogSec>
         <section>
-          <span>5 min</span>
-          <span>2 July</span>
+          <span>{getMinutesToRead(blog.content)} min</span>
+          <span>{formatDate(blog.createdAt)}</span>
         </section>
         <h3>{blog.title}</h3>
 
         <section>
           <StatChip>
-            <span>123</span>
+            <span>{blog._count.likedByUsers}</span>
             <FavoriteIcon style={{ color: "#E74C4F" }} />
           </StatChip>
           <StatChip>
-            <span>12</span>
+            <span>{blog.comments?.length}</span>
             <CommentIcon style={{ color: "#dab777" }} />
           </StatChip>
         </section>
@@ -573,3 +727,15 @@ function Card({ blog }: { blog: Blog }) {
 //   }, []);
 //   return viewportWidth;
 // }
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "long",
+  });
+  return formatter.format(date);
+}
+function getMinutesToRead(content: string): number {
+  const words = content.split(" ");
+  return Math.ceil(words.length / 200);
+}

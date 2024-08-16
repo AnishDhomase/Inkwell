@@ -670,7 +670,7 @@ userRouter.post("/blog/save", async function (c) {
     });
   }
 });
-userRouter.put("/blog/unsave", async function (c) {
+userRouter.post("/blog/unsave", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
@@ -757,7 +757,7 @@ userRouter.post("/blog/like", async function (c) {
     });
   }
 });
-userRouter.put("/blog/unlike", async function (c) {
+userRouter.post("/blog/unlike", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());

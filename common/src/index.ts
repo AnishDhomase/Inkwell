@@ -78,6 +78,7 @@ export const blogSearchInput = z.object({
 });
 export const pageInput = z.object({
   currentPage: z.number(),
+  sortBy: z.string(),
 });
 
 export type pageInputType = z.infer<typeof pageInput>;
