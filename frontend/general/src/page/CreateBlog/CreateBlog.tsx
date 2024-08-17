@@ -10,12 +10,12 @@ import {
 import CircularProgress from "@mui/material/CircularProgress";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const OuterBox = styled.div`
-  background-color: #ada8a8;
   min-height: 100vh;
   width: 100vw;
-  padding: 10px;
+  /* padding: 10px; */
   display: flex;
   justify-content: center;
   @media (max-width: 700px) {
@@ -25,15 +25,18 @@ const OuterBox = styled.div`
   }
 `;
 const InnerBox = styled.div`
-  background-color: white;
+  background-color: #fbfafa;
   width: 100%;
   max-width: 1000px;
   padding: 40px;
   border-radius: 10px;
-  /* border: 1px solid #ff7738; */
+  border: 1px solid #ff7738;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  @media (max-width: 1000px) {
+    border: none;
+  }
   @media (max-width: 800px) {
     & {
       padding: 20px;
@@ -196,7 +199,6 @@ const RightBox = styled.div`
 const H1 = styled.h1`
   color: #ff7738;
   font-size: 35px;
-  margin-bottom: 20px;
   text-align: center;
   @media (min-width: 1250px) {
     & {
@@ -217,13 +219,16 @@ const H3 = styled.h3`
   }
 `;
 const BackButton = styled.span`
+  border: 1px solid #ff7738;
   position: absolute;
-  top: 10px;
-  left: 20px;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
   z-index: 1;
-  color: #ff7738;
-  background-color: white;
-  padding: 5px 5px;
+  color: white;
+  margin: auto 0;
+  background-color: #ff7738;
+  padding: 5px 8px;
   border-radius: 50px;
   display: flex;
   align-items: center;
@@ -232,7 +237,7 @@ const BackButton = styled.span`
   &:hover {
     scale: 1.05;
   }
-  @media (min-width: 1250px) {
+  /* @media (min-width: 1250px) {
     & {
       top: 20px;
       scale: 1.5;
@@ -262,7 +267,11 @@ const BackButton = styled.span`
     top: 8px;
     left: 5px;
     border: 1px solid #ff7738;
-  }
+  } */
+`;
+const NavBar = styled.div`
+  position: relative;
+  margin-bottom: 20px;
 `;
 
 // TODO: Clear post for new post
@@ -291,6 +300,8 @@ export default function CreateBlog() {
     fetchTopics();
   }, []);
   async function handleBlogSubmit() {
+    if (!content || !title)
+      return toast.error("Title and Content are required");
     setLoading(() => true);
     const topics = selectedTopics.map((topic) => topic.id);
     let imageURL;
@@ -315,11 +326,16 @@ export default function CreateBlog() {
   }
   return (
     <OuterBox>
-      <BackButton onClick={() => navigate("/")}>
+      {/* <BackButton onClick={() => navigate("/")}>
         <KeyboardBackspaceIcon />
-      </BackButton>
+      </BackButton> */}
       <InnerBox>
-        <H1>Create Blog</H1>
+        <NavBar>
+          <BackButton onClick={() => navigate("/app")}>
+            <KeyboardBackspaceIcon />
+          </BackButton>
+          <H1>Create Blog</H1>
+        </NavBar>
         <Row>
           <LeftBox>
             <ProfilePhotoBox>

@@ -4,5 +4,4 @@
 4.  Subscription to see primium posts and remove Adds
 6.  Payment integration
 5.  Multiple images for a blog
-6.  Pagination for blogs and users
-7.  Encrypt password before putting it into Database
+6.  Encrypt password before putting it into Database
