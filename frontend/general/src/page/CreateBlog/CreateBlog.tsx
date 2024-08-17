@@ -370,7 +370,7 @@ export default function CreateBlog() {
                 alignItems: "center",
               }}
             >
-              {topics.length ? (
+              {topics.length || selectedTopics.length ? (
                 <TopicSelector
                   setSelectedTopics={setSelectedTopics}
                   selectedTopics={selectedTopics}

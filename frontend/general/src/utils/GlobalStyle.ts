@@ -13,5 +13,8 @@ const GlobalStyles = createGlobalStyle`
   ::-webkit-scrollbar {
     width:  0px;
   }
+  a {
+    text-decoration: none;
+  }
 `;
 export default GlobalStyles;

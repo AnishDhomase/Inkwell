@@ -15,7 +15,7 @@ function App() {
     async function fetchSelfDetails() {
       const details = await getSelfDetails();
       setSelfDetails(details);
-      setNotifications(details.notifications);
+      setNotifications(details?.notifications);
     }
     fetchSelfDetails();
   }, []);

@@ -105,19 +105,25 @@ const SortOption = styled.button<SortOptionProps>`
 const BlogBox = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  padding: 35px 0;
+  gap: 35px;
+  padding: 45px 0;
 `;
 const BlogCard = styled.div`
   width: 100%;
-  border-radius: 10px;
+  /* border-radius: 10px; */
   display: flex;
   gap: 15px;
+  border-bottom: 1px solid #efe9e9;
+  padding-bottom: 35px;
   &:hover {
     cursor: pointer;
-    background-color: #f9f9f9;
+  }
+  &:hover h3 {
+    color: #0c1a6b;
+    text-decoration: underline;
   }
 `;
+
 interface LeftBlogSecProps {
   imageURL: string;
 }
@@ -208,9 +214,10 @@ export default function Home({ selfDetails }: { selfDetails: object }) {
   const [activePageNumber, setActivePageNumber] = useState<number>(1);
   const [totalAvlBlogsCount, setTotalAvlBlogsCount] = useState<number>(0);
   const [mouseOnReadmore, setMouseOnReadmore] = useState<boolean>(false);
+  const [loadingBlogs, setLoadingBlogs] = useState<boolean>(false);
 
   // const sortBlogs = sortBlogsBy(sortBy, blogs);
-  const isThereMoreBlogsToLoad = totalAvlBlogsCount > blogs.length;
+  const isThereMoreBlogsToLoad = totalAvlBlogsCount > blogs?.length;
 
   // When sortBy/activeTopic changes, reset activePageNumber to 1
   useEffect(() => {
@@ -291,6 +298,7 @@ export default function Home({ selfDetails }: { selfDetails: object }) {
 
   //  Read more button
   async function handleReadMore() {
+    setLoadingBlogs(() => true);
     let blogArray = [];
     if (activeTopic === -1) {
       const { blogArr } = await getAllBlogs({
@@ -309,6 +317,7 @@ export default function Home({ selfDetails }: { selfDetails: object }) {
       blogArray = blogArr;
     }
     setBlogs((prev) => [...prev, ...blogArray]);
+    setLoadingBlogs(() => false);
     setActivePageNumber((prev) => prev + 1);
   }
 
@@ -367,6 +376,7 @@ export default function Home({ selfDetails }: { selfDetails: object }) {
           </ScrollContainer>
         </Sort>
         <Blogs blogs={blogs} userBlogs={userBlogs} />
+        {loadingBlogs && <BlogCardSkeletonLoader />}
         {isThereMoreBlogsToLoad && (
           <TextButton
             onMouseEnter={() => setMouseOnReadmore(true)}
@@ -390,25 +400,29 @@ export default function Home({ selfDetails }: { selfDetails: object }) {
 function Blogs({ blogs, userBlogs }: { blogs: Blog[]; userBlogs: any }) {
   return (
     <BlogBox>
-      {blogs.map((blog) => {
-        let liked = false;
-        let saved = false;
-        if (userBlogs?.liked?.includes(blog.id)) {
-          liked = true;
-        }
-        if (userBlogs?.saved?.includes(blog.id)) {
-          saved = true;
-        }
-        return (
-          <Card
-            key={blog.id}
-            blog={blog}
-            // userBlogs={userBlogs}
-            isLikedByUser={liked}
-            isSavedByUser={saved}
-          />
-        );
-      })}
+      {blogs?.length ? (
+        blogs.map((blog) => {
+          let liked = false;
+          let saved = false;
+          if (userBlogs?.liked?.includes(blog.id)) {
+            liked = true;
+          }
+          if (userBlogs?.saved?.includes(blog.id)) {
+            saved = true;
+          }
+          return (
+            <Card
+              key={blog.id}
+              blog={blog}
+              // userBlogs={userBlogs}
+              isLikedByUser={liked}
+              isSavedByUser={saved}
+            />
+          );
+        })
+      ) : (
+        <BlogCardSkeletonLoader />
+      )}
     </BlogBox>
   );
 }
@@ -463,19 +477,6 @@ function Card({
       }
     }
   }
-
-  //   const { width } = useViewportWidth();
-  //   const getShortTitle = (title: string) => {
-  //     if (width > 1250)
-  //       return title.length > 70 ? title.slice(0, 30) + "..." : title;
-  //     else if (width > 1020)
-  //       return title.length > 50 ? title.slice(0, 30) + "..." : title;
-  //     else if (width > 480)
-  //       return title.length > 30 ? title.slice(0, 30) + "..." : title;
-  //     else return title.length > 20 ? title.slice(0, 30) + "..." : title;
-  //   };
-  //   const shortTitle =
-  //     blog.title.length > 120 ? blog.title.slice(0, 0) + "..." : blog.title;
   return (
     <BlogCard key={blog.id}>
       <LeftBlogSec
@@ -520,7 +521,6 @@ function Card({
     </BlogCard>
   );
 }
-
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
   const formatter = new Intl.DateTimeFormat("en-GB", {
@@ -532,4 +532,94 @@ function formatDate(dateString: string): string {
 function getMinutesToRead(content: string): number {
   const words = content.split(" ");
   return Math.ceil(words.length / 200);
+}
+
+import { keyframes } from "styled-components";
+const shimmer = keyframes`
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+`;
+const ThickRowSkeleton = styled.div`
+  height: 24px;
+  width: 80%;
+  background: #f6f7f8;
+  background-image: linear-gradient(
+    to right,
+    #f6f7f8 0%,
+    #edeef1 20%,
+    #f6f7f8 40%,
+    #f6f7f8 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 800px 104px;
+  animation: ${shimmer} 1.5s linear infinite;
+`;
+const RowSkeleton = styled.div`
+  height: 16px;
+  width: 100%;
+  background: #f6f7f8;
+  background-image: linear-gradient(
+    to right,
+    #f6f7f8 0%,
+    #edeef1 20%,
+    #f6f7f8 40%,
+    #f6f7f8 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 800px 104px;
+  animation: ${shimmer} 1.5s linear infinite;
+`;
+const LeftBlogSecSkeleton = styled.div<LeftBlogSecProps>`
+  width: 40%;
+  min-height: 160px;
+  border-radius: 10px;
+  position: relative;
+  background-image: linear-gradient(
+    to right,
+    #f6f7f8 0%,
+    #edeef1 20%,
+    #f6f7f8 40%,
+    #f6f7f8 100%
+  );
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  span {
+    position: absolute;
+    left: 10px;
+    border-radius: 50px;
+    padding: 5px;
+    display: flex;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    border: 1px solid #333;
+  }
+`;
+function BlogCardSkeletonLoader() {
+  const n = 5;
+  return (
+    <>
+      {Array(n)
+        .fill(0)
+        .map((_, ind) => (
+          <BlogCardSkeleton key={ind} />
+        ))}
+    </>
+  );
+}
+function BlogCardSkeleton() {
+  return (
+    <BlogCard>
+      <LeftBlogSecSkeleton imageURL="../../../public/placeholderBlogImage.webp" />
+      <RightBlogSec>
+        <RowSkeleton />
+        <ThickRowSkeleton />
+        <RowSkeleton />
+      </RightBlogSec>
+    </BlogCard>
+  );
 }

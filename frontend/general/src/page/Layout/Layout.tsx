@@ -146,9 +146,11 @@ export default function Layout({
   return (
     <div>
       <Nav>
-        <Logo>Inkwell</Logo>
+        <Link to="/app">
+          <Logo>Inkwell</Logo>
+        </Link>
         <RightBox>
-          {selfDetails.id ? (
+          {selfDetails?.id ? (
             <>
               <CircleBorder>
                 <IconButton aria-label="delete">
@@ -305,9 +307,12 @@ const AddButton = styled.div<AddButtonProps>`
   padding: 8px;
   font-size: 30px;
   cursor: pointer;
-  border: 1px solid #f9f9f9;
-`;
+  border: 1px solid #f9f9f990;
 
+  &:hover {
+    border-color: white;
+  }
+`;
 import CottageOutlinedIcon from "@mui/icons-material/CottageOutlined";
 import CottageIcon from "@mui/icons-material/Cottage";
 import { RiSearchFill } from "react-icons/ri";
