@@ -7,6 +7,7 @@ import {
   blogInputType,
   pageInputType,
   deleteBlogInputType,
+  blogSearchInputType,
 } from "@anishdhomase/blog_app";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -200,12 +201,48 @@ export async function getBlogsOfTopic(
   topicName: string
 ) {
   try {
-    const res = await axios.post(`${BASE_URL}/blog/${topicName}`, payload);
+    const res = await axios.post(
+      `${BASE_URL}/blog/search/${topicName}`,
+      payload
+    );
     if (res.data.success) {
       return {
         blogArr: res.data.data.allBlogs,
         totalBlogsCount: res.data.data.totalBlogs,
       };
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return {};
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return {};
+  }
+}
+export async function getQueriedBlogs(payload: blogSearchInputType) {
+  try {
+    const res = await axios.post(`${BASE_URL}/blog/search`, payload);
+    if (res.data.success) {
+      return {
+        blogArr: res.data.data.allBlogs,
+        totalBlogsCount: res.data.data.totalBlogs,
+      };
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return {};
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return {};
+  }
+}
+export async function getBlog(payload: number) {
+  try {
+    const res = await axios.get(`${BASE_URL}/blog/${payload}`);
+    if (res.data.success) {
+      return res.data.data;
     } else {
       toast.error("Something went wrong, Try Again");
       return {};
@@ -241,11 +278,12 @@ export async function getSelfDetails() {
     if (res.data.success) {
       return res.data.data;
     } else {
-      toast.error("Something went wrong, Try Again");
+      toast.error("Something went wrong, Try Again 1");
       return null;
     }
   } catch (e) {
-    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    if (!axios.isAxiosError(e))
+      toast.error("Something went wrong, Try Again 2");
     else toast.error(e.response?.data?.error);
     return null;
   }
@@ -320,5 +358,20 @@ export async function unsaveBlog(
     if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
     else toast.error(e.response?.data?.error);
     return false;
+  }
+}
+export async function getUser(payload: number) {
+  try {
+    const res = await axios.get(`${BASE_URL}/user/userDetails/${payload}`);
+    if (res.data.success) {
+      return res.data.data;
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return {};
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return {};
   }
 }

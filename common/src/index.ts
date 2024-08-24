@@ -75,6 +75,7 @@ export const updateUserDetailsInput = z.object({
 export const blogSearchInput = z.object({
   query: z.string().min(1),
   currentPage: z.number(),
+  sortBy: z.string(),
 });
 export const pageInput = z.object({
   currentPage: z.number(),

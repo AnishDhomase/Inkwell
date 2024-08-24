@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { clearNotifications, getSelfDetails } from "../../apis/api";
+import { clearNotifications } from "../../apis/api";
 import PersonIcon from "@mui/icons-material/Person";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import Badge from "@mui/material/Badge";
 import IconButton from "@mui/material/IconButton";
 import styled from "styled-components";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
+// import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+// import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
+// import FavoriteIcon from "@mui/icons-material/Favorite";
+// import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { motion, AnimatePresence } from "framer-motion";
 import CircularProgress from "@mui/material/CircularProgress";
 
@@ -100,7 +100,8 @@ const Notification = styled.div`
   border-bottom: 1px solid #e9e2e2;
 `;
 
-type activePage = "home" | "search" | "add" | "liked" | "saved";
+// type activePage = "home" | "search" | "add" | "liked" | "saved";
+type activePage = "home" | "search" | "add" | "account";
 
 export default function Layout({
   selfDetails,
@@ -152,13 +153,13 @@ export default function Layout({
         <RightBox>
           {selfDetails?.id ? (
             <>
-              <CircleBorder>
+              {/* <CircleBorder>
                 <IconButton aria-label="delete">
                   <Badge badgeContent={0} max={9} color="primary">
                     <PersonIcon color="action" />
                   </Badge>
                 </IconButton>
-              </CircleBorder>
+              </CircleBorder> */}
 
               <CircleBorder
                 onClick={() => setIsNotificationOpen(!isNotificationOpen)}
@@ -229,10 +230,18 @@ export default function Layout({
         </RightBox>
       </Nav>
       <Main>
-        <LeftSec fullWidth={location.pathname === "/app/create"}>
+        <LeftSec
+          fullWidth={
+            !(
+              location.pathname === "/app/search" ||
+              location.pathname === "/app"
+            )
+          }
+        >
           <Outlet />
         </LeftSec>
-        {location.pathname !== "/app/create" && <RightSec>ewfwef</RightSec>}
+        {(location.pathname === "/app/search" ||
+          location.pathname === "/app") && <RightSec>ewfwef</RightSec>}
       </Main>
       {/* <Footer></Footer> */}
       <Navbar activePage={activePage} setActivePage={setActivePage} />
@@ -248,14 +257,14 @@ const StyledNav = styled.nav`
   margin: auto 0;
   padding: 5px;
   background-color: #ff7738;
-  max-height: 300px;
+  max-height: 200px;
   border-radius: 50px;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
   @media (max-width: 800px) {
-    max-width: 300px;
+    max-width: 200px;
     max-height: none;
     flex-direction: row;
     top: auto;
@@ -294,30 +303,33 @@ const Rod = styled.div`
     padding: 7px;
   }
 `;
-interface AddButtonProps {
-  active: boolean;
-}
-const AddButton = styled.div<AddButtonProps>`
-  background-color: ${(props) => (props.active ? "#f9f9f9" : "#ff7738")};
-  color: ${(props) => (props.active ? "#ff7738" : "#f9f9f9")};
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 8px;
-  font-size: 30px;
-  cursor: pointer;
-  border: 1px solid #f9f9f990;
+// interface AddButtonProps {
+//   active: boolean;
+// }
+// const AddButton = styled.div<AddButtonProps>`
+//   background-color: ${(props) => (props.active ? "#f9f9f9" : "#ff7738")};
+//   color: ${(props) => (props.active ? "#ff7738" : "#f9f9f9")};
+//   border-radius: 50%;
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+//   padding: 8px;
+//   font-size: 30px;
+//   cursor: pointer;
+//   border: 1px solid #f9f9f990;
 
-  &:hover {
-    border-color: white;
-  }
-`;
+//   &:hover {
+//     border-color: white;
+//   }
+// `;
 import CottageOutlinedIcon from "@mui/icons-material/CottageOutlined";
 import CottageIcon from "@mui/icons-material/Cottage";
 import { RiSearchFill } from "react-icons/ri";
 import { RiSearchLine } from "react-icons/ri";
-import { IoAddOutline } from "react-icons/io5";
+// import { IoAddOutline } from "react-icons/io5";
+import PermIdentityOutlinedIcon from "@mui/icons-material/PermIdentityOutlined";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 function Navbar({
   activePage,
@@ -386,6 +398,38 @@ function Navbar({
                 </IconButton>
               </Link>
               <Link to="/app/create">
+                <IconButton
+                  aria-label="delete"
+                  sx={{ color: "white" }}
+                  onClick={() => {
+                    setActivePage("add");
+                    setShowNav(false);
+                  }}
+                >
+                  {activePage === "add" ? (
+                    <AddCircleIcon />
+                  ) : (
+                    <AddCircleOutlineIcon />
+                  )}
+                </IconButton>
+              </Link>
+              <Link to="/app/account">
+                <IconButton
+                  aria-label="delete"
+                  sx={{ color: "white" }}
+                  onClick={() => {
+                    setActivePage("account");
+                    setShowNav(false);
+                  }}
+                >
+                  {activePage === "account" ? (
+                    <PersonIcon />
+                  ) : (
+                    <PermIdentityOutlinedIcon />
+                  )}
+                </IconButton>
+              </Link>
+              {/* <Link to="/app/create">
                 <AddButton
                   active={activePage == "add"}
                   onClick={() => {
@@ -395,8 +439,8 @@ function Navbar({
                 >
                   <IoAddOutline />
                 </AddButton>
-              </Link>
-              <Link to="/app/liked-Blogs">
+              </Link> */}
+              {/* <Link to="/app/liked-Blogs">
                 <IconButton
                   aria-label="delete"
                   sx={{ color: "white" }}
@@ -427,7 +471,7 @@ function Navbar({
                     <BookmarkBorderIcon />
                   )}
                 </IconButton>
-              </Link>
+              </Link> */}
             </StyledNav>
           </motion.span>
         </AnimatePresence>

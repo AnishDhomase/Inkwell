@@ -6,6 +6,8 @@ import Layout from "./page/Layout/Layout";
 import { useEffect, useState } from "react";
 import { getSelfDetails } from "./apis/api";
 import CreateBlog from "./page/CreateBlog/CreateBlog";
+import Search from "./page/Search/Search";
+import SpecificBlog from "./page/Blog/SpecificBlog";
 function App() {
   const [selfDetails, setSelfDetails] = useState<object>({});
   const [notifications, setNotifications] = useState<string[]>([]);
@@ -31,10 +33,18 @@ function App() {
             }
           >
             <Route index element={<Home selfDetails={selfDetails} />} />
-            <Route path="search" element={<p>Search</p>} />
+            <Route
+              path="search"
+              element={<Search selfDetails={selfDetails} />}
+            />
             <Route path="create" element={<CreateBlog />} />
-            <Route path="liked-Blogs" element={<p>liked-Blogs</p>} />
-            <Route path="saved-Blogs" element={<p>saved-Blogs</p>} />
+            <Route path="account" element={<p>Account</p>} />
+            <Route
+              path="blog/:blogid"
+              element={<SpecificBlog selfDetails={selfDetails} />}
+            />
+            {/* <Route path="liked-Blogs" element={<p>liked-Blogs</p>} /> */}
+            {/* <Route path="saved-Blogs" element={<p>saved-Blogs</p>} /> */}
           </Route>
         </Routes>
       </BrowserRouter>

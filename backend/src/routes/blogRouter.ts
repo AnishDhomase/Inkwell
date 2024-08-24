@@ -46,12 +46,10 @@ blogRouter.post("/", async function (c) {
       take: c.env?.pageContentLimitForBlogs,
       select: {
         id: true,
-        title: true,
-        content: true,
         blogImageURL: true,
-        authorId: true,
+        title: true,
         comments: true,
-        topics: true,
+        content: true,
         createdAt: true,
         _count: {
           select: { likedByUsers: true },
@@ -68,7 +66,7 @@ blogRouter.post("/", async function (c) {
     });
   }
 });
-blogRouter.get("/search", async function (c) {
+blogRouter.post("/search", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
@@ -107,7 +105,24 @@ blogRouter.get("/search", async function (c) {
         },
       },
     });
-    return c.json({ success: true, data: queriedBlogs });
+    await queriedBlogs.sort(sortBlogsBy(body.sortBy));
+    const totalBlogs = await prisma.blog.count({
+      where: {
+        OR: [
+          { title: { contains: body.query, mode: "insensitive" } },
+          { content: { contains: body.query, mode: "insensitive" } },
+          {
+            topics: {
+              some: { name: { contains: body.query, mode: "insensitive" } },
+            },
+          },
+        ],
+      },
+    });
+    return c.json({
+      success: true,
+      data: { allBlogs: queriedBlogs, totalBlogs },
+    });
   } catch {
     return c.json({
       success: false,
@@ -115,7 +130,7 @@ blogRouter.get("/search", async function (c) {
     });
   }
 });
-blogRouter.post("/:topic", async function (c) {
+blogRouter.post("search/:topic", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
@@ -161,7 +176,43 @@ blogRouter.post("/:topic", async function (c) {
       success: true,
       data: { allBlogs: queriedBlogs, totalBlogs },
     });
-    return c.json({ success: true, data: queriedBlogs });
+    // return c.json({ success: true, data: queriedBlogs });
+  } catch {
+    return c.json({
+      success: false,
+      error: "Something went wrong! Unable to fetch the blogs!",
+    });
+  }
+});
+blogRouter.get("/:blogid", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const blogId = parseInt(c.req.param("blogid"));
+    const blog = await prisma.blog.findFirst({
+      where: { id: blogId },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        blogImageURL: true,
+        authorId: true,
+        comments: true,
+        topics: true,
+        createdAt: true,
+        _count: {
+          select: { likedByUsers: true },
+        },
+      },
+    });
+    if (!blog) {
+      return c.json({
+        success: false,
+        error: "Something went wrong! No such blog exist!",
+      });
+    }
+    return c.json({ success: true, data: blog });
   } catch {
     return c.json({
       success: false,

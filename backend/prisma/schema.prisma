@@ -13,7 +13,7 @@ model User {
   email          String   @unique
   name           String
   password       String
-  profilePicURL     String?
+  profilePicURL  String?
   description    String?
   favoriteTopics Topic[]  @relation("UserTopics")
   createdAt      DateTime @default(now())
@@ -38,7 +38,7 @@ model Blog {
   authorId       Int
   comments       Comment[]
   topics         Topic[]  @relation("BlogTopics")
-  blogImageURL      String?
+  blogImageURL   String?
   createdAt      DateTime @default(now())
 
   // Relations

@@ -126,6 +126,29 @@ userRouter.get("/search", async function (c) {
     });
   }
 });
+userRouter.get("userDetails/:userId", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const userId = Number(c.req.param("userId"));
+    const queriedUser = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+      select: {
+        username: true,
+        profilePicURL: true,
+      },
+    });
+    return c.json({ success: true, data: queriedUser });
+  } catch {
+    return c.json({
+      success: false,
+      error: "Something went wrong! Unable to fetch the users!",
+    });
+  }
+});
 // Get author details
 userRouter.get("/details/author", async function (c) {
   const prisma = new PrismaClient({
