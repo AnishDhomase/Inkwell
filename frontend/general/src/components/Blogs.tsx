@@ -144,6 +144,7 @@ export function Card({
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) {
     event.stopPropagation();
+    event.preventDefault();
     if (liked) {
       // unlike
       const success = await unlikeBlog({ blogId: blog.id });
@@ -162,6 +163,7 @@ export function Card({
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) {
     event.stopPropagation();
+    event.preventDefault();
     if (saved) {
       // unsave
       const success = await unsaveBlog({ blogId: blog.id });

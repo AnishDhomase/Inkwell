@@ -96,6 +96,36 @@ userRouter.post("/signin", async function (c) {
     });
   }
 });
+// Most followed Users
+userRouter.get("/mostFollowed", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const allUsers = await prisma.user.findMany({
+      take: 5,
+      orderBy: {
+        followers: {
+          _count: "desc",
+        },
+      },
+      select: {
+        id: true,
+        username: true,
+        profilePicURL: true,
+        _count: {
+          select: { followers: true },
+        },
+      },
+    });
+    return c.json({ success: true, data: allUsers });
+  } catch {
+    return c.json({
+      success: false,
+      error: "Something went wrong! Unable to fetch the users!",
+    });
+  }
+});
 // Search User
 userRouter.get("/search", async function (c) {
   const prisma = new PrismaClient({
@@ -912,34 +942,19 @@ userRouter.put("/blog/comment", async function (c) {
     });
   }
 });
-userRouter.delete("/blog/comment", async function (c) {
+userRouter.delete("/blog/comment/:commentId", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
   try {
+    const commentId = Number(c.req.param("commentId"));
     const userId = c.get("jwtPayload");
-    const body = await c.req.json();
-    const { success } = commentDeleteInput.safeParse(body);
-    if (!success) {
-      c.status(400);
-      return c.json({ success: false, error: "Your Inputs are not valid!" });
-    }
     await prisma.comment.delete({
       where: {
-        id: body.commentId,
+        id: commentId,
         authorId: userId,
       },
     });
-    // await prisma.comment.update({
-    //   where: {
-    //     id: body.commentId,
-    //     authorId: userId,
-    //   },
-    //   data: {
-    //     active: false,
-    //   },
-    // });
-
     return c.json({ success: true });
   } catch (e) {
     c.status(400);

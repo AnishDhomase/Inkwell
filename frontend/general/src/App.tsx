@@ -40,7 +40,7 @@ function App() {
             <Route path="create" element={<CreateBlog />} />
             <Route path="account" element={<p>Account</p>} />
             <Route
-              path="blog/:blogid"
+              path="blog/:blogId"
               element={<SpecificBlog selfDetails={selfDetails} />}
             />
             {/* <Route path="liked-Blogs" element={<p>liked-Blogs</p>} /> */}

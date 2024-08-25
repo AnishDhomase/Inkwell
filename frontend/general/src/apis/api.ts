@@ -8,6 +8,9 @@ import {
   pageInputType,
   deleteBlogInputType,
   blogSearchInputType,
+  commentInputType,
+  commentDeleteInputType,
+  commentEditInputType,
 } from "@anishdhomase/blog_app";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -360,7 +363,7 @@ export async function unsaveBlog(
     return false;
   }
 }
-export async function getUser(payload: number) {
+export async function getUser(payload: number): Promise<object> {
   try {
     const res = await axios.get(`${BASE_URL}/user/userDetails/${payload}`);
     if (res.data.success) {
@@ -373,5 +376,80 @@ export async function getUser(payload: number) {
     if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
     else toast.error(e.response?.data?.error);
     return {};
+  }
+}
+export async function commentOnBlog(
+  payload: commentInputType
+): Promise<boolean> {
+  try {
+    const res = await axios.post(`${BASE_URL}/user/blog/comment`, payload, {
+      headers: getHeaders(),
+    });
+    if (res.data.success) {
+      return true;
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return false;
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return false;
+  }
+}
+export async function deleteCommentOnBlog(
+  payload: commentDeleteInputType
+): Promise<boolean> {
+  try {
+    const res = await axios.delete(
+      `${BASE_URL}/user/blog/comment/${payload.commentId}`,
+      {
+        headers: getHeaders(),
+      }
+    );
+    if (res.data.success) {
+      return true;
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return false;
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return false;
+  }
+}
+export async function editCommentOnBlog(
+  payload: commentEditInputType
+): Promise<boolean> {
+  try {
+    const res = await axios.put(`${BASE_URL}/user/blog/comment`, payload, {
+      headers: getHeaders(),
+    });
+    if (res.data.success) {
+      return true;
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return false;
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return false;
+  }
+}
+export async function getMostFollowedUsers(): Promise<object[]> {
+  try {
+    const res = await axios.get(`${BASE_URL}/user/mostFollowed`);
+    if (res.data.success) {
+      return res.data.data;
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return [];
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return [];
   }
 }

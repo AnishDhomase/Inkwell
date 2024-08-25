@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
-import { clearNotifications } from "../../apis/api";
+import { clearNotifications, getMostFollowedUsers } from "../../apis/api";
 import PersonIcon from "@mui/icons-material/Person";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import Badge from "@mui/material/Badge";
 import IconButton from "@mui/material/IconButton";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 // import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 // import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 // import FavoriteIcon from "@mui/icons-material/Favorite";
 // import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { motion, AnimatePresence } from "framer-motion";
 import CircularProgress from "@mui/material/CircularProgress";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
@@ -46,7 +47,7 @@ interface LeftSecProps {
   fullWidth: boolean;
 }
 const LeftSec = styled.div<LeftSecProps>`
-  width: ${(props) => (props.fullWidth ? "100%" : "65%")};
+  width: ${(props) => (props.fullWidth ? "100%" : "70%")};
   padding: 20px ${(props) => (props.fullWidth ? "0" : "20px")};
   @media (max-width: 1020px) {
     width: 100%;
@@ -56,13 +57,75 @@ const LeftSec = styled.div<LeftSecProps>`
   }
 `;
 const RightSec = styled.div`
-  width: 35%;
+  position: sticky;
+  max-height: 92vh;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  width: 30%;
   padding: 20px;
-  border-left: 2px solid #f8f5f5;
+  padding-left: 0;
+  /* border-left: 2px solid #f8f5f5; */
+  h4 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+  }
   @media (max-width: 1020px) {
     display: none;
   }
 `;
+const Banner = styled.div`
+  width: 100%;
+  min-height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  font-size: 20px;
+  background: #f0f1f3;
+`;
+const Info = styled.div`
+  p {
+    margin-top: 10px;
+    font-size: 15px;
+    color: #908e8e;
+  }
+`;
+const FollowSuggestions = styled.div``;
+const Users = styled.div`
+  padding-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+const Row = styled.div`
+  gap: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+const FollowButton = styled.button`
+  font-size: 17px;
+  padding: 2px 5px;
+  background-color: transparent;
+  border: 1px solid #3856ff;
+  color: #3856ff;
+  border-radius: 5px;
+  &:hover {
+    cursor: pointer;
+    scale: 1.015;
+
+    background-color: #3856ff;
+    border: 1px solid transparent;
+    color: white;
+  }
+  &:active {
+    opacity: 0.8;
+  }
+`;
+
 interface NotificationPanelProps {
   noNotifactions: boolean;
 }
@@ -78,6 +141,7 @@ const NotificationPanel = styled(motion.div)<NotificationPanelProps>`
   flex-direction: column;
   align-items: ${(props) => (props.noNotifactions ? "center" : "flex-start")};
   gap: 10px;
+  z-index: 100;
 `;
 const Button = styled.button`
   width: 100%;
@@ -113,6 +177,7 @@ export default function Layout({
   const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [activePage, setActivePage] = useState<activePage>("home");
+  const [mostFollowedUsers, setMostFollowedUsers] = useState<object[]>([]);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -131,6 +196,16 @@ export default function Layout({
       setActivePage("saved");
     }
   }, [location]);
+
+  //  Fetch most followed users
+  useEffect(() => {
+    async function fetchMostFollowedUsers() {
+      const users = await getMostFollowedUsers();
+      setMostFollowedUsers(users);
+    }
+    fetchMostFollowedUsers();
+  }, []);
+  console.log(mostFollowedUsers);
 
   //   Clear notifications
   async function handleClearNotifications() {
@@ -241,7 +316,40 @@ export default function Layout({
           <Outlet />
         </LeftSec>
         {(location.pathname === "/app/search" ||
-          location.pathname === "/app") && <RightSec>ewfwef</RightSec>}
+          location.pathname === "/app") && (
+          <RightSec>
+            <Banner>Inkwell Plus is coming soon!</Banner>
+            <FollowSuggestions>
+              <h4>Who to Follow</h4>
+              <Users>
+                {mostFollowedUsers?.map((user) => (
+                  <Row key={user.id}>
+                    <UserCard
+                      username={user.username}
+                      profilePicURL={user.profilePicURL}
+                    >
+                      {user._count.followers} Followers
+                    </UserCard>
+                    <FollowButton>Follow</FollowButton>
+                  </Row>
+                ))}
+              </Users>
+            </FollowSuggestions>
+            <Info>
+              <h4>Reading list</h4>
+              <p>
+                Click the{" "}
+                <BookmarkBorderIcon
+                  style={{
+                    verticalAlign: "middle",
+                    color: "#c3bfbd",
+                  }}
+                />{" "}
+                on any story to easily add it to your reading list.
+              </p>
+            </Info>
+          </RightSec>
+        )}
       </Main>
       {/* <Footer></Footer> */}
       <Navbar activePage={activePage} setActivePage={setActivePage} />
@@ -330,6 +438,7 @@ import { RiSearchLine } from "react-icons/ri";
 import PermIdentityOutlinedIcon from "@mui/icons-material/PermIdentityOutlined";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import UserCard from "../../components/UserCard";
 
 function Navbar({
   activePage,
