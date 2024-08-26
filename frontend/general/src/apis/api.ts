@@ -456,7 +456,9 @@ export async function editCommentOnBlog(
 }
 export async function getMostFollowedUsers(): Promise<object[]> {
   try {
-    const res = await axios.get(`${BASE_URL}/user/mostFollowed`);
+    const res = await axios.get(`${BASE_URL}/user/mostFollowed`, {
+      headers: getHeaders(),
+    });
     if (res.data.success) {
       return res.data.data;
     } else {

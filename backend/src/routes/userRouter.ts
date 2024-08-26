@@ -96,36 +96,6 @@ userRouter.post("/signin", async function (c) {
     });
   }
 });
-// Most followed Users
-userRouter.get("/mostFollowed", async function (c) {
-  const prisma = new PrismaClient({
-    datasourceUrl: c.env?.DATABASE_URL,
-  }).$extends(withAccelerate());
-  try {
-    const allUsers = await prisma.user.findMany({
-      take: 5,
-      orderBy: {
-        followers: {
-          _count: "desc",
-        },
-      },
-      select: {
-        id: true,
-        username: true,
-        profilePicURL: true,
-        _count: {
-          select: { followers: true },
-        },
-      },
-    });
-    return c.json({ success: true, data: allUsers });
-  } catch {
-    return c.json({
-      success: false,
-      error: "Something went wrong! Unable to fetch the users!",
-    });
-  }
-});
 // Search User
 userRouter.get("/search", async function (c) {
   const prisma = new PrismaClient({
@@ -258,6 +228,42 @@ userRouter.use(async (c, next) => {
 });
 
 // 🚹 User Related Routes 🚹
+// Most followed Users
+userRouter.get("/mostFollowed", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const userId = c.get("jwtPayload");
+    const allUsers = await prisma.user.findMany({
+      where: {
+        id: {
+          not: userId,
+        },
+      },
+      take: 5,
+      orderBy: {
+        followers: {
+          _count: "desc",
+        },
+      },
+      select: {
+        id: true,
+        username: true,
+        profilePicURL: true,
+        _count: {
+          select: { followers: true },
+        },
+      },
+    });
+    return c.json({ success: true, data: allUsers });
+  } catch {
+    return c.json({
+      success: false,
+      error: "Something went wrong! Unable to fetch the users!",
+    });
+  }
+});
 // Get Self Details
 userRouter.get("/details", async function (c) {
   const prisma = new PrismaClient({

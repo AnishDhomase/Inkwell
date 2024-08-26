@@ -5,7 +5,7 @@ import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 const BackButton = styled.span`
   cursor: pointer;
   &:hover {
-    scale: 1.05;
+    transform: translateX(-3px);
   }
 `;
 

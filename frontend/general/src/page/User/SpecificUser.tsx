@@ -1,6 +1,6 @@
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import { useEffect, useMemo, useState } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import {
   Blog,
@@ -455,9 +455,15 @@ export default function SpecificUser({ selfDetails }: { selfDetails: object }) {
       <UserInfoCard>
         <header>
           <h1>{userDetails.name}</h1>
-          <button onClick={handleFollow}>
-            {follow ? "Following" : "Follow"}
-          </button>
+          {selfDetails.id !== Number(userId) ? (
+            <button onClick={handleFollow}>
+              {follow ? "Following" : "Follow"}
+            </button>
+          ) : (
+            <Link to="/app/account">
+              <button>Edit Profile</button>
+            </Link>
+          )}
         </header>
         <main>
           <StatCard>
@@ -496,7 +502,12 @@ export default function SpecificUser({ selfDetails }: { selfDetails: object }) {
           </ContactCard>
         )}
 
-        <Title>Blogs by {userDetails?.name?.split(" ")[0]}</Title>
+        <Title>
+          Blogs by{" "}
+          {Number(userId) === selfDetails.id
+            ? "you"
+            : userDetails?.name?.split(" ")[0]}
+        </Title>
         <Blogs blogs={userDetails.blogs} userBlogs={userBlogs} />
       </UserInfoCard>
     </Container>
