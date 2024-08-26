@@ -1,22 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-import {
-  Blog,
-  getAllBlogs,
-  getAllTopics,
-  getBlogsOfTopic,
-  getQueriedBlogs,
-  likeBlog,
-  saveBlog,
-  Topic,
-  unlikeBlog,
-  unsaveBlog,
-} from "../../apis/api";
+import { useEffect, useRef, useState } from "react";
+import { Blog, getAllTopics, getQueriedBlogs, Topic } from "../../apis/api";
 import styled from "styled-components";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
-import CommentIcon from "@mui/icons-material/Comment";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 
@@ -113,89 +97,9 @@ const SortOption = styled.button<SortOptionProps>`
   margin-right: 10px;
   &:hover {
     cursor: pointer;
-    scale: 1.015;
   }
   &:active {
     opacity: 0.8;
-  }
-`;
-const BlogBox = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 35px;
-  padding: 45px 0;
-`;
-const BlogCard = styled.div`
-  width: 100%;
-  /* border-radius: 10px; */
-  display: flex;
-  gap: 15px;
-  border-bottom: 1px solid #efe9e9;
-  padding-bottom: 35px;
-  &:hover {
-    cursor: pointer;
-  }
-  &:hover h3 {
-    color: #0c1a6b;
-    text-decoration: underline;
-  }
-`;
-interface LeftBlogSecProps {
-  imageURL: string;
-}
-const LeftBlogSec = styled.div<LeftBlogSecProps>`
-  width: 40%;
-  min-height: 160px;
-  border-radius: 10px;
-  position: relative;
-  background-image: url(${(props) => props.imageURL});
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border: 1px solid #393939;
-  span {
-    position: absolute;
-    left: 10px;
-    border-radius: 50px;
-    padding: 5px;
-    display: flex;
-    cursor: pointer;
-    background-color: #f9f9f9;
-    border: 1px solid #333;
-  }
-`;
-const Like = styled.span`
-  top: 10px;
-`;
-const Save = styled.span`
-  top: 50px;
-`;
-const RightBlogSec = styled.div`
-  width: 60%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 10px;
-  h3 {
-    font-size: 20px;
-    font-weight: 700;
-    color: #333;
-  }
-  section {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 18px;
-    color: #a38d8d;
-  }
-`;
-const StatChip = styled.div`
-  color: #000000;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  span {
-    font-size: 18px;
   }
 `;
 const TextButton = styled.button`
@@ -220,12 +124,53 @@ const TextButton = styled.button`
     transform: translateY(0px);
   }
 `;
+const SearchForBox = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  font-size: 16px;
+  color: #7b7a7a;
+  margin-bottom: 25px;
+`;
+interface TopicBtnProps {
+  active?: boolean;
+}
+const TextBtn = styled.button<TopicBtnProps>`
+  color: ${(props) => (props.active ? "#3856ff" : "#2c2828")};
+  text-decoration: ${(props) => (props.active ? "underline" : "none")};
+  border: none;
+  background-color: transparent;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  &:active {
+    opacity: 0.8;
+  }
+`;
+const SearchStatusBox = styled.div`
+  display: flex;
+  justify-content: center;
+  font-size: 20px;
+  color: #ff7738;
+  margin-top: 100px;
+`;
+
 type SortOption = "newest" | "oldest" | "popular";
+const SortOptionsArr: SortOption[] = ["newest", "oldest", "popular"];
+enum SearchStatus {
+  noSearchYet,
+  noResultFound,
+  resultFound,
+}
+
 import { RiSearchLine } from "react-icons/ri";
 import Blogs from "../../components/Blogs";
-import BlogCardSkeletonLoader from "../../components/BlogCardSkeleton";
+import { Link, useLocation } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function Search({ selfDetails }: { selfDetails: object }) {
+  const categoryOfSearch = useLocation().pathname.split("/")[3];
+  const [searchFor, setSearchFor] = useState<string>(categoryOfSearch);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [query, setQuery] = useState<string>("");
@@ -234,6 +179,9 @@ export default function Search({ selfDetails }: { selfDetails: object }) {
   const [totalAvlBlogsCount, setTotalAvlBlogsCount] = useState<number>(0);
   const [mouseOnReadmore, setMouseOnReadmore] = useState<boolean>(false);
   const [loadingBlogs, setLoadingBlogs] = useState<boolean>(false);
+  const [searchFeedback, setSearchFeedback] = useState<SearchStatus>(
+    SearchStatus.noSearchYet
+  );
 
   const isThereMoreBlogsToLoad = totalAvlBlogsCount > blogs?.length;
 
@@ -272,23 +220,33 @@ export default function Search({ selfDetails }: { selfDetails: object }) {
 
   // handle search
   async function handleSearch() {
-    if (!query) {
+    if (!query.trim()) {
       toast.error("Please enter a search query");
       return;
     }
-    let blogArray = [],
-      countOfAvlBlogs = 0;
-    const { blogArr, totalBlogsCount } = await getQueriedBlogs({
-      currentPage: 1,
-      sortBy,
-      query,
-    });
-    blogArray = blogArr;
-    countOfAvlBlogs = totalBlogsCount;
+    if (searchFor === "blogs") {
+      let blogArray = [],
+        countOfAvlBlogs = 0;
+      const { blogArr, totalBlogsCount } = await getQueriedBlogs({
+        currentPage: 1,
+        sortBy,
+        query,
+      });
+      blogArray = blogArr;
+      countOfAvlBlogs = totalBlogsCount;
+      if (!blogArray.length) setSearchFeedback(SearchStatus.noResultFound);
+      else setSearchFeedback(SearchStatus.resultFound);
 
-    setBlogs(blogArray);
-    setTotalAvlBlogsCount(countOfAvlBlogs);
+      setBlogs(blogArray);
+      setTotalAvlBlogsCount(countOfAvlBlogs);
+    } else {
+      alert("Search for users is not implemented yet");
+    }
   }
+  useEffect(() => {
+    if (query === "" && blogs.length === 0)
+      setSearchFeedback(SearchStatus.noSearchYet);
+  }, [query]);
 
   // Horizontal scroll when mouse wheel is used in ScrollContainer
   const scrollContainerRef1 = useRef<HTMLDivElement>(null);
@@ -331,13 +289,31 @@ export default function Search({ selfDetails }: { selfDetails: object }) {
     saved: selfDetails?.savedBlogs?.map((blog: Blog) => blog.id) || [],
   };
 
+  function getSearchStatus() {
+    if (searchFeedback === SearchStatus.noSearchYet) {
+      return `Start Searching for ${searchFor}!`;
+    } else if (searchFeedback === SearchStatus.noResultFound) {
+      return `No results found!`;
+    }
+    return "";
+  }
+
   return (
     <div>
       <>
+        <SearchForBox>
+          <p>Search for</p>
+          <Link to="/app/search/blogs" onClick={() => setSearchFor("blogs")}>
+            <TextBtn active={searchFor === "blogs"}>Blogs</TextBtn>
+          </Link>
+          <Link to="/app/search/users" onClick={() => setSearchFor("users")}>
+            <TextBtn active={searchFor === "users"}>Users</TextBtn>
+          </Link>
+        </SearchForBox>
         <SearchBox>
           <Input
             type="text"
-            placeholder="Search for blogs"
+            placeholder="Search here . . ."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -345,52 +321,52 @@ export default function Search({ selfDetails }: { selfDetails: object }) {
             <RiSearchLine />
           </SearchBtn>
         </SearchBox>
-        <Sort>
-          <ScrollContainer ref={scrollContainerRef1}>
-            <TopicBtnWrapper>
-              <SortOption
-                onClick={() => setSortBy("newest")}
-                active={sortBy === "newest"}
-              >
-                Newest First
-              </SortOption>
-              <SortOption
-                onClick={() => setSortBy("oldest")}
-                active={sortBy === "oldest"}
-              >
-                Oldest First
-              </SortOption>
-              <SortOption
-                onClick={() => setSortBy("popular")}
-                active={sortBy === "popular"}
-              >
-                Most Popular
-              </SortOption>
-            </TopicBtnWrapper>
-          </ScrollContainer>
-        </Sort>
+        {searchFor === "blogs" && (
+          <Sort>
+            <ScrollContainer ref={scrollContainerRef1}>
+              <TopicBtnWrapper>
+                {SortOptionsArr.map((option) => (
+                  <SortOption
+                    onClick={() => setSortBy(option)}
+                    active={sortBy === option}
+                  >
+                    {option === "popular"
+                      ? "Most Popular"
+                      : option.charAt(0).toUpperCase() +
+                        option.slice(1) +
+                        " First"}
+                  </SortOption>
+                ))}
+              </TopicBtnWrapper>
+            </ScrollContainer>
+          </Sort>
+        )}
 
-        {blogs.length > 0 && (
-          <>
+        <>
+          {searchFeedback === SearchStatus.resultFound && (
             <Blogs blogs={blogs} userBlogs={userBlogs} />
-            {loadingBlogs && <BlogCardSkeletonLoader />}
-            {isThereMoreBlogsToLoad && (
-              <TextButton
-                onMouseEnter={() => setMouseOnReadmore(true)}
-                onMouseLeave={() => setMouseOnReadmore(false)}
-                onClick={handleReadMore}
-              >
-                <span>Read More</span>
-                <b>
-                  {mouseOnReadmore ? (
-                    <KeyboardDoubleArrowDownIcon />
-                  ) : (
-                    <KeyboardArrowDownIcon />
-                  )}
-                </b>
-              </TextButton>
-            )}
-          </>
+          )}
+
+          {isThereMoreBlogsToLoad && (
+            <TextButton
+              onMouseEnter={() => setMouseOnReadmore(true)}
+              onMouseLeave={() => setMouseOnReadmore(false)}
+              onClick={handleReadMore}
+            >
+              <span>Read More</span>
+              <b>
+                {mouseOnReadmore ? (
+                  <KeyboardDoubleArrowDownIcon />
+                ) : (
+                  <KeyboardArrowDownIcon />
+                )}
+              </b>
+            </TextButton>
+          )}
+        </>
+
+        {searchFeedback !== SearchStatus.resultFound && (
+          <SearchStatusBox>{getSearchStatus()}</SearchStatusBox>
         )}
       </>
     </div>

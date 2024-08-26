@@ -57,12 +57,15 @@ const LeftSec = styled.div<LeftSecProps>`
   }
 `;
 const RightSec = styled.div`
+  /* max-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto; */
   position: sticky;
-  max-height: 92vh;
+  max-height: 103vh;
   top: 0;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 40px;
   width: 30%;
   padding: 20px;
   padding-left: 0;
@@ -123,6 +126,18 @@ const FollowButton = styled.button`
   }
   &:active {
     opacity: 0.8;
+  }
+`;
+const TextBtn = styled.button`
+  background-color: transparent;
+  border: none;
+  margin-top: 15px;
+  font-weight: 400;
+  font-size: 15px;
+  color: #3856ff;
+  &:hover {
+    cursor: pointer;
+    text-decoration: underline;
   }
 `;
 
@@ -308,14 +323,14 @@ export default function Layout({
         <LeftSec
           fullWidth={
             !(
-              location.pathname === "/app/search" ||
+              location.pathname.startsWith("/app/search") ||
               location.pathname === "/app"
             )
           }
         >
           <Outlet />
         </LeftSec>
-        {(location.pathname === "/app/search" ||
+        {(location.pathname.startsWith("/app/search") ||
           location.pathname === "/app") && (
           <RightSec>
             <Banner>Inkwell Plus is coming soon!</Banner>
@@ -334,6 +349,8 @@ export default function Layout({
                   </Row>
                 ))}
               </Users>
+
+              <TextBtn>See more suggestions</TextBtn>
             </FollowSuggestions>
             <Info>
               <h4>Reading list</h4>

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Auth from "./page/Auth/Auth";
 import { UserDetailsProvider } from "./context/UserDetailContext";
 import Home from "./page/Home/Home";
@@ -33,18 +33,24 @@ function App() {
             }
           >
             <Route index element={<Home selfDetails={selfDetails} />} />
-            <Route
-              path="search"
-              element={<Search selfDetails={selfDetails} />}
-            />
+            <Route path="search">
+              <Route index element={<Navigate replace to="blogs" />} />
+              <Route
+                path="blogs"
+                element={<Search selfDetails={selfDetails} />}
+              />
+              <Route
+                path="users"
+                element={<Search selfDetails={selfDetails} />}
+              />
+              <Route path="*" element={<Navigate replace to="blogs" />} />
+            </Route>
             <Route path="create" element={<CreateBlog />} />
             <Route path="account" element={<p>Account</p>} />
             <Route
               path="blog/:blogId"
               element={<SpecificBlog selfDetails={selfDetails} />}
             />
-            {/* <Route path="liked-Blogs" element={<p>liked-Blogs</p>} /> */}
-            {/* <Route path="saved-Blogs" element={<p>saved-Blogs</p>} /> */}
           </Route>
         </Routes>
       </BrowserRouter>
