@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 interface UserBoxProps {
@@ -39,22 +40,28 @@ const UserDetails = styled.div`
 
 export default function UserCard({
   children,
+  userId,
   username,
   profilePicURL,
 }: {
   children?: React.ReactNode;
+  userId: number;
   username: string;
   profilePicURL: string;
 }) {
   return (
-    <UserBox>
-      <UserProfile
-        imageURL={profilePicURL || "../../../public/placeholderBlogImage.webp"}
-      />
-      <UserDetails>
-        <p>{username}</p>
-        <span>{children}</span>
-      </UserDetails>
-    </UserBox>
+    <Link to={`/app/user/${userId}`}>
+      <UserBox>
+        <UserProfile
+          imageURL={
+            profilePicURL || "../../../public/placeholderBlogImage.webp"
+          }
+        />
+        <UserDetails>
+          <p>{username}</p>
+          <span>{children}</span>
+        </UserDetails>
+      </UserBox>
+    </Link>
   );
 }

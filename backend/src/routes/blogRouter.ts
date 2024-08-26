@@ -52,7 +52,9 @@ blogRouter.post("/", async function (c) {
         content: true,
         createdAt: true,
         _count: {
-          select: { likedByUsers: true },
+          select: {
+            likedByUsers: true,
+          },
         },
       },
     });

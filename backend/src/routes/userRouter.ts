@@ -167,6 +167,7 @@ userRouter.get("userDetails/:userId", async function (c) {
         id: userId,
       },
       select: {
+        id: true,
         username: true,
         profilePicURL: true,
       },
@@ -180,47 +181,43 @@ userRouter.get("userDetails/:userId", async function (c) {
   }
 });
 // Get author details
-userRouter.get("/details/author", async function (c) {
+userRouter.get("/details/:userId", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
   try {
-    const body = await c.req.json();
-    const { success } = authorDetailsInput.safeParse(body);
-    if (!success) {
-      c.status(400);
-      return c.json({ success: false, error: "Your Inputs are not valid!" });
-    }
+    const authorId = Number(c.req.param("userId"));
 
     const authorDetails = await prisma.user.findFirst({
       where: {
-        id: body.authorId,
+        id: authorId,
       },
       select: {
         id: true,
         username: true,
+        email: true,
         name: true,
         profilePicURL: true,
         description: true,
 
         // Actions
-        blogs: true,
-        followers: {
+        blogs: {
           select: {
             id: true,
-            username: true,
-            name: true,
-            profilePicURL: true,
-            description: true,
+            title: true,
+            content: true,
+            blogImageURL: true,
+            createdAt: true,
+            comments: true,
+            _count: {
+              select: { likedByUsers: true },
+            },
           },
         },
-        following: {
+        _count: {
           select: {
-            id: true,
-            username: true,
-            name: true,
-            profilePicURL: true,
-            description: true,
+            followers: true,
+            following: true,
           },
         },
       },
@@ -514,7 +511,7 @@ userRouter.post("/follow", async function (c) {
     });
   }
 });
-userRouter.put("/unfollow", async function (c) {
+userRouter.post("/unfollow", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());

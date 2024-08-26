@@ -183,40 +183,24 @@ export default function Search({ selfDetails }: { selfDetails: object }) {
     SearchStatus.noSearchYet
   );
 
-  const isThereMoreBlogsToLoad = totalAvlBlogsCount > blogs?.length;
-
-  // When sortBy/query changes, reset activePageNumber to 1
+  // Horizontal scroll when mouse wheel is used in ScrollContainer
+  const scrollContainerRef1 = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    setActivePageNumber(1);
-  }, [sortBy, query]);
+    const container = scrollContainerRef1.current;
+    if (container) {
+      const handleWheel = (event: WheelEvent) => {
+        event.preventDefault();
+        const scrollSpeed = 0.8;
+        container.scrollLeft += event.deltaY * scrollSpeed;
+      };
 
-  // Fetching all topics
-  useEffect(() => {
-    async function fetchAllTopics() {
-      const topicArr = await getAllTopics();
-      setTopics(topicArr);
+      container.addEventListener("wheel", handleWheel, { passive: false });
+
+      return () => {
+        container.removeEventListener("wheel", handleWheel);
+      };
     }
-    fetchAllTopics();
   }, []);
-  // Fetching all blogs again when sortBy changes
-  useEffect(() => {
-    async function fetchAllBlogs() {
-      if (!query) return;
-      let blogArray = [],
-        countOfAvlBlogs = 0;
-      const { blogArr, totalBlogsCount } = await getQueriedBlogs({
-        currentPage: 1,
-        sortBy,
-        query,
-      });
-      blogArray = blogArr;
-      countOfAvlBlogs = totalBlogsCount;
-
-      setBlogs(blogArray);
-      setTotalAvlBlogsCount(countOfAvlBlogs);
-    }
-    fetchAllBlogs();
-  }, [sortBy]);
 
   // handle search
   async function handleSearch() {
@@ -247,25 +231,46 @@ export default function Search({ selfDetails }: { selfDetails: object }) {
     if (query === "" && blogs.length === 0)
       setSearchFeedback(SearchStatus.noSearchYet);
   }, [query]);
-
-  // Horizontal scroll when mouse wheel is used in ScrollContainer
-  const scrollContainerRef1 = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const container = scrollContainerRef1.current;
-    if (container) {
-      const handleWheel = (event: WheelEvent) => {
-        event.preventDefault();
-        const scrollSpeed = 0.8;
-        container.scrollLeft += event.deltaY * scrollSpeed;
-      };
-
-      container.addEventListener("wheel", handleWheel, { passive: false });
-
-      return () => {
-        container.removeEventListener("wheel", handleWheel);
-      };
+  function getSearchStatus() {
+    if (searchFeedback === SearchStatus.noSearchYet) {
+      return `Start Searching for ${searchFor}!`;
+    } else if (searchFeedback === SearchStatus.noResultFound) {
+      return `No results found!`;
     }
+    return "";
+  }
+  const isThereMoreBlogsToLoad = totalAvlBlogsCount > blogs?.length;
+  // When sortBy/query changes, reset activePageNumber to 1
+  useEffect(() => {
+    setActivePageNumber(1);
+  }, [sortBy, query]);
+  // Fetching all topics
+  useEffect(() => {
+    async function fetchAllTopics() {
+      const topicArr = await getAllTopics();
+      setTopics(topicArr);
+    }
+    fetchAllTopics();
   }, []);
+  // Fetching all blogs again when sortBy changes
+  useEffect(() => {
+    async function fetchAllBlogs() {
+      if (!query) return;
+      let blogArray = [],
+        countOfAvlBlogs = 0;
+      const { blogArr, totalBlogsCount } = await getQueriedBlogs({
+        currentPage: 1,
+        sortBy,
+        query,
+      });
+      blogArray = blogArr;
+      countOfAvlBlogs = totalBlogsCount;
+
+      setBlogs(blogArray);
+      setTotalAvlBlogsCount(countOfAvlBlogs);
+    }
+    fetchAllBlogs();
+  }, [sortBy]);
 
   //  Read more button
   async function handleReadMore() {
@@ -288,15 +293,6 @@ export default function Search({ selfDetails }: { selfDetails: object }) {
     liked: selfDetails?.likedBlogs?.map((blog: Blog) => blog.id) || [],
     saved: selfDetails?.savedBlogs?.map((blog: Blog) => blog.id) || [],
   };
-
-  function getSearchStatus() {
-    if (searchFeedback === SearchStatus.noSearchYet) {
-      return `Start Searching for ${searchFor}!`;
-    } else if (searchFeedback === SearchStatus.noResultFound) {
-      return `No results found!`;
-    }
-    return "";
-  }
 
   return (
     <div>

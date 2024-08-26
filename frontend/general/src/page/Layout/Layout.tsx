@@ -334,37 +334,44 @@ export default function Layout({
           location.pathname === "/app") && (
           <RightSec>
             <Banner>Inkwell Plus is coming soon!</Banner>
-            <FollowSuggestions>
-              <h4>Who to Follow</h4>
-              <Users>
-                {mostFollowedUsers?.map((user) => (
-                  <Row key={user.id}>
-                    <UserCard
-                      username={user.username}
-                      profilePicURL={user.profilePicURL}
-                    >
-                      {user._count.followers} Followers
-                    </UserCard>
-                    <FollowButton>Follow</FollowButton>
-                  </Row>
-                ))}
-              </Users>
+            {location.pathname !== "/app/search/users" && (
+              <>
+                <FollowSuggestions>
+                  <h4>Who to Follow</h4>
+                  <Users>
+                    {mostFollowedUsers?.map((user) => (
+                      <Row key={user.id}>
+                        <UserCard
+                          userId={user.id}
+                          username={user.username}
+                          profilePicURL={user.profilePicURL}
+                        >
+                          {user._count.followers} Followers
+                        </UserCard>
+                        <FollowButton>Follow</FollowButton>
+                      </Row>
+                    ))}
+                  </Users>
+                  <Link to="/app/search/users">
+                    <TextBtn>See more suggestions</TextBtn>
+                  </Link>
+                </FollowSuggestions>
 
-              <TextBtn>See more suggestions</TextBtn>
-            </FollowSuggestions>
-            <Info>
-              <h4>Reading list</h4>
-              <p>
-                Click the{" "}
-                <BookmarkBorderIcon
-                  style={{
-                    verticalAlign: "middle",
-                    color: "#c3bfbd",
-                  }}
-                />{" "}
-                on any story to easily add it to your reading list.
-              </p>
-            </Info>
+                <Info>
+                  <h4>Reading list</h4>
+                  <p>
+                    Click the{" "}
+                    <BookmarkBorderIcon
+                      style={{
+                        verticalAlign: "middle",
+                        color: "#c3bfbd",
+                      }}
+                    />{" "}
+                    on any story to easily add it to your reading list.
+                  </p>
+                </Info>
+              </>
+            )}
           </RightSec>
         )}
       </Main>

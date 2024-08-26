@@ -63,7 +63,7 @@ const ImageBox = styled.div`
   border-radius: 10px;
   position: relative;
   border: 1px solid #333;
-  background-color: #6d1717;
+  background-color: #ffffff;
   display: flex;
   img {
     border-radius: 10px;
@@ -397,9 +397,7 @@ export default function SpecificBlog({ selfDetails }: { selfDetails: object }) {
 
   return (
     <Container>
-      <BackButton onClick={() => navigate("/app")}>
-        <KeyboardBackspaceIcon />
-      </BackButton>
+      <BackBtn />
 
       <ImageBox>
         <img
@@ -427,6 +425,7 @@ export default function SpecificBlog({ selfDetails }: { selfDetails: object }) {
 
       <Header>
         <UserCard
+          userId={authorDetails?.id}
           username={authorDetails?.username}
           profilePicURL={authorDetails?.profilePicURL}
         />
@@ -513,6 +512,7 @@ function getTimeAgo(dateString: string): string {
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import UserCard from "../../components/UserCard";
+import BackBtn from "../../components/BackBtn";
 function Comment({
   comment,
   myUserId,
@@ -554,6 +554,7 @@ function Comment({
     <CommentContent overlay={loading}>
       <header>
         <UserCard
+          userId={comment.authorId}
           username={authorDetails?.username}
           profilePicURL={authorDetails?.profilePicURL}
         />

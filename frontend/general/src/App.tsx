@@ -8,6 +8,7 @@ import { getSelfDetails } from "./apis/api";
 import CreateBlog from "./page/CreateBlog/CreateBlog";
 import Search from "./page/Search/Search";
 import SpecificBlog from "./page/Blog/SpecificBlog";
+import SpecificUser from "./page/User/SpecificUser";
 function App() {
   const [selfDetails, setSelfDetails] = useState<object>({});
   const [notifications, setNotifications] = useState<string[]>([]);
@@ -50,6 +51,10 @@ function App() {
             <Route
               path="blog/:blogId"
               element={<SpecificBlog selfDetails={selfDetails} />}
+            />
+            <Route
+              path="user/:userId"
+              element={<SpecificUser selfDetails={selfDetails} />}
             />
           </Route>
         </Routes>

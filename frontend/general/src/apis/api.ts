@@ -11,6 +11,7 @@ import {
   commentInputType,
   commentDeleteInputType,
   commentEditInputType,
+  userFollowInputType,
 } from "@anishdhomase/blog_app";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -378,6 +379,21 @@ export async function getUser(payload: number): Promise<object> {
     return {};
   }
 }
+export async function getUserDetails(payload: number): Promise<object> {
+  try {
+    const res = await axios.get(`${BASE_URL}/user/details/${payload}`);
+    if (res.data.success) {
+      return res.data.data;
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return {};
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return {};
+  }
+}
 export async function commentOnBlog(
   payload: commentInputType
 ): Promise<boolean> {
@@ -451,5 +467,44 @@ export async function getMostFollowedUsers(): Promise<object[]> {
     if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
     else toast.error(e.response?.data?.error);
     return [];
+  }
+}
+export async function followUser(
+  payload: userFollowInputType
+): Promise<boolean> {
+  try {
+    const res = await axios.post(`${BASE_URL}/user/follow`, payload, {
+      headers: getHeaders(),
+    });
+    if (res.data.success) {
+      return true;
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return false;
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return false;
+  }
+}
+export async function unfollowUser(
+  payload: userFollowInputType
+): Promise<boolean> {
+  try {
+    const res = await axios.post(`${BASE_URL}/user/unfollow`, payload, {
+      headers: getHeaders(),
+    });
+    console.log(res);
+    if (res.data.success) {
+      return true;
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return false;
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return false;
   }
 }
