@@ -12,6 +12,7 @@ import styled, { keyframes } from "styled-components";
 import { motion, AnimatePresence } from "framer-motion";
 import CircularProgress from "@mui/material/CircularProgress";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight"; //small
 
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
@@ -346,9 +347,13 @@ export default function Layout({
                           username={user.username}
                           profilePicURL={user.profilePicURL}
                         >
-                          {user._count.followers} Followers
+                          {`${user._count.followers} Follower${
+                            user._count.followers === 1 ? "" : "s"
+                          }`}
                         </UserCard>
-                        <FollowButton>Follow</FollowButton>
+                        <Link to={`/app/user/${user.id}`}>
+                          <ChevronRightIcon />
+                        </Link>
                       </Row>
                     ))}
                   </Users>
@@ -360,7 +365,7 @@ export default function Layout({
                 <Info>
                   <h4>Reading list</h4>
                   <p>
-                    Click the{" "}
+                    Click the
                     <BookmarkBorderIcon
                       style={{
                         verticalAlign: "middle",

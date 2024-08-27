@@ -12,6 +12,7 @@ import {
   commentDeleteInputType,
   commentEditInputType,
   userFollowInputType,
+  userSearchInputType,
 } from "@anishdhomase/blog_app";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -469,6 +470,24 @@ export async function getMostFollowedUsers(): Promise<object[]> {
     if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
     else toast.error(e.response?.data?.error);
     return [];
+  }
+}
+export async function getQueriedUsers(payload: userSearchInputType) {
+  try {
+    const res = await axios.post(`${BASE_URL}/user/search`, payload);
+    if (res.data.success) {
+      return {
+        userArr: res.data.data.allUsers,
+        totalUsersCount: res.data.data.totalUsers,
+      };
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return {};
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return {};
   }
 }
 export async function followUser(

@@ -5,6 +5,7 @@
     "vite-plugin-eslint": "^1.8.1"
   },
   "dependencies": {
+    "@anishdhomase/blog_app": "^1.0.21",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^5.16.7",

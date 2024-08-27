@@ -39,11 +39,23 @@ function App() {
               <Route index element={<Navigate replace to="blogs" />} />
               <Route
                 path="blogs"
-                element={<Search selfDetails={selfDetails} />}
+                element={
+                  <Search
+                    selfDetails={selfDetails}
+                    setSelfDetails={setSelfDetails}
+                    setNotifications={setNotifications}
+                  />
+                }
               />
               <Route
                 path="users"
-                element={<Search selfDetails={selfDetails} />}
+                element={
+                  <Search
+                    selfDetails={selfDetails}
+                    setSelfDetails={setSelfDetails}
+                    setNotifications={setNotifications}
+                  />
+                }
               />
               <Route path="*" element={<Navigate replace to="blogs" />} />
             </Route>

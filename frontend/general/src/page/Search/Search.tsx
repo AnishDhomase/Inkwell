@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Blog, getAllTopics, getQueriedBlogs, Topic } from "../../apis/api";
+import {
+  Blog,
+  getAllTopics,
+  getQueriedBlogs,
+  getQueriedUsers,
+  Topic,
+} from "../../apis/api";
 import styled from "styled-components";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
@@ -167,8 +173,17 @@ import { RiSearchLine } from "react-icons/ri";
 import Blogs from "../../components/Blogs";
 import { Link, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
+import UserSearchCard from "../../components/UerSearchCard";
 
-export default function Search({ selfDetails }: { selfDetails: object }) {
+export default function Search({
+  selfDetails,
+  setSelfDetails,
+  setNotifications,
+}: {
+  selfDetails: object;
+  setSelfDetails: (details: object) => void;
+  setNotifications: (notifications: string[]) => void;
+}) {
   const categoryOfSearch = useLocation().pathname.split("/")[3];
   const [searchFor, setSearchFor] = useState<string>(categoryOfSearch);
   const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -182,6 +197,9 @@ export default function Search({ selfDetails }: { selfDetails: object }) {
   const [searchFeedback, setSearchFeedback] = useState<SearchStatus>(
     SearchStatus.noSearchYet
   );
+  const [users, setUsers] = useState([]);
+  const [totalAvlUsersCount, setTotalAvlsetUsersCount] = useState<number>(0);
+  console.log(users, totalAvlUsersCount);
 
   // Horizontal scroll when mouse wheel is used in ScrollContainer
   const scrollContainerRef1 = useRef<HTMLDivElement>(null);
@@ -201,6 +219,11 @@ export default function Search({ selfDetails }: { selfDetails: object }) {
       };
     }
   }, []);
+
+  // Reset searchFeedback when searchFor changes
+  useEffect(() => {
+    setSearchFeedback(SearchStatus.noSearchYet);
+  }, [searchFor]);
 
   // handle search
   async function handleSearch() {
@@ -224,13 +247,28 @@ export default function Search({ selfDetails }: { selfDetails: object }) {
       setBlogs(blogArray);
       setTotalAvlBlogsCount(countOfAvlBlogs);
     } else {
-      alert("Search for users is not implemented yet");
+      let userArray = [],
+        countOfAvlUsers = 0;
+      const { userArr, totalUsersCount } = await getQueriedUsers({
+        currentPage: 1,
+        query,
+      });
+      userArray = userArr;
+      countOfAvlUsers = totalUsersCount;
+      if (!userArr.length) setSearchFeedback(SearchStatus.noResultFound);
+      else setSearchFeedback(SearchStatus.resultFound);
+
+      setUsers(userArray);
+      setTotalAvlsetUsersCount(countOfAvlUsers);
     }
   }
   useEffect(() => {
-    if (query === "" && blogs.length === 0)
+    if (searchFor === "blogs" && query === "" && blogs.length === 0)
       setSearchFeedback(SearchStatus.noSearchYet);
-  }, [query]);
+    else if (searchFor === "users" && query === "" && users.length === 0)
+      setSearchFeedback(SearchStatus.noSearchYet);
+  }, [query, searchFor, blogs, users]);
+
   function getSearchStatus() {
     if (searchFeedback === SearchStatus.noSearchYet) {
       return `Start Searching for ${searchFor}!`;
@@ -339,11 +377,12 @@ export default function Search({ selfDetails }: { selfDetails: object }) {
         )}
 
         <>
-          {searchFeedback === SearchStatus.resultFound && (
-            <Blogs blogs={blogs} userBlogs={userBlogs} />
-          )}
+          {searchFor === "blogs" &&
+            searchFeedback === SearchStatus.resultFound && (
+              <Blogs blogs={blogs} userBlogs={userBlogs} />
+            )}
 
-          {isThereMoreBlogsToLoad && (
+          {isThereMoreBlogsToLoad && searchFor === "blogs" && (
             <TextButton
               onMouseEnter={() => setMouseOnReadmore(true)}
               onMouseLeave={() => setMouseOnReadmore(false)}
@@ -359,6 +398,32 @@ export default function Search({ selfDetails }: { selfDetails: object }) {
               </b>
             </TextButton>
           )}
+        </>
+
+        <>
+          {searchFor === "users" &&
+            searchFeedback === SearchStatus.resultFound && (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "30px",
+                  width: "100%",
+                  maxWidth: "450px",
+                  margin: "0 auto",
+                  marginTop: "50px",
+                }}
+              >
+                {users.map((user) => (
+                  <UserSearchCard
+                    selfDetails={selfDetails}
+                    user={user}
+                    setSelfDetails={setSelfDetails}
+                    setNotifications={setNotifications}
+                  />
+                ))}
+              </div>
+            )}
         </>
 
         {searchFeedback !== SearchStatus.resultFound && (

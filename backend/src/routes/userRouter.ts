@@ -18,6 +18,7 @@ import {
   updateUserDetailsInput,
   blogSearchInput,
   pageInput,
+  userSearchInput,
 } from "@anishdhomase/blog_app";
 
 const userRouter = new Hono<{
@@ -97,13 +98,13 @@ userRouter.post("/signin", async function (c) {
   }
 });
 // Search User
-userRouter.get("/search", async function (c) {
+userRouter.post("/search", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
   try {
     const body = await c.req.json();
-    const { success } = blogSearchInput.safeParse(body);
+    const { success } = userSearchInput.safeParse(body);
     if (!success) {
       c.status(400);
       return c.json({ success: false, error: "Invalid input!" });
@@ -117,8 +118,36 @@ userRouter.get("/search", async function (c) {
       },
       skip: (body.currentPage - 1) * c.env?.pageContentLimitForUsers,
       take: c.env?.pageContentLimitForUsers,
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        profilePicURL: true,
+        description: true,
+        _count: {
+          select: {
+            followers: true,
+            following: true,
+            blogs: true,
+          },
+        },
+      },
     });
-    return c.json({ success: true, data: queriedUsers });
+    const totalUsers = await prisma.user.count({
+      where: {
+        OR: [
+          { username: { contains: body.query, mode: "insensitive" } },
+          { name: { contains: body.query, mode: "insensitive" } },
+        ],
+      },
+    });
+    return c.json({
+      success: true,
+      data: {
+        allUsers: queriedUsers,
+        totalUsers,
+      },
+    });
   } catch {
     return c.json({
       success: false,

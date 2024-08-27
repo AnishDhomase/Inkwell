@@ -77,6 +77,10 @@ export const blogSearchInput = z.object({
   currentPage: z.number(),
   sortBy: z.string(),
 });
+export const userSearchInput = z.object({
+  query: z.string().min(1),
+  currentPage: z.number(),
+});
 export const pageInput = z.object({
   currentPage: z.number(),
   sortBy: z.string(),
@@ -84,6 +88,7 @@ export const pageInput = z.object({
 
 export type pageInputType = z.infer<typeof pageInput>;
 export type blogSearchInputType = z.infer<typeof blogSearchInput>;
+export type userSearchInputType = z.infer<typeof userSearchInput>;
 export type updateUserDetailsInputType = z.infer<typeof updateUserDetailsInput>;
 export type photoInputType = z.infer<typeof photoInput>;
 export type adminUserDeleteInputType = z.infer<typeof adminUserDeleteInput>;
