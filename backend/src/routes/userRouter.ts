@@ -19,6 +19,7 @@ import {
   blogSearchInput,
   pageInput,
   userSearchInput,
+  updateGeneralDetailsInput,
 } from "@anishdhomase/blog_app";
 
 const userRouter = new Hono<{
@@ -409,6 +410,36 @@ userRouter.post("/photo", async function (c) {
     return c.json({
       success: false,
       error: "Something went wrong! Unable to upload Profile photo!",
+    });
+  }
+});
+//Edit name, description, profilePicURL
+userRouter.put("/details/general", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  try {
+    const body = await c.req.json();
+    const { success } = updateGeneralDetailsInput.safeParse(body);
+    if (!success) {
+      c.status(400);
+      return c.json({ success: false, error: "Your Inputs are not valid!" });
+    }
+    const userId = c.get("jwtPayload");
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        ...body,
+      },
+    });
+    return c.json({ success: true });
+  } catch (e) {
+    return c.json({
+      success: false,
+      error: "Something went wrong! Unable to edit user details!",
     });
   }
 });

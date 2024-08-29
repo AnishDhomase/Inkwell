@@ -13,6 +13,7 @@ import {
   commentEditInputType,
   userFollowInputType,
   userSearchInputType,
+  updateGeneralDetailsInputType,
 } from "@anishdhomase/blog_app";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -518,6 +519,45 @@ export async function unfollowUser(
     });
     console.log(res);
     if (res.data.success) {
+      return true;
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return false;
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return false;
+  }
+}
+export async function updateUserGeneralInfo(
+  payload: updateGeneralDetailsInputType,
+  file: File | null
+): Promise<boolean> {
+  try {
+    let fileUrl;
+    if (file) {
+      fileUrl = await getCloudinaryFileURL(file);
+      if (!fileUrl) {
+        toast.error("Something went wrong, Try Again");
+        return false;
+      }
+    }
+    if (fileUrl) {
+      const payload1 = { url: fileUrl } as photoInputType;
+      const res = await axios.post(`${BASE_URL}/user/photo`, payload1, {
+        headers: getHeaders(),
+      });
+      if (!res.data.success) {
+        toast.error("Something went wrong, Try Again");
+        return false;
+      }
+    }
+    const res2 = await axios.put(`${BASE_URL}/user/details/general`, payload, {
+      headers: getHeaders(),
+    });
+    if (res2.data.success) {
+      toast.success("Successfully Updated your Information");
       return true;
     } else {
       toast.error("Something went wrong, Try Again");

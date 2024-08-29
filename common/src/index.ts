@@ -85,7 +85,14 @@ export const pageInput = z.object({
   currentPage: z.number(),
   sortBy: z.string(),
 });
+export const updateGeneralDetailsInput = z.object({
+  name: z.string().optional(),
+  description: z.string().max(1000).optional(),
+});
 
+export type updateGeneralDetailsInputType = z.infer<
+  typeof updateGeneralDetailsInput
+>;
 export type pageInputType = z.infer<typeof pageInput>;
 export type blogSearchInputType = z.infer<typeof blogSearchInput>;
 export type userSearchInputType = z.infer<typeof userSearchInput>;

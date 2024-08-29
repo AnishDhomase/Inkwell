@@ -173,7 +173,7 @@ import { RiSearchLine } from "react-icons/ri";
 import Blogs from "../../components/Blogs";
 import { Link, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
-import UserSearchCard from "../../components/UerSearchCard";
+import UserSearchCard from "../../components/UserSearchCard";
 
 export default function Search({
   selfDetails,
@@ -376,6 +376,7 @@ export default function Search({
           </Sort>
         )}
 
+        {/* blogs */}
         <>
           {searchFor === "blogs" &&
             searchFeedback === SearchStatus.resultFound && (
@@ -400,6 +401,7 @@ export default function Search({
           )}
         </>
 
+        {/* users */}
         <>
           {searchFor === "users" &&
             searchFeedback === SearchStatus.resultFound && (

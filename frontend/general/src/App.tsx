@@ -27,6 +27,7 @@ function App() {
     <UserDetailsProvider>
       <BrowserRouter>
         <Routes>
+          <Route index element={<Navigate replace to="app" />} />
           <Route path="authorization" element={<Auth />} />
           <Route
             path="app"

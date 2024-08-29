@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 const Container = styled.div`
-  margin-top: -20px;
+  /* margin-top: -20px; */
   display: flex;
   justify-content: space-between;
   min-height: 100vh;
@@ -9,13 +9,14 @@ const Container = styled.div`
 `;
 const NavigationPanel = styled.nav`
   width: 25%;
-  background-color: #a4a4a431;
+  background-color: #f6f5f5;
   min-height: 100vh;
   /* padding: 0 20px; */
   & > h1 {
     font-size: 30px;
     font-weight: 700;
     padding: 30px 20px;
+    cursor: pointer;
   }
   & > div {
     display: flex;
@@ -61,7 +62,11 @@ const SettingSection = styled.section`
     margin-top: 5px;
   }
 `;
-const Row = styled.div`
+interface RowProps {
+  active?: boolean;
+}
+const Row = styled.div<RowProps>`
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -74,13 +79,27 @@ const Row = styled.div`
   &:hover > span {
     transform: translateX(2px);
   }
+  &::before {
+    position: absolute;
+    right: -10px;
+    content: "";
+    width: 20px;
+    height: 20px;
+    background-color: ${(props) => (props.active ? "#f6f5f5" : "transparent")};
+    //rotate  by 45deg
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+  span {
+    visibility: ${(props) => (props.active ? "hidden" : "visible")};
+    color: #a09d9d;
+  }
 `;
 
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos"; //big
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"; //small
 
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import {
   Blog,
@@ -93,9 +112,11 @@ import {
   getUserDetails,
   likeBlog,
   saveBlog,
+  setProfilePhoto,
   unfollowUser,
   unlikeBlog,
   unsaveBlog,
+  updateUserGeneralInfo,
 } from "../../apis/api";
 import Blogs, { formatDate } from "../../components/Blogs";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
@@ -108,6 +129,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import BackBtn from "../../components/BackBtn";
+import { color } from "framer-motion";
 
 // const Container = styled.div`
 //   padding: 0 20%;
@@ -124,28 +146,28 @@ import BackBtn from "../../components/BackBtn";
 //   flex-direction: column;
 //   align-items: start;
 // `;
-const BackgroundBanner = styled.div`
-  width: 100%;
-  height: 200px;
-  border-radius: 10px;
-  background-color: #ffe0d6;
-  background-image: linear-gradient(160deg, #ffc8ab 0%, #ffe0d6 100%);
-  /* background-image: linear-gradient(to left, #ffecd2 0%, #fcb69f 100%); */
-  padding: 20px;
-  color: #333;
-  span {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    font-size: 20px;
-    font-weight: 500;
-  }
-`;
+// const BackgroundBanner = styled.div`
+//   width: 100%;
+//   height: 200px;
+//   border-radius: 10px;
+//   background-color: #ffe0d6;
+//   background-image: linear-gradient(160deg, #ffc8ab 0%, #ffe0d6 100%);
+//   /* background-image: linear-gradient(to left, #ffecd2 0%, #fcb69f 100%); */
+//   padding: 20px;
+//   color: #333;
+//   span {
+//     display: flex;
+//     align-items: center;
+//     gap: 15px;
+//     font-size: 20px;
+//     font-weight: 500;
+//   }
+// `;
 const ImageBox = styled.div`
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: -90px;
+  /* margin-top: -90px; */
   background-color: transparent;
 `;
 const UserProfilePhoto = styled.img`
@@ -166,12 +188,15 @@ const UserInfoCard = styled.div`
     padding: 0;
   }
   header {
-    font-size: 23px;
     display: flex;
     justify-content: center;
     flex-direction: column;
     align-items: center;
     gap: 5px;
+    h1 {
+      font-size: 28px;
+      text-transform: capitalize;
+    }
     p {
       font-size: 20px;
       color: #a09d9d;
@@ -262,8 +287,21 @@ const Button = styled.button`
     transform: translateX(4px);
   }
 `;
+const PagePath = styled.div`
+  font-size: 20px;
+  font-weight: 700;
+  color: #3856ff;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  @media (max-width: 450px) {
+    margin-bottom: 40px;
+    transform: translateY(-20px);
+  }
+`;
 
-enum sectionsOfAccountPage {
+enum Section {
+  home,
   general,
   password,
   yourBlogs,
@@ -271,24 +309,53 @@ enum sectionsOfAccountPage {
   savedBlogs,
   favouriteTopics,
 }
+const SectionArr = [
+  "Home",
+  "General",
+  "Password",
+  "Your-Blogs",
+  "Liked-Blogs",
+  "Saved-Blogs",
+  "Favourite-Topics",
+];
+const SectionComponents: Record<Section, React.FC<SectionProps>> = {
+  [Section.home]: Setting_Home,
+  [Section.general]: Setting_General,
+};
 
 export default function Account({ selfDetails }: { selfDetails: object }) {
-  const [activeSection, setActiveSection] = useState<sectionsOfAccountPage>();
+  const [activeSection, setActiveSection] = useState<Section>(Section.general);
+
+  function renderActiveSection() {
+    const ActiveComponent = SectionComponents[activeSection];
+    return (
+      <ActiveComponent
+        selfDetails={selfDetails}
+        setActiveSection={setActiveSection}
+      />
+    );
+  }
   return (
     <Container>
       <NavigationPanel>
-        <h1>Settings</h1>
+        <h1 onClick={() => setActiveSection(Section.home)}>Settings</h1>
         <div>
           <SettingSection>
             <header>EDIT PROFILE</header>
             <main>
-              <Row>
+              <Row
+                onClick={() => setActiveSection(Section.general)}
+                active={activeSection === Section.general}
+              >
                 <p>General</p>
                 <span>
                   <ChevronRightIcon />
                 </span>
               </Row>
-              <Row>
+              <Row
+                onClick={() => setActiveSection(Section.password)}
+                active={activeSection === Section.password}
+              >
                 <p>Password</p>
                 <span>
                   <ChevronRightIcon />
@@ -299,19 +366,28 @@ export default function Account({ selfDetails }: { selfDetails: object }) {
           <SettingSection>
             <header>CONTENT</header>
             <main>
-              <Row>
+              <Row
+                onClick={() => setActiveSection(Section.yourBlogs)}
+                active={activeSection === Section.yourBlogs}
+              >
                 <p>Your Blogs</p>
                 <span>
                   <ChevronRightIcon />
                 </span>
               </Row>
-              <Row>
+              <Row
+                onClick={() => setActiveSection(Section.likedBlogs)}
+                active={activeSection === Section.likedBlogs}
+              >
                 <p>Liked Blogs</p>
                 <span>
                   <ChevronRightIcon />
                 </span>
               </Row>
-              <Row>
+              <Row
+                onClick={() => setActiveSection(Section.savedBlogs)}
+                active={activeSection === Section.savedBlogs}
+              >
                 <p>Saved Blogs</p>
                 <span>
                   <ChevronRightIcon />
@@ -328,7 +404,10 @@ export default function Account({ selfDetails }: { selfDetails: object }) {
                   <ToggleButton />
                 </StyledToggleButton>
               </Row>
-              <Row>
+              <Row
+                onClick={() => setActiveSection(Section.favouriteTopics)}
+                active={activeSection === Section.favouriteTopics}
+              >
                 <p>Favourite Topics</p>
                 <span>
                   <ChevronRightIcon />
@@ -339,42 +418,409 @@ export default function Account({ selfDetails }: { selfDetails: object }) {
         </div>
       </NavigationPanel>
       <OutputPanel>
-        <BackgroundBanner>
-          <span>
-            <BackBtn />
+        <PagePath>
+          <span
+            onClick={() => setActiveSection(Section.home)}
+            style={{ cursor: "pointer" }}
+          >
+            Settings
           </span>
-        </BackgroundBanner>
-        <ImageBox>
-          <UserProfilePhoto src={selfDetails.profilePicURL} alt="profile" />
-        </ImageBox>
-        <UserInfoCard>
-          <header>
-            <h1>{selfDetails.name}</h1>
-            <p>{selfDetails.username}</p>
-          </header>
-          <main>
-            <StatCard>
-              <h2>{selfDetails.followers?.length}</h2>
-              <span>Followers</span>
-            </StatCard>
-            <StatCard>
-              <h2>{selfDetails.following?.length}</h2>
-              <span>Following</span>
-            </StatCard>
-            <StatCard>
-              <h2>{selfDetails.blogs?.length}</h2>
-              <span>Blogs</span>
-            </StatCard>
-          </main>
-        </UserInfoCard>
-        <Button>
-          <p>Edit Profile</p>
-          <span>
-            <ChevronRightIcon />
-          </span>
-        </Button>
+          <ChevronRightIcon
+            style={{
+              color: "#9baaff",
+            }}
+          />
+          {SectionArr[activeSection]}
+        </PagePath>
+        {renderActiveSection()}
+        {/* {SectionComponent[activeSection]({ selfDetails, setActiveSection })} */}
       </OutputPanel>
     </Container>
+  );
+}
+
+const ProfilePhotoBox = styled.div`
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  /* border: 2px solid #ff7738; */
+  border: 2px solid black;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #e3dede;
+  margin: 0 auto;
+  @media (max-width: 450px) {
+    width: 200px;
+    height: 200px;
+  }
+`;
+const Img = styled.img`
+  height: 100%;
+  width: 100%;
+`;
+const FileInputBox = styled.div`
+  height: 25px;
+  width: 25px;
+  position: absolute;
+  z-index: 100;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background-color: black;
+  color: white;
+  padding: 5px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin: 0 auto;
+  transform: translate(55px, -15px);
+  @media (max-width: 450px) {
+    height: 30px;
+    width: 30px;
+    transform: translate(65px, -15px);
+  }
+  svg {
+    font-size: 16px;
+  }
+  &:hover {
+    background-color: #3856ff;
+  }
+`;
+interface ProfilePhotoBoxProps {
+  uploading: boolean;
+}
+const EditPhoto = styled.div<ProfilePhotoBoxProps>`
+  position: relative;
+  // uploading overlay
+  main {
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    margin: 0 auto;
+    width: 150px;
+    height: 150px;
+    background-color: ${(props) =>
+      props.uploading ? "rgba(0,0,0,0.5)" : "transparent"};
+    border-radius: 50%;
+    display: ${(props) => (props.uploading ? "flex" : "none")};
+    justify-content: center;
+    align-items: center;
+    @media (max-width: 450px) {
+      width: 200px;
+      height: 200px;
+    }
+  }
+`;
+// const SavePhoto = styled.button`
+//   padding: 5px 10px;
+//   background-color: #3856ff;
+//   color: white;
+//   border: none;
+//   border-radius: 5px;
+//   margin: 0 auto;
+//   display: block;
+//   margin-top: 10px;
+//   font-size: 18px;
+//   cursor: pointer;
+//   &:hover {
+//   }
+// `;
+const InputBox = styled.div`
+  width: 60%;
+  min-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 0 auto;
+  margin-top: 20px;
+  @media (max-width: 450px) {
+    width: 100%;
+    min-width: 0;
+  }
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+
+    label {
+      font-size: 18px;
+      font-weight: 500;
+      color: #3856ff;
+    }
+  }
+  input,
+  textarea {
+    width: 100%;
+    padding: 10px 0;
+    border: none;
+    border-bottom: 2px solid #e9e5e5;
+    font-size: 18px;
+    outline: none;
+    /* resize: none; */
+    &:focus {
+      border-bottom: 2px solid #a2b0ff;
+    }
+  }
+  textarea {
+    /* min-height: 100px; */
+  }
+`;
+const FollowBox = styled.section`
+  width: 60%;
+  min-width: 400px;
+  margin: 0 auto;
+  margin-top: 40px;
+  @media (max-width: 450px) {
+    width: 100%;
+    min-width: 0;
+  }
+  header {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+  }
+`;
+interface FollowTabProps {
+  active: boolean;
+}
+const FollowTab = styled.button<FollowTabProps>`
+  font-size: 18px;
+  font-weight: 600;
+  padding: 5px 0px;
+  background-color: transparent;
+  color: ${(props) => (props.active ? "#3856ff" : "#a09d9d")};
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  &:hover {
+    border-bottom: 2px solid
+      ${(props) => (props.active ? "#3856ff" : "#a09d9d")};
+  }
+`;
+const SaveAll = styled.button`
+  padding: 10px 15px;
+  background-color: #3856ff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  margin: 0 auto;
+  display: block;
+  margin-top: 80px;
+  font-size: 18px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  &:hover {
+  }
+`;
+interface SectionProps {
+  selfDetails: object;
+  setActiveSection: (section: Section) => void;
+}
+import ModeEditOutlineIcon from "@mui/icons-material/ModeEditOutline";
+import UserCard from "../../components/UserCard";
+import UserFollowCard from "../../components/UserCardWithFollowBtn";
+import UserCardWithFollowBtn from "../../components/UserCardWithFollowBtn";
+function Setting_General({ selfDetails, setActiveSection }: SectionProps) {
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(true);
+  const [name, setName] = useState(selfDetails?.name);
+  const [description, setDescription] = useState(selfDetails?.description);
+  const [followTab, setFollowTab] = useState<"following" | "followers">(
+    "following"
+  );
+
+  const ref = useRef(null);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFile(e.target.files[0]);
+      setPreview(URL.createObjectURL(e.target.files[0]));
+    }
+  };
+  // async function handleUpload() {
+  //   setUploading(true);
+  //   const success = await setProfilePhoto(file);
+  //   setUploading(false);
+  // }
+  // Set preview to the profilePicURL from selfDetails, name and description to the respective values
+
+  // Pre-fill the form with the name, description and profilePicURL
+  useEffect(() => {
+    setUploading(() => true);
+    setPreview(selfDetails?.profilePicURL);
+    setName(selfDetails?.name);
+    setDescription(selfDetails?.description);
+    setUploading(() => false);
+  }, [selfDetails]);
+
+  // Auto resize the textarea
+  const textareaRef = useRef(null);
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [description]);
+
+  // Save all changes
+  async function handleSave() {
+    setUploading(() => true);
+    const success = await updateUserGeneralInfo(
+      {
+        name,
+        description,
+      },
+      file
+    );
+    setUploading(() => false);
+  }
+  return (
+    <>
+      <EditPhoto uploading={uploading}>
+        <ProfilePhotoBox>
+          {preview && (
+            <Img src={preview || "../../../public/user.png"} alt="preview" />
+          )}
+        </ProfilePhotoBox>
+        <FileInputBox onClick={() => ref?.current?.click()}>
+          <input
+            ref={ref}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            hidden
+          />
+          <ModeEditOutlineIcon />
+        </FileInputBox>
+        <main>
+          <CircularProgress
+            size={20}
+            thickness={6}
+            sx={{
+              color: "white",
+            }}
+          />
+        </main>
+      </EditPhoto>
+      {/* <SavePhoto onClick={handleUpload} disabled={uploading}>
+        {!uploading ? (
+          "Update"
+        ) : (
+          <CircularProgress
+            size={20}
+            thickness={6}
+            sx={{
+              color: "white",
+            }}
+          />
+        )}
+      </SavePhoto> */}
+      <InputBox>
+        <div>
+          <label>Name</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+        <div>
+          <label>Description</label>
+
+          <AutoResizingTextarea
+            value={description}
+            handleOnChange={(e) => setDescription(e.target.value)}
+          />
+        </div>
+      </InputBox>
+      <FollowBox>
+        <header>
+          <FollowTab
+            onClick={() => setFollowTab("following")}
+            active={followTab === "following"}
+          >
+            Following
+          </FollowTab>
+          <FollowTab
+            onClick={() => setFollowTab("followers")}
+            active={followTab === "followers"}
+          >
+            Followers
+          </FollowTab>
+        </header>
+        <main>
+          {selfDetails[followTab]?.map((user: object) => (
+            <UserCardWithFollowBtn user={user} selfDetails={selfDetails} />
+          ))}
+        </main>
+      </FollowBox>
+
+      <SaveAll onClick={handleSave} disabled={uploading}>
+        {" "}
+        {!uploading ? (
+          "Save Changes"
+        ) : (
+          <CircularProgress
+            size={20}
+            thickness={6}
+            sx={{
+              color: "white",
+            }}
+          />
+        )}
+      </SaveAll>
+    </>
+  );
+}
+function Setting_Home({ selfDetails, setActiveSection }: SectionProps) {
+  return (
+    <>
+      {/* <BackgroundBanner>
+        <span>
+          <BackBtn />
+        </span>
+      </BackgroundBanner> */}
+      <ImageBox>
+        <UserProfilePhoto src={selfDetails.profilePicURL} alt="profile" />
+      </ImageBox>
+      <UserInfoCard>
+        <header>
+          <h1>{selfDetails.name}</h1>
+          <p>{selfDetails.username}</p>
+        </header>
+        <main>
+          <StatCard>
+            <h2>{selfDetails.followers?.length}</h2>
+            <span>Followers</span>
+          </StatCard>
+          <StatCard>
+            <h2>{selfDetails.following?.length}</h2>
+            <span>Following</span>
+          </StatCard>
+          <StatCard>
+            <h2>{selfDetails.blogs?.length}</h2>
+            <span>Blogs</span>
+          </StatCard>
+        </main>
+      </UserInfoCard>
+      <Button>
+        <p onClick={() => setActiveSection(Section.general)}>Edit Profile</p>
+        <span>
+          <ChevronRightIcon />
+        </span>
+      </Button>
+    </>
   );
 }
 
@@ -404,5 +850,31 @@ export function ToggleButton() {
     <Toggle on={darkModeOn} onClick={() => setDarkModeOn(!darkModeOn)}>
       <Ball />
     </Toggle>
+  );
+}
+
+const StyledTextarea = styled.textarea`
+  /* min-height: 50px; */
+  resize: none;
+  overflow-y: hidden;
+`;
+export function AutoResizingTextarea({
+  value,
+  handleOnChange,
+}: {
+  value: string;
+  handleOnChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+}) {
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [value]);
+
+  return (
+    <StyledTextarea ref={textareaRef} value={value} onChange={handleOnChange} />
   );
 }
