@@ -9,6 +9,34 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import CommentIcon from "@mui/icons-material/Comment";
 import { Link } from "react-router-dom";
 
+const BlogBoxLiked = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 35px;
+  padding: 45px 0;
+  width: 70%;
+  min-width: 500px;
+  margin: 0 auto;
+  @media (max-width: 550px) {
+    min-width: 0;
+    width: 100%;
+  }
+  @media (max-width: 450px) {
+    min-width: 0;
+    width: 100%;
+    margin-top: -50px;
+  }
+`;
+const BlogCardLiked = styled.div`
+  position: relative;
+  border-bottom: 1px solid #efe9e9;
+  padding-bottom: 30px;
+  width: 100%;
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
+  align-items: center;
+`;
 const BlogBox = styled.div`
   display: flex;
   flex-direction: column;
@@ -30,6 +58,40 @@ const BlogCard = styled.div`
     text-decoration: underline;
   }
 `;
+
+const LHS = styled.div`
+  display: flex;
+  gap: 15px;
+  width: 100%;
+`;
+const RHS = styled.div`
+  display: flex;
+  gap: 15px;
+  /* width: 100%; */
+  button {
+    cursor: pointer;
+    border: none;
+    color: red;
+    border: 1px solid red;
+    border-radius: 50px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+  }
+  button:hover {
+    background-color: red;
+    color: white;
+  }
+  @media (max-width: 450px) {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+  }
+`;
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { CircularProgress } from "@mui/material";
 
 interface LeftBlogSecProps {
   imageURL: string;
@@ -123,6 +185,185 @@ export default function Blogs({
         <BlogCardSkeletonLoader />
       )}
     </BlogBox>
+  );
+}
+export function BlogsLiked({ blogs }: { blogs: object[] }) {
+  return (
+    <BlogBoxLiked>
+      {blogs?.length ? (
+        blogs.map((blog) => {
+          return <CardLiked key={blog.id} blog={blog} />;
+        })
+      ) : (
+        <BlogCardSkeletonLoader />
+      )}
+    </BlogBoxLiked>
+  );
+}
+export function CardLiked({ blog }: { blog: Blog }) {
+  const [loading, setLoading] = useState<boolean>(false);
+
+  async function handleBlogLike(
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) {
+    event.stopPropagation();
+    event.preventDefault();
+    setLoading(() => true);
+    // if (liked) {
+    // unlike
+    const success = await unlikeBlog({ blogId: blog.id });
+    // if (success) {
+    //   setLiked(false);
+    // }
+    // } else {
+    // like
+    // const success = await likeBlog({ blogId: blog.id });
+    // if (success) {
+    //   setLiked(true);
+    // }
+    // }
+    setLoading(() => false);
+  }
+  // async function handleBlogSave(
+  //   event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  // ) {
+  //   event.stopPropagation();
+  //   event.preventDefault();
+  //   if (saved) {
+  //     // unsave
+  //     const success = await unsaveBlog({ blogId: blog.id });
+  //     if (success) {
+  //       setSaved(false);
+  //     }
+  //   } else {
+  //     // save
+  //     const success = await saveBlog({ blogId: blog.id });
+  //     if (success) {
+  //       setSaved(true);
+  //     }
+  //   }
+  // }
+  return (
+    <Link to={`/app/blog/${blog.id}`}>
+      <BlogCardLiked key={blog.id}>
+        <LHS>
+          <LeftBlogSec
+            imageURL={
+              blog.blogImageURL || "../../../public/placeholderBlogImage.webp"
+            }
+          >
+            {/* <img src={blog.blogImageURL} alt="blog" /> */}
+            {/* <Like onClick={handleBlogLike}>
+            {!liked ? (
+              <FavoriteBorderIcon color="action" />
+            ) : (
+              <FavoriteIcon color="error" />
+            )}
+          </Like> */}
+            {/* <Save onClick={handleBlogSave}>
+            {!saved ? (
+              <BookmarkBorderIcon color="action" />
+            ) : (
+              <BookmarkIcon color="primary" />
+            )}
+          </Save> */}
+          </LeftBlogSec>
+          <RightBlogSec>
+            <section>
+              <span>{getMinutesToRead(blog.content)} min</span>
+              <span>{formatDate(blog.createdAt)}</span>
+            </section>
+            <h3>{blog.title}</h3>
+
+            <section>
+              <StatChip>
+                <span>{blog._count.likedByUsers}</span>
+                <FavoriteIcon style={{ color: "#E74C4F" }} />
+              </StatChip>
+              <StatChip>
+                <span>{blog.comments?.length}</span>
+                <CommentIcon style={{ color: "#dab777" }} />
+              </StatChip>
+            </section>
+          </RightBlogSec>
+        </LHS>
+        <RHS>
+          <button onClick={handleBlogLike}>
+            {!loading ? (
+              <DeleteOutlineIcon />
+            ) : (
+              <CircularProgress size={20} thickness={6} />
+            )}
+          </button>
+        </RHS>
+      </BlogCardLiked>
+    </Link>
+  );
+}
+export function BlogsSaved({ blogs }: { blogs: object[] }) {
+  return (
+    <BlogBoxLiked>
+      {blogs?.length ? (
+        blogs.map((blog) => {
+          return <CardSaved key={blog.id} blog={blog} />;
+        })
+      ) : (
+        <BlogCardSkeletonLoader />
+      )}
+    </BlogBoxLiked>
+  );
+}
+export function CardSaved({ blog }: { blog: Blog }) {
+  const [loading, setLoading] = useState<boolean>(false);
+
+  async function handleBlogSave(
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) {
+    event.stopPropagation();
+    event.preventDefault();
+    setLoading(() => true);
+    await unsaveBlog({ blogId: blog.id });
+    setLoading(() => false);
+  }
+  return (
+    <Link to={`/app/blog/${blog.id}`}>
+      <BlogCardLiked>
+        <LHS>
+          <LeftBlogSec
+            imageURL={
+              blog.blogImageURL || "../../../public/placeholderBlogImage.webp"
+            }
+          ></LeftBlogSec>
+          <RightBlogSec>
+            <section>
+              <span>{getMinutesToRead(blog.content)} min</span>
+              <span>{formatDate(blog.createdAt)}</span>
+            </section>
+            <h3>{blog.title}</h3>
+
+            <section>
+              <StatChip>
+                <span>{blog._count.savedByUsers}</span>
+                <FavoriteIcon style={{ color: "#E74C4F" }} />
+              </StatChip>
+              <StatChip>
+                <span>{blog.comments?.length}</span>
+                <CommentIcon style={{ color: "#dab777" }} />
+              </StatChip>
+            </section>
+          </RightBlogSec>
+        </LHS>
+        <RHS>
+          <button onClick={handleBlogSave}>
+            {!loading ? (
+              <DeleteOutlineIcon />
+            ) : (
+              <CircularProgress size={20} thickness={6} />
+            )}
+          </button>
+        </RHS>
+      </BlogCardLiked>
+    </Link>
   );
 }
 export function Card({

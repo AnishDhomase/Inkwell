@@ -52,8 +52,9 @@ interface LeftSecProps {
 }
 const LeftSec = styled.div<LeftSecProps>`
   width: ${(props) => (props.fullWidth ? "100%" : "70%")};
-  padding: 20px ${(props) => (props.fullWidth ? "0" : "20px")};
+  /* padding: 20px ${(props) => (props.fullWidth ? "0" : "20px")}; */
   padding: 0 ${(props) => (props.fullWidth ? "0" : "20px")};
+  padding-top: 20px;
   @media (max-width: 1020px) {
     width: 100%;
   }

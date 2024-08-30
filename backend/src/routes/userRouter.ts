@@ -20,6 +20,7 @@ import {
   pageInput,
   userSearchInput,
   updateGeneralDetailsInput,
+  updatePasswordDetailsInput,
 } from "@anishdhomase/blog_app";
 
 const userRouter = new Hono<{
@@ -317,8 +318,38 @@ userRouter.get("/details", async function (c) {
 
         // Actions
         blogs: true,
-        savedBlogs: true,
-        likedBlogs: true,
+        likedBlogs: {
+          select: {
+            id: true,
+            title: true,
+            content: true,
+            authorId: true,
+            blogImageURL: true,
+            createdAt: true,
+            comments: true,
+            _count: {
+              select: {
+                likedByUsers: true,
+              },
+            },
+          },
+        },
+        savedBlogs: {
+          select: {
+            id: true,
+            title: true,
+            content: true,
+            authorId: true,
+            blogImageURL: true,
+            createdAt: true,
+            comments: true,
+            _count: {
+              select: {
+                savedByUsers: true,
+              },
+            },
+          },
+        },
         comments: true,
         followers: {
           select: {
@@ -413,7 +444,7 @@ userRouter.post("/photo", async function (c) {
     });
   }
 });
-//Edit name, description, profilePicURL
+//Edit name, description
 userRouter.put("/details/general", async function (c) {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
@@ -422,6 +453,35 @@ userRouter.put("/details/general", async function (c) {
   try {
     const body = await c.req.json();
     const { success } = updateGeneralDetailsInput.safeParse(body);
+    if (!success) {
+      c.status(400);
+      return c.json({ success: false, error: "Your Inputs are not valid!" });
+    }
+    const userId = c.get("jwtPayload");
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        ...body,
+      },
+    });
+    return c.json({ success: true });
+  } catch (e) {
+    return c.json({
+      success: false,
+      error: "Something went wrong! Unable to edit user details!",
+    });
+  }
+});
+userRouter.put("/details/password", async function (c) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  try {
+    const body = await c.req.json();
+    const { success } = updatePasswordDetailsInput.safeParse(body);
     if (!success) {
       c.status(400);
       return c.json({ success: false, error: "Your Inputs are not valid!" });

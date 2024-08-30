@@ -14,6 +14,7 @@ import {
   userFollowInputType,
   userSearchInputType,
   updateGeneralDetailsInputType,
+  updatePasswordDetailsInputType,
 } from "@anishdhomase/blog_app";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -558,6 +559,26 @@ export async function updateUserGeneralInfo(
     });
     if (res2.data.success) {
       toast.success("Successfully Updated your Information");
+      return true;
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return false;
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return false;
+  }
+}
+export async function updateUserPasswordInfo(
+  payload: updatePasswordDetailsInputType
+): Promise<boolean> {
+  try {
+    const res = await axios.put(`${BASE_URL}/user/details/password`, payload, {
+      headers: getHeaders(),
+    });
+    if (res.data.success) {
+      toast.success("Successfully Updated your Password");
       return true;
     } else {
       toast.error("Something went wrong, Try Again");

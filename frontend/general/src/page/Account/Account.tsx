@@ -10,7 +10,7 @@ const Container = styled.div`
 const NavigationPanel = styled.nav`
   width: 25%;
   background-color: #f6f5f5;
-  min-height: 100vh;
+  /* height: 100vh; */
   /* padding: 0 20px; */
   & > h1 {
     font-size: 30px;
@@ -117,8 +117,13 @@ import {
   unlikeBlog,
   unsaveBlog,
   updateUserGeneralInfo,
+  updateUserPasswordInfo,
 } from "../../apis/api";
-import Blogs, { formatDate } from "../../components/Blogs";
+import Blogs, {
+  BlogsLiked,
+  BlogsSaved,
+  formatDate,
+} from "../../components/Blogs";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -321,10 +326,13 @@ const SectionArr = [
 const SectionComponents: Record<Section, React.FC<SectionProps>> = {
   [Section.home]: Setting_Home,
   [Section.general]: Setting_General,
+  [Section.password]: Setting_Password,
+  [Section.likedBlogs]: Setting_LikedBlogs,
+  [Section.savedBlogs]: Setting_SavedBlogs,
 };
 
 export default function Account({ selfDetails }: { selfDetails: object }) {
-  const [activeSection, setActiveSection] = useState<Section>(Section.general);
+  const [activeSection, setActiveSection] = useState<Section>(Section.home);
 
   function renderActiveSection() {
     const ActiveComponent = SectionComponents[activeSection];
@@ -335,6 +343,7 @@ export default function Account({ selfDetails }: { selfDetails: object }) {
       />
     );
   }
+  console.log(selfDetails);
   return (
     <Container>
       <NavigationPanel>
@@ -623,6 +632,14 @@ const SaveAll = styled.button`
   &:hover {
   }
 `;
+const Msg = styled.div`
+  /* margin-top: 50px; */
+  font-size: 20px;
+  font-weight: 500;
+  color: #a09d9d;
+  text-align: center;
+`;
+
 interface SectionProps {
   selfDetails: object;
   setActiveSection: (section: Section) => void;
@@ -648,12 +665,6 @@ function Setting_General({ selfDetails, setActiveSection }: SectionProps) {
       setPreview(URL.createObjectURL(e.target.files[0]));
     }
   };
-  // async function handleUpload() {
-  //   setUploading(true);
-  //   const success = await setProfilePhoto(file);
-  //   setUploading(false);
-  // }
-  // Set preview to the profilePicURL from selfDetails, name and description to the respective values
 
   // Pre-fill the form with the name, description and profilePicURL
   useEffect(() => {
@@ -820,6 +831,77 @@ function Setting_Home({ selfDetails, setActiveSection }: SectionProps) {
           <ChevronRightIcon />
         </span>
       </Button>
+    </>
+  );
+}
+function Setting_Password({ selfDetails, setActiveSection }: SectionProps) {
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // Pre-fill the form with the password
+  useEffect(() => {
+    setPassword(selfDetails?.password);
+  }, [selfDetails]);
+
+  // Save changes
+  async function handleSave() {
+    setLoading(() => true);
+    await updateUserPasswordInfo({
+      password,
+    });
+    setLoading(() => false);
+  }
+  return (
+    <>
+      <InputBox
+        style={{
+          marginTop: "50px",
+        }}
+      >
+        <div>
+          <label>Password</label>
+          <input
+            type="text"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+      </InputBox>
+      <SaveAll onClick={handleSave} disabled={loading}>
+        {!loading ? (
+          "Save Password"
+        ) : (
+          <CircularProgress
+            size={20}
+            thickness={6}
+            sx={{
+              color: "white",
+            }}
+          />
+        )}
+      </SaveAll>
+    </>
+  );
+}
+function Setting_LikedBlogs({ selfDetails, setActiveSection }: SectionProps) {
+  return (
+    <>
+      {selfDetails?.likedBlogs?.length > 0 ? (
+        <BlogsLiked blogs={selfDetails.likedBlogs} />
+      ) : (
+        <Msg>No liked blogs found!</Msg>
+      )}
+    </>
+  );
+}
+function Setting_SavedBlogs({ selfDetails, setActiveSection }: SectionProps) {
+  return (
+    <>
+      {selfDetails?.savedBlogs?.length > 0 ? (
+        <BlogsSaved blogs={selfDetails.savedBlogs} />
+      ) : (
+        <Msg>No Saved blogs found!</Msg>
+      )}
     </>
   );
 }

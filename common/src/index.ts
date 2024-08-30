@@ -89,7 +89,13 @@ export const updateGeneralDetailsInput = z.object({
   name: z.string().optional(),
   description: z.string().max(1000).optional(),
 });
+export const updatePasswordDetailsInput = z.object({
+  password: z.string().min(6),
+});
 
+export type updatePasswordDetailsInputType = z.infer<
+  typeof updatePasswordDetailsInput
+>;
 export type updateGeneralDetailsInputType = z.infer<
   typeof updateGeneralDetailsInput
 >;
