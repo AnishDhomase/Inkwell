@@ -107,12 +107,15 @@ import {
   deleteCommentOnBlog,
   editCommentOnBlog,
   followUser,
+  getAllTopics,
   getBlog,
   getUser,
   getUserDetails,
   likeBlog,
   saveBlog,
+  setFavouriteTopics,
   setProfilePhoto,
+  Topic,
   unfollowUser,
   unlikeBlog,
   unsaveBlog,
@@ -271,6 +274,7 @@ const StyledToggleButton = styled.div`
   margin-right: 5px;
 `;
 const Button = styled.button`
+  min-width: 100px;
   margin: 0 auto;
   font-size: 18px;
   display: flex;
@@ -329,6 +333,7 @@ const SectionComponents: Record<Section, React.FC<SectionProps>> = {
   [Section.password]: Setting_Password,
   [Section.likedBlogs]: Setting_LikedBlogs,
   [Section.savedBlogs]: Setting_SavedBlogs,
+  [Section.favouriteTopics]: Setting_FavouriteTopics,
 };
 
 export default function Account({ selfDetails }: { selfDetails: object }) {
@@ -639,6 +644,13 @@ const Msg = styled.div`
   color: #a09d9d;
   text-align: center;
 `;
+const SelectorBox = styled.div`
+  width: 100%;
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
 
 interface SectionProps {
   selfDetails: object;
@@ -648,6 +660,7 @@ import ModeEditOutlineIcon from "@mui/icons-material/ModeEditOutline";
 import UserCard from "../../components/UserCard";
 import UserFollowCard from "../../components/UserCardWithFollowBtn";
 import UserCardWithFollowBtn from "../../components/UserCardWithFollowBtn";
+import { TopicSelector } from "../Auth/FavTopic";
 function Setting_General({ selfDetails, setActiveSection }: SectionProps) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -903,6 +916,63 @@ function Setting_SavedBlogs({ selfDetails, setActiveSection }: SectionProps) {
         <Msg>No Saved blogs found!</Msg>
       )}
     </>
+  );
+}
+function Setting_FavouriteTopics({
+  selfDetails,
+  setActiveSection,
+}: SectionProps) {
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [selectedTopics, setSelectedTopics] = useState<Topic[]>([]);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  useEffect(() => {
+    async function fetchTopics() {
+      const topicsArr = await getAllTopics();
+      const favTopics = selfDetails.favoriteTopics;
+      const restTopicsArr = topicsArr.filter((topic) => {
+        for (const favTopic of favTopics) {
+          if (favTopic.id === topic.id) {
+            return false;
+          }
+        }
+        return true;
+      });
+      console.log(favTopics, restTopicsArr);
+      setTopics(restTopicsArr);
+      setSelectedTopics(favTopics);
+    }
+    fetchTopics();
+  }, [selfDetails]);
+  async function handleTopicsSubmit() {
+    setLoading(() => true);
+    const favoriteTopics = selectedTopics.map((topic) => topic.id);
+    await setFavouriteTopics({ favoriteTopics });
+    setLoading(() => false);
+  }
+  return (
+    <SelectorBox>
+      <TopicSelector
+        setSelectedTopics={setSelectedTopics}
+        selectedTopics={selectedTopics}
+        topics={topics}
+        setTopics={setTopics}
+        blog={false}
+      />
+      <Button disabled={loading} onClick={handleTopicsSubmit}>
+        {!loading ? (
+          "Save Changes"
+        ) : (
+          <CircularProgress
+            size={20}
+            thickness={6}
+            sx={{
+              color: "white",
+            }}
+          />
+        )}
+      </Button>
+    </SelectorBox>
   );
 }
 
