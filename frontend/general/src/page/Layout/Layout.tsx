@@ -443,30 +443,11 @@ const Rod = styled.div`
     padding: 7px;
   }
 `;
-// interface AddButtonProps {
-//   active: boolean;
-// }
-// const AddButton = styled.div<AddButtonProps>`
-//   background-color: ${(props) => (props.active ? "#f9f9f9" : "#ff7738")};
-//   color: ${(props) => (props.active ? "#ff7738" : "#f9f9f9")};
-//   border-radius: 50%;
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   padding: 8px;
-//   font-size: 30px;
-//   cursor: pointer;
-//   border: 1px solid #f9f9f990;
 
-//   &:hover {
-//     border-color: white;
-//   }
-// `;
 import CottageOutlinedIcon from "@mui/icons-material/CottageOutlined";
 import CottageIcon from "@mui/icons-material/Cottage";
 import { RiSearchFill } from "react-icons/ri";
 import { RiSearchLine } from "react-icons/ri";
-// import { IoAddOutline } from "react-icons/io5";
 import PermIdentityOutlinedIcon from "@mui/icons-material/PermIdentityOutlined";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
