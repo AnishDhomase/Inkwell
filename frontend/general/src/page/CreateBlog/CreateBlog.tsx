@@ -326,9 +326,6 @@ export default function CreateBlog() {
   }
   return (
     <OuterBox>
-      {/* <BackButton onClick={() => navigate("/")}>
-        <KeyboardBackspaceIcon />
-      </BackButton> */}
       <InnerBox>
         <NavBar>
           <BackButton onClick={() => navigate("/app")}>

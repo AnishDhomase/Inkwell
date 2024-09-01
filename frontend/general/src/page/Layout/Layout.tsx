@@ -205,16 +205,14 @@ export default function Layout({
 
   // When Route changes update active page
   useEffect(() => {
-    if (location.pathname === "/app") {
-      setActivePage("home");
-    } else if (location.pathname === "/app/search") {
+    if (location.pathname.startsWith("/app/search")) {
       setActivePage("search");
     } else if (location.pathname === "/app/create") {
       setActivePage("add");
-    } else if (location.pathname === "/app/liked-Blogs") {
-      setActivePage("liked");
-    } else if (location.pathname === "/app/saved-Blogs") {
-      setActivePage("saved");
+    } else if (location.pathname.startsWith("/app/account")) {
+      setActivePage("account");
+    } else if (location.pathname.startsWith("/app")) {
+      setActivePage("home");
     }
   }, [location]);
 
