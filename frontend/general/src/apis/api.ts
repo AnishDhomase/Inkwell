@@ -21,12 +21,31 @@ import toast from "react-hot-toast";
 
 const BASE_URL = "http://127.0.0.1:8787";
 
+// Get JWT Token from Local Storage
 function getHeaders() {
   return {
     authorization: `${localStorage.getItem("tokenOfBlogApp")}`,
   };
 }
 
+export interface Topic {
+  id: number;
+  name: string;
+}
+export interface Blog {
+  id: number;
+  title: string;
+  content: string;
+  authorId: number;
+  blogImageURL: string;
+  createdAt: string;
+  active: boolean;
+  _count: {
+    likedByUsers: number;
+  };
+}
+
+// Auth
 export async function signIn(payload: SigninType) {
   try {
     const res = await axios.post(`${BASE_URL}/user/signin`, payload);
@@ -57,6 +76,8 @@ export async function signUp(payload: SignupType) {
     return false;
   }
 }
+
+// User Signup Process
 export async function postSelfBio(payload: userDescriptionInputType) {
   try {
     const res = await axios.post(`${BASE_URL}/user/description`, payload, {
@@ -74,10 +95,6 @@ export async function postSelfBio(payload: userDescriptionInputType) {
     else toast.error(e.response?.data?.error);
     return false;
   }
-}
-export interface Topic {
-  id: number;
-  name: string;
 }
 export async function getAllTopics(): Promise<Topic[]> {
   try {
@@ -155,6 +172,8 @@ export async function setProfilePhoto(file: File | null) {
     return false;
   }
 }
+
+// Post Blog
 export async function createPost(payload: blogInputType) {
   try {
     const res = await axios.post(`${BASE_URL}/user/blog`, payload, {
@@ -173,18 +192,8 @@ export async function createPost(payload: blogInputType) {
     return false;
   }
 }
-export interface Blog {
-  id: number;
-  title: string;
-  content: string;
-  authorId: number;
-  blogImageURL: string;
-  createdAt: string;
-  active: boolean;
-  _count: {
-    likedByUsers: number;
-  };
-}
+
+// Get Blogs
 export async function getAllBlogs(payload: pageInputType) {
   try {
     const res = await axios.post(`${BASE_URL}/blog`, payload);
@@ -260,41 +269,8 @@ export async function getBlog(payload: number) {
     return {};
   }
 }
-export async function clearNotifications() {
-  try {
-    const res = await axios.delete(`${BASE_URL}/user/notifications`, {
-      headers: getHeaders(),
-    });
-    if (res.data.success) {
-      return true;
-    } else {
-      toast.error("Something went wrong, Try Again");
-      return false;
-    }
-  } catch (e) {
-    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
-    else toast.error(e.response?.data?.error);
-    return false;
-  }
-}
-export async function getSelfDetails() {
-  try {
-    const res = await axios.get(`${BASE_URL}/user/details`, {
-      headers: getHeaders(),
-    });
-    if (res.data.success) {
-      return res.data.data;
-    } else {
-      toast.error("Something went wrong, Try Again 1");
-      return null;
-    }
-  } catch (e) {
-    if (!axios.isAxiosError(e))
-      toast.error("Something went wrong, Try Again 2");
-    else toast.error(e.response?.data?.error);
-    return null;
-  }
-}
+
+// Blog Actions
 export async function likeBlog(payload: deleteBlogInputType): Promise<boolean> {
   try {
     const res = await axios.post(`${BASE_URL}/user/blog/like`, payload, {
@@ -367,36 +343,6 @@ export async function unsaveBlog(
     return false;
   }
 }
-export async function getUser(payload: number): Promise<object> {
-  try {
-    const res = await axios.get(`${BASE_URL}/user/userDetails/${payload}`);
-    if (res.data.success) {
-      return res.data.data;
-    } else {
-      toast.error("Something went wrong, Try Again");
-      return {};
-    }
-  } catch (e) {
-    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
-    else toast.error(e.response?.data?.error);
-    return {};
-  }
-}
-export async function getUserDetails(payload: number): Promise<object> {
-  try {
-    const res = await axios.get(`${BASE_URL}/user/details/${payload}`);
-    if (res.data.success) {
-      return res.data.data;
-    } else {
-      toast.error("Something went wrong, Try Again");
-      return {};
-    }
-  } catch (e) {
-    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
-    else toast.error(e.response?.data?.error);
-    return {};
-  }
-}
 export async function commentOnBlog(
   payload: commentInputType
 ): Promise<boolean> {
@@ -457,6 +403,75 @@ export async function editCommentOnBlog(
     return false;
   }
 }
+
+// User Details
+export async function clearNotifications() {
+  try {
+    const res = await axios.delete(`${BASE_URL}/user/notifications`, {
+      headers: getHeaders(),
+    });
+    if (res.data.success) {
+      return true;
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return false;
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return false;
+  }
+}
+export async function getSelfDetails() {
+  try {
+    const res = await axios.get(`${BASE_URL}/user/details`, {
+      headers: getHeaders(),
+    });
+    if (res.data.success) {
+      return res.data.data;
+    } else {
+      toast.error("Something went wrong, Try Again 1");
+      return null;
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e))
+      toast.error("Something went wrong, Try Again 2");
+    else toast.error(e.response?.data?.error);
+    return null;
+  }
+}
+
+// Get User
+export async function getUser(payload: number): Promise<object> {
+  try {
+    const res = await axios.get(`${BASE_URL}/user/userDetails/${payload}`);
+    if (res.data.success) {
+      return res.data.data;
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return {};
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return {};
+  }
+}
+export async function getUserDetails(payload: number): Promise<object> {
+  try {
+    const res = await axios.get(`${BASE_URL}/user/details/${payload}`);
+    if (res.data.success) {
+      return res.data.data;
+    } else {
+      toast.error("Something went wrong, Try Again");
+      return {};
+    }
+  } catch (e) {
+    if (!axios.isAxiosError(e)) toast.error("Something went wrong, Try Again");
+    else toast.error(e.response?.data?.error);
+    return {};
+  }
+}
 export async function getMostFollowedUsers(): Promise<object[]> {
   try {
     const res = await axios.get(`${BASE_URL}/user/mostFollowed`, {
@@ -492,6 +507,8 @@ export async function getQueriedUsers(payload: userSearchInputType) {
     return {};
   }
 }
+
+// User Actions
 export async function followUser(
   payload: userFollowInputType
 ): Promise<boolean> {
@@ -531,6 +548,8 @@ export async function unfollowUser(
     return false;
   }
 }
+
+// User Settings Actions
 export async function updateUserGeneralInfo(
   payload: updateGeneralDetailsInputType,
   file: File | null

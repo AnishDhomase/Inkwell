@@ -23,6 +23,7 @@ function App() {
     }
     fetchSelfDetails();
   }, []);
+
   return (
     <UserDetailsProvider>
       <BrowserRouter>
@@ -63,8 +64,40 @@ function App() {
             <Route path="create" element={<CreateBlog />} />
             <Route
               path="account"
-              element={<Account selfDetails={selfDetails} />}
-            ></Route>
+              // element={<Account selfDetails={selfDetails} />}
+            >
+              <Route index element={<Navigate replace to="home" />} />
+              <Route
+                path="home"
+                element={<Account selfDetails={selfDetails} />}
+              />
+              <Route
+                path="general"
+                element={<Account selfDetails={selfDetails} />}
+              />
+              <Route
+                path="password"
+                element={<Account selfDetails={selfDetails} />}
+              />
+              <Route
+                path="your-blogs"
+                element={<Account selfDetails={selfDetails} />}
+              />
+              <Route
+                path="liked-blogs"
+                element={<Account selfDetails={selfDetails} />}
+              />
+              <Route
+                path="saved-blogs"
+                element={<Account selfDetails={selfDetails} />}
+              />
+              <Route
+                path="favourite-topics"
+                element={<Account selfDetails={selfDetails} />}
+              />
+              <Route path="*" element={<Navigate replace to="home" />} />
+            </Route>
+
             <Route
               path="blog/:blogId"
               element={<SpecificBlog selfDetails={selfDetails} />}

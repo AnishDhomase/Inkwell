@@ -12,11 +12,14 @@ const NavigationPanel = styled.nav`
   background-color: #f6f5f5;
   /* height: 100vh; */
   /* padding: 0 20px; */
-  & > h1 {
-    font-size: 30px;
-    font-weight: 700;
-    padding: 30px 20px;
+  & > a {
     cursor: pointer;
+    h1 {
+      font-size: 33px;
+      font-weight: 700;
+      padding: 20px 20px;
+      cursor: pointer;
+    }
   }
   & > div {
     display: flex;
@@ -100,7 +103,13 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight"; //small
 
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  Navigate,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import {
   Blog,
   commentOnBlog,
@@ -336,8 +345,32 @@ const SectionComponents: Record<Section, React.FC<SectionProps>> = {
   [Section.favouriteTopics]: Setting_FavouriteTopics,
 };
 
+function getActivePage(categoryOfSettings: string): Section {
+  switch (categoryOfSettings) {
+    case "home":
+      return Section.home;
+    case "general":
+      return Section.general;
+    case "password":
+      return Section.password;
+    case "your-blogs":
+      return Section.yourBlogs;
+    case "liked-blogs":
+      return Section.likedBlogs;
+    case "saved-blogs":
+      return Section.savedBlogs;
+    case "favourite-topics":
+      return Section.favouriteTopics;
+    default:
+      return Section.home;
+  }
+}
+
 export default function Account({ selfDetails }: { selfDetails: object }) {
-  const [activeSection, setActiveSection] = useState<Section>(Section.home);
+  const categoryOfSettings = useLocation().pathname.split("/")[3];
+  const page = getActivePage(categoryOfSettings);
+
+  const [activeSection, setActiveSection] = useState<Section>(page);
 
   function renderActiveSection() {
     const ActiveComponent = SectionComponents[activeSection];
@@ -352,61 +385,73 @@ export default function Account({ selfDetails }: { selfDetails: object }) {
   return (
     <Container>
       <NavigationPanel>
-        <h1 onClick={() => setActiveSection(Section.home)}>Settings</h1>
+        <Link to="/app/account/home">
+          <h1 onClick={() => setActiveSection(Section.home)}>Settings</h1>
+        </Link>
         <div>
           <SettingSection>
             <header>EDIT PROFILE</header>
             <main>
-              <Row
-                onClick={() => setActiveSection(Section.general)}
-                active={activeSection === Section.general}
-              >
-                <p>General</p>
-                <span>
-                  <ChevronRightIcon />
-                </span>
-              </Row>
-              <Row
-                onClick={() => setActiveSection(Section.password)}
-                active={activeSection === Section.password}
-              >
-                <p>Password</p>
-                <span>
-                  <ChevronRightIcon />
-                </span>
-              </Row>
+              <Link to="/app/account/general">
+                <Row
+                  onClick={() => setActiveSection(Section.general)}
+                  active={activeSection === Section.general}
+                >
+                  <p>General</p>
+                  <span>
+                    <ChevronRightIcon />
+                  </span>
+                </Row>
+              </Link>
+              <Link to="/app/account/password">
+                <Row
+                  onClick={() => setActiveSection(Section.password)}
+                  active={activeSection === Section.password}
+                >
+                  <p>Password</p>
+                  <span>
+                    <ChevronRightIcon />
+                  </span>
+                </Row>
+              </Link>
             </main>
           </SettingSection>
           <SettingSection>
             <header>CONTENT</header>
             <main>
-              <Row
-                onClick={() => setActiveSection(Section.yourBlogs)}
-                active={activeSection === Section.yourBlogs}
-              >
-                <p>Your Blogs</p>
-                <span>
-                  <ChevronRightIcon />
-                </span>
-              </Row>
-              <Row
-                onClick={() => setActiveSection(Section.likedBlogs)}
-                active={activeSection === Section.likedBlogs}
-              >
-                <p>Liked Blogs</p>
-                <span>
-                  <ChevronRightIcon />
-                </span>
-              </Row>
-              <Row
-                onClick={() => setActiveSection(Section.savedBlogs)}
-                active={activeSection === Section.savedBlogs}
-              >
-                <p>Saved Blogs</p>
-                <span>
-                  <ChevronRightIcon />
-                </span>
-              </Row>
+              <Link to="/app/account/your-blogs">
+                <Row
+                  onClick={() => setActiveSection(Section.yourBlogs)}
+                  active={activeSection === Section.yourBlogs}
+                >
+                  <p>Your Blogs</p>
+                  <span>
+                    <ChevronRightIcon />
+                  </span>
+                </Row>
+              </Link>
+              <Link to="/app/account/liked-blogs">
+                <Row
+                  onClick={() => setActiveSection(Section.likedBlogs)}
+                  active={activeSection === Section.likedBlogs}
+                >
+                  <p>Liked Blogs</p>
+                  <span>
+                    <ChevronRightIcon />
+                  </span>
+                </Row>
+              </Link>
+              <Link to="/app/account/saved-blogs">
+                <Row
+                  onClick={() => setActiveSection(Section.savedBlogs)}
+                  active={activeSection === Section.savedBlogs}
+                >
+                  <p>Saved Blogs</p>
+                  <span>
+                    <ChevronRightIcon />
+                  </span>
+                </Row>
+              </Link>
             </main>
           </SettingSection>
           <SettingSection>
@@ -418,15 +463,17 @@ export default function Account({ selfDetails }: { selfDetails: object }) {
                   <ToggleButton />
                 </StyledToggleButton>
               </Row>
-              <Row
-                onClick={() => setActiveSection(Section.favouriteTopics)}
-                active={activeSection === Section.favouriteTopics}
-              >
-                <p>Favourite Topics</p>
-                <span>
-                  <ChevronRightIcon />
-                </span>
-              </Row>
+              <Link to="/app/account/favourite-topics">
+                <Row
+                  onClick={() => setActiveSection(Section.favouriteTopics)}
+                  active={activeSection === Section.favouriteTopics}
+                >
+                  <p>Favourite Topics</p>
+                  <span>
+                    <ChevronRightIcon />
+                  </span>
+                </Row>
+              </Link>
             </main>
           </SettingSection>
         </div>
