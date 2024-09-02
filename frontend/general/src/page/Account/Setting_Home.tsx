@@ -18,7 +18,7 @@ const UserProfilePhoto = styled.img`
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid #ff7738;
-  border: 5px solid white;
+  border: 2px solid black;
 `;
 const UserInfoCard = styled.div`
   width: 100%;
@@ -36,10 +36,12 @@ const UserInfoCard = styled.div`
     h1 {
       font-size: 28px;
       text-transform: capitalize;
+      text-align: center;
     }
     p {
       font-size: 20px;
       color: #a09d9d;
+      text-align: center;
     }
   }
   button {

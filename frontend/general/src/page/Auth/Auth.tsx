@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { LoginSignup } from "./LoginSignup";
 import { Description } from "./Description";
 import FavTopic from "./FavTopic";
 import ProfilePhoto from "./ProfilePhoto";
+import { useUserDetails } from "../../context/UserDetailContext";
+import { getSelfDetails } from "../../apis/api";
 
 const OuterBox = styled.div`
   min-height: 100vh;
@@ -319,6 +321,7 @@ const Skip = styled.div<SkipProps>`
 `;
 
 export default function Auth() {
+  const { setSelfDetails, setNotifications } = useUserDetails();
   const [step, setStep] = useState(1);
   const pageMap = [
     { Component: <LoginSignup setStep={setStep} /> },
@@ -327,6 +330,16 @@ export default function Auth() {
     { Component: <FavTopic setStep={setStep} /> },
   ];
   const navigate = useNavigate();
+
+  //  Re fetch self details on every step change
+  useEffect(() => {
+    async function fetchSelfDetails() {
+      const details = await getSelfDetails();
+      setSelfDetails(details);
+      setNotifications(details?.notifications);
+    }
+    fetchSelfDetails();
+  }, [step, setSelfDetails, setNotifications]);
 
   function getProgressWidth(): string {
     return `${((step - 1) / (pageMap.length - 1)) * 100}%`;

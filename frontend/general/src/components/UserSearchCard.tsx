@@ -7,6 +7,7 @@ import {
   getUserDetails,
   unfollowUser,
 } from "../apis/api";
+import toast from "react-hot-toast";
 
 interface UserBoxProps {
   imageURL: string;
@@ -133,6 +134,7 @@ export default function UserSearchCard({
   );
   // Pre-fill Follow and Unfollow status
   useEffect(() => {
+    if (!selfDetails?.id) return;
     const result = selfDetails.following?.some(
       (aUser: object) => aUser.id === user.id
     );
@@ -144,6 +146,10 @@ export default function UserSearchCard({
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) {
     event.preventDefault();
+    if (!selfDetails?.id) {
+      toast.error("Login/Signup to follow the user");
+      return;
+    }
     setLoading(true);
     if (follow) {
       // Unfollow
@@ -195,7 +201,7 @@ export default function UserSearchCard({
             </footer>
           </UserDetails>
         </Left>
-        {selfDetails.id !== user.id && (
+        {selfDetails?.id !== user.id && (
           <Right>
             <FollowBtn onClick={handleFollow} disabled={loading}>
               {follow ? "Following" : "Follow"}

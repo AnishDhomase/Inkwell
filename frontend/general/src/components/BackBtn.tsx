@@ -3,6 +3,7 @@ import styled from "styled-components";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 
 const BackButton = styled.span`
+  margin: 10px 0 20px 0;
   cursor: pointer;
   &:hover {
     transform: translateX(-3px);

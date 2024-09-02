@@ -37,6 +37,7 @@ const FileInputBox = styled.div`
   right: 0;
   left: 0;
   background-color: black;
+  border: 2px solid white;
   color: white;
   padding: 5px;
   border-radius: 50%;
@@ -299,7 +300,6 @@ export default function Setting_General({
       </FollowBox>
 
       <SaveAll onClick={handleSave} disabled={uploading}>
-        {" "}
         {!uploading ? (
           "Save Changes"
         ) : (

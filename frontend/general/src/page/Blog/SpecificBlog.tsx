@@ -221,6 +221,7 @@ const PreviousComments = styled.div`
   margin-top: -20px;
   display: flex;
   flex-direction: column;
+  margin-bottom: 100px;
   /* gap: 15px; */
 `;
 interface CommentContentProps {
@@ -268,8 +269,9 @@ const Tool = styled.button`
   }
 `;
 
-export default function SpecificBlog({ selfDetails }: { selfDetails: object }) {
-  const navigate = useNavigate();
+export default function SpecificBlog() {
+  const { selfDetails } = useUserDetails();
+
   const { blogId } = useParams();
   const [blogDetails, setBlogDetails] = useState<object>({});
   const [authorDetails, setAuthorDetails] = useState<object>({});
@@ -299,6 +301,11 @@ export default function SpecificBlog({ selfDetails }: { selfDetails: object }) {
 
   // User all Liked and Saved blogs
   const userBlogs = useMemo(() => {
+    if (!selfDetails?.id)
+      return {
+        liked: [],
+        saved: [],
+      };
     return {
       liked: selfDetails?.likedBlogs?.map((blog: Blog) => blog.id) || [],
       saved: selfDetails?.savedBlogs?.map((blog: Blog) => blog.id) || [],
@@ -307,6 +314,7 @@ export default function SpecificBlog({ selfDetails }: { selfDetails: object }) {
 
   // Pre-fill liked and saved status
   useEffect(() => {
+    if (!selfDetails?.id) return;
     let liked = false;
     let saved = false;
     if (userBlogs?.liked?.includes(blogDetails?.id)) {
@@ -317,13 +325,17 @@ export default function SpecificBlog({ selfDetails }: { selfDetails: object }) {
     }
     setLiked(liked);
     setSaved(saved);
-  }, [userBlogs, blogDetails]);
+  }, [userBlogs, blogDetails, selfDetails]);
 
   // Handle like and save
   async function handleBlogLike(
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) {
     event.stopPropagation();
+    if (!selfDetails?.id) {
+      toast.error("Login/Signup to like the blog");
+      return;
+    }
     if (liked) {
       // unlike
       const success = await unlikeBlog({ blogId: blogDetails.id });
@@ -342,6 +354,10 @@ export default function SpecificBlog({ selfDetails }: { selfDetails: object }) {
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) {
     event.stopPropagation();
+    if (!selfDetails?.id) {
+      toast.error("Login/Signup to save the blog");
+      return;
+    }
     if (saved) {
       // unsave
       const success = await unsaveBlog({ blogId: blogDetails.id });
@@ -359,6 +375,10 @@ export default function SpecificBlog({ selfDetails }: { selfDetails: object }) {
 
   // Handle comment
   async function handleCommentPost() {
+    if (!selfDetails?.id) {
+      toast.error("Login/Signup to comment on the blog");
+      return;
+    }
     if (!commentText) {
       toast.error("Comment cannot be empty");
       return;
@@ -376,6 +396,10 @@ export default function SpecificBlog({ selfDetails }: { selfDetails: object }) {
     setLoading(() => false);
   }
   async function handleDeleteComment(commentId: number) {
+    if (!selfDetails?.id) {
+      toast.error("Login/Signup to delete the comment");
+      return;
+    }
     setLoading(() => true);
     const success = await deleteCommentOnBlog({ commentId });
     if (success) {
@@ -385,6 +409,10 @@ export default function SpecificBlog({ selfDetails }: { selfDetails: object }) {
     setLoading(() => false);
   }
   async function handleEditComment(commentId: number, content: string) {
+    if (!selfDetails?.id) {
+      toast.error("Login/Signup to edit the comment");
+      return;
+    }
     setLoading(() => true);
     const success = await editCommentOnBlog({ commentId, content });
     if (success) {
@@ -470,7 +498,7 @@ export default function SpecificBlog({ selfDetails }: { selfDetails: object }) {
             <Comment
               key={comment.id}
               comment={comment}
-              myUserId={selfDetails.id}
+              myUserId={selfDetails?.id}
               handleDeleteComment={handleDeleteComment}
               handleEditComment={handleEditComment}
               editing={editing}
@@ -513,6 +541,7 @@ import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import UserCard from "../../components/UserCard";
 import BackBtn from "../../components/BackBtn";
+import { useUserDetails } from "../../context/UserDetailContext";
 function Comment({
   comment,
   myUserId,
@@ -532,6 +561,7 @@ function Comment({
   const [loading, setLoading] = useState<boolean>(false);
   const [commentContent, setCommentContent] = useState<string>(comment.content);
 
+  // Fetch comment author details
   useEffect(() => {
     async function fetchAuthor() {
       const res = await getUser(Number(comment.authorId));
@@ -540,11 +570,19 @@ function Comment({
     fetchAuthor();
   }, []);
   async function handleDeleteCmmt() {
+    if (!myUserId) {
+      toast.error("Login/Signup to delete the comment");
+      return;
+    }
     setLoading(() => true);
     await handleDeleteComment(comment.id);
     setLoading(() => false);
   }
   async function handleEditCmmt() {
+    if (!myUserId) {
+      toast.error("Login/Signup to edit the comment");
+      return;
+    }
     setLoading(() => true);
     await handleEditComment(comment.id, commentContent);
     setLoading(() => false);
@@ -569,7 +607,7 @@ function Comment({
           disabled={loading}
         />
       )}
-      {myUserId === comment.authorId && (
+      {myUserId && myUserId === comment.authorId && (
         <ToolBox>
           {editing !== comment.id ? (
             <Tool onClick={() => setEditing(comment.id)} disabled={loading}>

@@ -1,7 +1,8 @@
 import styled from "styled-components";
 import UserCard from "./UserCard";
 import { useEffect, useState } from "react";
-import { followUser, unfollowUser } from "../apis/api";
+import { followUser, getSelfDetails, unfollowUser } from "../apis/api";
+import { useUserDetails } from "../context/UserDetailContext";
 
 const Row = styled.div`
   display: flex;
@@ -25,6 +26,7 @@ export default function UserCardWithFollowBtn({
   user: object;
   selfDetails: object;
 }) {
+  const { setSelfDetails, setNotifications } = useUserDetails();
   const [follow, setFollow] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -48,9 +50,9 @@ export default function UserCardWithFollowBtn({
       if (res) {
         setFollow(false);
         // Fetch self details again to update following list
-        // const details = await getSelfDetails();
-        // setSelfDetails(details);
-        // setNotifications(details?.notifications);
+        const details = await getSelfDetails();
+        setSelfDetails(details);
+        setNotifications(details?.notifications);
       }
     } else {
       // Follow
@@ -58,9 +60,9 @@ export default function UserCardWithFollowBtn({
       if (res) {
         setFollow(true);
         // Fetch self details again to update following list
-        // const details = await getSelfDetails();
-        // setSelfDetails(details);
-        // setNotifications(details?.notifications);
+        const details = await getSelfDetails();
+        setSelfDetails(details);
+        setNotifications(details?.notifications);
       }
     }
     setLoading(false);

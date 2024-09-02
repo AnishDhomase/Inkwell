@@ -12,6 +12,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import BlogCardSkeletonLoader from "../../components/BlogCardSkeleton";
 import Blogs from "../../components/Blogs";
+import { useUserDetails } from "../../context/UserDetailContext";
 
 const Explore = styled.div`
   user-select: none;
@@ -120,7 +121,8 @@ const TextButton = styled.button`
 `;
 type SortOption = "newest" | "oldest" | "popular";
 
-export default function Home({ selfDetails }: { selfDetails: object }) {
+export default function Home() {
+  const { selfDetails } = useUserDetails();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [activeTopic, setActiveTopic] = useState<number>(-1);

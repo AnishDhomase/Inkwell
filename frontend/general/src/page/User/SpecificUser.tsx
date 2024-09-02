@@ -1,29 +1,14 @@
-import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
-import { useEffect, useMemo, useState } from "react";
-import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import {
   Blog,
-  commentOnBlog,
-  deleteCommentOnBlog,
-  editCommentOnBlog,
   followUser,
-  getBlog,
-  getUser,
+  getSelfDetails,
   getUserDetails,
-  likeBlog,
-  saveBlog,
   unfollowUser,
-  unlikeBlog,
-  unsaveBlog,
 } from "../../apis/api";
-import Blogs, { formatDate } from "../../components/Blogs";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
-import toast from "react-hot-toast";
-import { CircularProgress } from "@mui/material";
+import Blogs from "../../components/Blogs";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
@@ -60,12 +45,6 @@ const BackgroundBanner = styled.div`
     font-weight: 500;
   }
 `;
-const BackButton = styled.span`
-  cursor: pointer;
-  &:hover {
-    scale: 1.05;
-  }
-`;
 const UserProfilePhoto = styled.img`
   background-color: #f9f9f9;
   margin-top: -90px;
@@ -98,6 +77,7 @@ const UserInfoCard = styled.div`
     }
   }
   button {
+    min-width: 80px;
     padding: 5px 10px;
     background-color: #3856ff;
     color: #fff;
@@ -174,51 +154,6 @@ const ContactCard = styled.div`
   }
 `;
 
-// interface PhotoProps {
-//   imageURL: string;
-// }
-const ImageBox = styled.div`
-  width: 100%;
-  border-radius: 10px;
-  position: relative;
-  border: 1px solid #333;
-  background-color: #6d1717;
-  display: flex;
-  img {
-    border-radius: 10px;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  span {
-    position: absolute;
-    border-radius: 50px;
-    padding: 5px;
-    display: flex;
-    cursor: pointer;
-    background-color: #f9f9f9;
-    border: 1px solid #333;
-    bottom: 10px;
-  }
-`;
-const Like = styled.span`
-  right: 10px;
-`;
-const Save = styled.span`
-  right: 50px;
-`;
-
-const Header = styled.div`
-  font-size: 18px;
-  font-weight: 500;
-  margin-top: 15px;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #333;
-`;
-
 const Title = styled.h1`
   font-size: 22px;
   font-weight: 700;
@@ -229,167 +164,9 @@ const Title = styled.h1`
     font-size: 25px;
   }
 `;
-const Content = styled.p`
-  font-size: 20px;
-  font-weight: 400;
-  color: #333;
-  margin-top: 15px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  @media (max-width: 550px) {
-    font-size: 18px;
-  }
-`;
-const Topics = styled.div`
-  display: flex;
-  gap: 10px;
-  margin-top: 25px;
-`;
-const Topic = styled.span`
-  padding: 5px 10px;
-  background-color: #e4e4e4;
-  color: #333;
-  font-size: 18px;
-  border-radius: 50px;
-  border: 1px solid #333;
-  /* &:hover {
-    cursor: pointer;
-  } */
-`;
-const CommentBox = styled.div`
-  margin-top: 20px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  & h1 {
-    font-size: 25px;
-  }
-`;
-const WriteComment = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: end;
-  gap: 10px;
-  border: 1px solid #333;
-  border-radius: 15px;
-  overflow: hidden;
-  padding: 15px;
-  @media (max-width: 475px) {
-    padding: 10px;
-  }
-  &:hover {
-    border: 1px solid #ff7738;
-  }
-  textarea {
-    resize: none;
-    border: none;
-    width: 100%;
-    height: 100px;
-    font-size: 18px;
-    color: #333;
-    outline: none;
-  }
-  textarea:disabled {
-    background-color: transparent;
-  }
-  div {
-    display: flex;
-    gap: 10px;
-  }
-`;
-const OutlinedButton = styled.button`
-  padding: 5px 10px;
-  color: #ff7738;
-  border: 1px solid #ff7738;
-  font-size: 18px;
-  border-radius: 10px;
-  background-color: transparent;
-  &:hover {
-    cursor: pointer;
-    scale: 1.02;
-  }
-`;
-const Button = styled.button`
-  padding: 5px 10px;
-  background-color: #ff7738;
-  color: #fff;
-  font-size: 18px;
-  border: none;
-  border-radius: 10px;
-  &:hover {
-    cursor: pointer;
-    scale: 1.02;
-  }
-`;
-const ButtonSmall = styled.button`
-  padding: 2px 5px;
-  background-color: #ff7738;
-  color: #fff;
-  font-size: 16px;
-  border: none;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  &:hover {
-    cursor: pointer;
-    scale: 1.02;
-  }
-`;
-const PreviousComments = styled.div`
-  margin-top: -20px;
-  display: flex;
-  flex-direction: column;
-  /* gap: 15px; */
-`;
-interface CommentContentProps {
-  overlay: boolean;
-}
-const CommentContent = styled.div<CommentContentProps>`
-  opacity: ${(props) => (props.overlay ? 0.5 : 1)};
-  border-bottom: 1px solid #dfdbdb;
-  padding: 25px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  font-size: 17px;
-  & header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-  }
-  & textarea {
-    font-size: 17px;
-    border: none;
-    outline: none;
 
-    resize: none;
-    min-height: 50px;
-  }
-`;
-const ToolBox = styled.div`
-  display: flex;
-  gap: 5px;
-  color: #c4b9b4;
-  cursor: pointer;
-`;
-const Tool = styled.button`
-  padding: 0 5px;
-  display: flex;
-  align-items: center;
-  background-color: transparent;
-  border: none;
-  color: #c4b9b4;
-  cursor: pointer;
-  &:hover {
-    color: #636161;
-  }
-`;
-
-export default function SpecificUser({ selfDetails }: { selfDetails: object }) {
-  const navigate = useNavigate();
+export default function SpecificUser() {
+  const { selfDetails, setSelfDetails, setNotifications } = useUserDetails();
   const { userId } = useParams();
   const [userDetails, setUserDetails] = useState<object>({});
   const [follow, setFollow] = useState<boolean>(false);
@@ -397,7 +174,7 @@ export default function SpecificUser({ selfDetails }: { selfDetails: object }) {
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Fetch user details
+  // Fetch author details
   useEffect(() => {
     async function fetchUser() {
       const res = await getUserDetails(Number(userId));
@@ -405,10 +182,12 @@ export default function SpecificUser({ selfDetails }: { selfDetails: object }) {
     }
     fetchUser();
   }, [userId]);
-  console.log(userDetails);
 
   // Pre-fill Follow and Unfollow status
   useEffect(() => {
+    if (!selfDetails?.id) {
+      return;
+    }
     const result = selfDetails.following?.some(
       (user: object) => user.id === Number(userId)
     );
@@ -417,6 +196,10 @@ export default function SpecificUser({ selfDetails }: { selfDetails: object }) {
 
   // Handle Follow and Unfollow
   async function handleFollow() {
+    if (!selfDetails?.id) {
+      toast.error("Login/Signup to follow the user");
+      return;
+    }
     setLoading(true);
     if (follow) {
       // Unfollow
@@ -425,6 +208,10 @@ export default function SpecificUser({ selfDetails }: { selfDetails: object }) {
         setFollow(false);
         const res = await getUserDetails(Number(userId));
         setUserDetails(res);
+        // Fetch self details again to update follow status
+        const details = await getSelfDetails();
+        setSelfDetails(details);
+        setNotifications(details?.notifications);
       }
     } else {
       // Follow
@@ -433,6 +220,11 @@ export default function SpecificUser({ selfDetails }: { selfDetails: object }) {
         setFollow(true);
         const res = await getUserDetails(Number(userId));
         setUserDetails(res);
+
+        // Fetch self details again to update follow status
+        const details = await getSelfDetails();
+        setSelfDetails(details);
+        setNotifications(details?.notifications);
       }
     }
     setLoading(false);
@@ -455,9 +247,21 @@ export default function SpecificUser({ selfDetails }: { selfDetails: object }) {
       <UserInfoCard>
         <header>
           <h1>{userDetails.name}</h1>
-          {selfDetails.id !== Number(userId) ? (
+          {selfDetails?.id !== Number(userId) ? (
             <button onClick={handleFollow}>
-              {follow ? "Following" : "Follow"}
+              {!loading ? (
+                follow ? (
+                  "Following"
+                ) : (
+                  "Follow"
+                )
+              ) : (
+                <CircularProgress
+                  size={20}
+                  thickness={6}
+                  style={{ color: "white" }}
+                />
+              )}
             </button>
           ) : (
             <Link to="/app/account">
@@ -504,7 +308,7 @@ export default function SpecificUser({ selfDetails }: { selfDetails: object }) {
 
         <Title>
           Blogs by{" "}
-          {Number(userId) === selfDetails.id
+          {Number(userId) === selfDetails?.id
             ? "you"
             : userDetails?.name?.split(" ")[0]}
         </Title>
@@ -542,3 +346,6 @@ function getTimeAgo(dateString: string): string {
 
 import UserCard from "../../components/UserCard";
 import BackBtn from "../../components/BackBtn";
+import toast from "react-hot-toast";
+import { useUserDetails } from "../../context/UserDetailContext";
+import { CircularProgress } from "@mui/material";

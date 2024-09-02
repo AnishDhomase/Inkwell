@@ -172,7 +172,7 @@ export function LoginSignup({ setStep }: { setStep: any }) {
         email: formData.email,
         password: formData.password,
       });
-      if (success) navigate("/");
+      if (success) navigate("/app");
     } else {
       // signup
       const success = await signUp({

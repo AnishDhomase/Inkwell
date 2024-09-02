@@ -17,7 +17,6 @@ const SearchBox = styled.div`
   width: 100%;
   max-width: 450px;
 `;
-
 const SearchBtn = styled.button`
   background-color: #ff7738;
   color: white;
@@ -174,16 +173,10 @@ import Blogs from "../../components/Blogs";
 import { Link, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import UserSearchCard from "../../components/UserSearchCard";
+import { useUserDetails } from "../../context/UserDetailContext";
 
-export default function Search({
-  selfDetails,
-  setSelfDetails,
-  setNotifications,
-}: {
-  selfDetails: object;
-  setSelfDetails: (details: object) => void;
-  setNotifications: (notifications: string[]) => void;
-}) {
+export default function Search() {
+  const { selfDetails, setSelfDetails, setNotifications } = useUserDetails();
   const categoryOfSearch = useLocation().pathname.split("/")[3];
   const [searchFor, setSearchFor] = useState<string>(categoryOfSearch);
   const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -268,7 +261,6 @@ export default function Search({
     else if (searchFor === "users" && query === "" && users.length === 0)
       setSearchFeedback(SearchStatus.noSearchYet);
   }, [query, searchFor, blogs, users]);
-
   function getSearchStatus() {
     if (searchFeedback === SearchStatus.noSearchYet) {
       return `Start Searching for ${searchFor}!`;

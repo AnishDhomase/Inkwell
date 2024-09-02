@@ -92,6 +92,7 @@ const RHS = styled.div`
 `;
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { CircularProgress } from "@mui/material";
+import toast from "react-hot-toast";
 
 interface LeftBlogSecProps {
   imageURL: string;
@@ -175,7 +176,6 @@ export default function Blogs({
             <Card
               key={blog.id}
               blog={blog}
-              // userBlogs={userBlogs}
               isLikedByUser={liked}
               isSavedByUser={saved}
             />
@@ -377,10 +377,13 @@ export function Card({
 }) {
   const [liked, setLiked] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(false);
+
+  // Pre-fill liked and saved status
   useEffect(() => {
     setLiked(isLikedByUser);
     setSaved(isSavedByUser);
   }, [isLikedByUser, isSavedByUser]);
+
   async function handleBlogLike(
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) {
@@ -452,11 +455,11 @@ export function Card({
 
           <section>
             <StatChip>
-              <span>{blog._count.likedByUsers}</span>
+              <span>{blog?._count?.likedByUsers}</span>
               <FavoriteIcon style={{ color: "#E74C4F" }} />
             </StatChip>
             <StatChip>
-              <span>{blog.comments?.length}</span>
+              <span>{blog?.comments?.length}</span>
               <CommentIcon style={{ color: "#dab777" }} />
             </StatChip>
           </section>

@@ -4,11 +4,9 @@ import PersonIcon from "@mui/icons-material/Person";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import Badge from "@mui/material/Badge";
 import IconButton from "@mui/material/IconButton";
-import styled, { keyframes } from "styled-components";
-// import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-// import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
-// import FavoriteIcon from "@mui/icons-material/Favorite";
-// import BookmarkIcon from "@mui/icons-material/Bookmark";
+import styled from "styled-components";
+import LogoutIcon from "@mui/icons-material/Logout";
+
 import { motion, AnimatePresence } from "framer-motion";
 import CircularProgress from "@mui/material/CircularProgress";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
@@ -36,6 +34,10 @@ const RightBox = styled.div`
   gap: 10px;
 `;
 const CircleBorder = styled.div`
+  min-width: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border: 1px solid #dcdbdb;
   border-radius: 50%;
 `;
@@ -152,6 +154,15 @@ interface NotificationPanelProps {
 }
 const NotificationPanel = styled(motion.div)<NotificationPanelProps>`
   min-width: ${(props) => (props.noNotifactions ? "160px" : "300px")};
+  max-width: 300px;
+  max-height: 300px;
+  @media screen and (max-width: 480px) {
+    margin-left: 10px;
+    min-width: 200px;
+  }
+
+  overflow-x: hidden;
+  overflow-y: auto;
   position: absolute;
   border: 1px solid #c4bfbf;
   right: 20px;
@@ -163,6 +174,16 @@ const NotificationPanel = styled(motion.div)<NotificationPanelProps>`
   align-items: ${(props) => (props.noNotifactions ? "center" : "flex-start")};
   gap: 10px;
   z-index: 100;
+
+  /* Scroolbar */
+  /* For WebKit browsers */
+  ::-webkit-scrollbar {
+    width: 8px;
+    background-color: #1761ca;
+  }
+  /* For Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: darkgrey transparent;
 `;
 const Button = styled.button`
   width: 100%;
@@ -188,17 +209,15 @@ const Notification = styled.div`
 // type activePage = "home" | "search" | "add" | "liked" | "saved";
 type activePage = "home" | "search" | "add" | "account";
 
-export default function Layout({
-  selfDetails,
-  notifications,
-}: {
-  selfDetails: any;
-  notifications: string[];
-}) {
+export default function Layout() {
+  const { selfDetails, notifications, setSelfDetails, setNotifications } =
+    useUserDetails();
   const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [activePage, setActivePage] = useState<activePage>("home");
   const [mostFollowedUsers, setMostFollowedUsers] = useState<object[]>([]);
+  const [notificationsState, setNotificationsState] =
+    useState<string[]>(notifications);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -218,13 +237,13 @@ export default function Layout({
 
   //  Fetch most followed users
   useEffect(() => {
+    if (!selfDetails?.id) return;
     async function fetchMostFollowedUsers() {
       const users = await getMostFollowedUsers();
       setMostFollowedUsers(users);
     }
     fetchMostFollowedUsers();
-  }, []);
-  console.log(mostFollowedUsers);
+  }, [selfDetails]);
 
   //   Clear notifications
   async function handleClearNotifications() {
@@ -233,9 +252,24 @@ export default function Layout({
     setLoading(() => false);
     if (success) {
       setTimeout(() => {
-        setNotifications([]);
-      }, 1000);
+        setNotificationsState([]);
+      }, 500);
     }
+  }
+  useEffect(() => {
+    setNotificationsState(notifications);
+  }, [notifications]);
+
+  // Logout
+  function handleLogout() {
+    if (!selfDetails?.id) {
+      return;
+    }
+    setLoading(() => true);
+    localStorage.removeItem("tokenOfBlogApp");
+    setSelfDetails({});
+    setNotifications([]);
+    setLoading(() => false);
   }
 
   return (
@@ -247,20 +281,26 @@ export default function Layout({
         <RightBox>
           {selfDetails?.id ? (
             <>
-              {/* <CircleBorder>
-                <IconButton aria-label="delete">
-                  <Badge badgeContent={0} max={9} color="primary">
-                    <PersonIcon color="action" />
-                  </Badge>
-                </IconButton>
-              </CircleBorder> */}
+              {location.pathname.startsWith("/app/account") && (
+                <CircleBorder onClick={handleLogout}>
+                  <IconButton aria-label="delete">
+                    <Badge badgeContent={0} max={9} color="primary">
+                      {!loading ? (
+                        <LogoutIcon color="action" />
+                      ) : (
+                        <CircularProgress size={20} thickness={6} />
+                      )}
+                    </Badge>
+                  </IconButton>
+                </CircleBorder>
+              )}
 
               <CircleBorder
                 onClick={() => setIsNotificationOpen(!isNotificationOpen)}
               >
                 <IconButton aria-label="delete">
                   <Badge
-                    badgeContent={notifications.length}
+                    badgeContent={notificationsState.length}
                     max={9}
                     color="primary"
                   >
@@ -297,11 +337,11 @@ export default function Layout({
                   duration: 1,
                   ease: "backInOut",
                 }}
-                noNotifactions={notifications.length == 0}
+                noNotifactions={notificationsState.length == 0}
               >
-                {notifications.length ? (
+                {notificationsState?.length ? (
                   <>
-                    {notifications.map((content, ind) => (
+                    {notificationsState?.map((content, ind) => (
                       <Notification>{content}</Notification>
                     ))}
                     <Button
@@ -340,30 +380,32 @@ export default function Layout({
             <Banner>Inkwell Plus is coming soon!</Banner>
             {location.pathname !== "/app/search/users" && (
               <>
-                <FollowSuggestions>
-                  <h4>Who to Follow</h4>
-                  <Users>
-                    {mostFollowedUsers?.map((user) => (
-                      <Row key={user.id}>
-                        <UserCard
-                          userId={user.id}
-                          username={user.username}
-                          profilePicURL={user.profilePicURL}
-                        >
-                          {`${user._count.followers} Follower${
-                            user._count.followers === 1 ? "" : "s"
-                          }`}
-                        </UserCard>
-                        <Link to={`/app/user/${user.id}`}>
-                          <ChevronRightIcon />
-                        </Link>
-                      </Row>
-                    ))}
-                  </Users>
-                  <Link to="/app/search/users">
-                    <TextBtn>See more suggestions</TextBtn>
-                  </Link>
-                </FollowSuggestions>
+                {selfDetails?.id && (
+                  <FollowSuggestions>
+                    <h4>Who to Follow</h4>
+                    <Users>
+                      {mostFollowedUsers?.map((user) => (
+                        <Row key={user.id}>
+                          <UserCard
+                            userId={user.id}
+                            username={user.username}
+                            profilePicURL={user.profilePicURL}
+                          >
+                            {`${user._count.followers} Follower${
+                              user._count.followers === 1 ? "" : "s"
+                            }`}
+                          </UserCard>
+                          <Link to={`/app/user/${user.id}`}>
+                            <ChevronRightIcon />
+                          </Link>
+                        </Row>
+                      ))}
+                    </Users>
+                    <Link to="/app/search/users">
+                      <TextBtn>See more suggestions</TextBtn>
+                    </Link>
+                  </FollowSuggestions>
+                )}
 
                 <Info>
                   <h4>Reading list</h4>
@@ -452,6 +494,7 @@ import PermIdentityOutlinedIcon from "@mui/icons-material/PermIdentityOutlined";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import UserCard from "../../components/UserCard";
+import { useUserDetails } from "../../context/UserDetailContext";
 
 function Navbar({
   activePage,

@@ -19,7 +19,8 @@ import {
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const BASE_URL = "http://127.0.0.1:8787";
+// const BASE_URL = "http://127.0.0.1:8787";
+const BASE_URL = "https://backend.anishdhomase.workers.dev";
 
 // Get JWT Token from Local Storage
 function getHeaders() {
@@ -273,8 +274,18 @@ export async function getBlog(payload: number) {
 // Blog Actions
 export async function likeBlog(payload: deleteBlogInputType): Promise<boolean> {
   try {
+    const headers = getHeaders();
+    console.log(headers);
+    if (
+      !headers ||
+      !headers.authorization ||
+      headers.authorization === "null"
+    ) {
+      toast.error("Login/Signup to like the blog");
+      return false;
+    }
     const res = await axios.post(`${BASE_URL}/user/blog/like`, payload, {
-      headers: getHeaders(),
+      headers,
     });
     if (res.data.success) {
       return true;
@@ -292,8 +303,17 @@ export async function unlikeBlog(
   payload: deleteBlogInputType
 ): Promise<boolean> {
   try {
+    const headers = getHeaders();
+    if (
+      !headers ||
+      !headers.authorization ||
+      headers.authorization === "null"
+    ) {
+      toast.error("Login/Signup to like the blog");
+      return false;
+    }
     const res = await axios.post(`${BASE_URL}/user/blog/unlike`, payload, {
-      headers: getHeaders(),
+      headers,
     });
     if (res.data.success) {
       return true;
@@ -309,8 +329,17 @@ export async function unlikeBlog(
 }
 export async function saveBlog(payload: deleteBlogInputType): Promise<boolean> {
   try {
+    const headers = getHeaders();
+    if (
+      !headers ||
+      !headers.authorization ||
+      headers.authorization === "null"
+    ) {
+      toast.error("Login/Signup to save the blog");
+      return false;
+    }
     const res = await axios.post(`${BASE_URL}/user/blog/save`, payload, {
-      headers: getHeaders(),
+      headers,
     });
     if (res.data.success) {
       return true;
@@ -328,8 +357,17 @@ export async function unsaveBlog(
   payload: deleteBlogInputType
 ): Promise<boolean> {
   try {
+    const headers = getHeaders();
+    if (
+      !headers ||
+      !headers.authorization ||
+      headers.authorization === "null"
+    ) {
+      toast.error("Login/Signup to save the blog");
+      return false;
+    }
     const res = await axios.post(`${BASE_URL}/user/blog/unsave`, payload, {
-      headers: getHeaders(),
+      headers,
     });
     if (res.data.success) {
       return true;
@@ -422,7 +460,7 @@ export async function clearNotifications() {
     return false;
   }
 }
-export async function getSelfDetails() {
+export async function getSelfDetails(): Promise<object> {
   try {
     const res = await axios.get(`${BASE_URL}/user/details`, {
       headers: getHeaders(),
@@ -430,14 +468,14 @@ export async function getSelfDetails() {
     if (res.data.success) {
       return res.data.data;
     } else {
-      toast.error("Something went wrong, Try Again 1");
-      return null;
+      // toast.error("Something went wrong, Try Again 1");
+      return {};
     }
   } catch (e) {
-    if (!axios.isAxiosError(e))
-      toast.error("Something went wrong, Try Again 2");
-    else toast.error(e.response?.data?.error);
-    return null;
+    // if (!axios.isAxiosError(e))
+    // toast.error("Something went wrong, Try Again 2");
+    // else toast.error(e.response?.data?.error);
+    return {};
   }
 }
 

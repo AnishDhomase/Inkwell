@@ -11,6 +11,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useUserDetails } from "../../context/UserDetailContext";
 
 const OuterBox = styled.div`
   min-height: 100vh;
@@ -276,6 +277,7 @@ const NavBar = styled.div`
 
 // TODO: Clear post for new post
 export default function CreateBlog() {
+  const { selfDetails } = useUserDetails();
   const [preview, setPreview] = useState<string | null>();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [file, setFile] = useState<File | null>(null);
@@ -300,6 +302,10 @@ export default function CreateBlog() {
     fetchTopics();
   }, []);
   async function handleBlogSubmit() {
+    if (!selfDetails?.id) {
+      toast.error("Login/Signup to create a blog");
+      return;
+    }
     if (!content || !title)
       return toast.error("Title and Content are required");
     setLoading(() => true);

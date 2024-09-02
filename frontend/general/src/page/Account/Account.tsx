@@ -12,6 +12,9 @@ import Setting_SavedBlogs from "./Setting_SavedBlogs";
 import Setting_FavouriteTopics from "./Setting_FavouriteTopics";
 import { ToggleButton } from "../../components/ToggleBtn";
 import { IconButton } from "@mui/material";
+import Blogs from "../../components/Blogs";
+import { useUserDetails } from "../../context/UserDetailContext";
+import Setting_YourBlogs from "./Setting_YourBlogs";
 
 const Container = styled.div`
   /* margin-top: -20px; */
@@ -31,7 +34,7 @@ const NavigationPanel = styled.nav`
     h1 {
       font-size: 33px;
       font-weight: 700;
-      padding: 20px 20px;
+      padding: 30px 20px;
       cursor: pointer;
     }
   }
@@ -162,6 +165,34 @@ const NavPanelToggler = styled.button<NavPanelTogglerProps>`
     right: 10px;
   }
 `;
+const UnAuthenticated = styled.div`
+  min-height: 85vh;
+  /* color my orange */
+  color: #ff8848;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* font-size: 30px; */
+  h1 {
+    font-size: 35px;
+    text-align: center;
+    @media (max-width: 400px) {
+      font-size: 30px;
+    }
+    @media (max-width: 340px) {
+      font-size: 25px;
+    }
+  }
+  p {
+    font-size: 18px;
+    color: #a09d9d;
+    text-align: center;
+    @media (max-width: 400px) {
+      font-size: 16px;
+    }
+  }
+`;
 
 // Page Types and Logic
 export enum Section {
@@ -189,6 +220,7 @@ const SectionComponents: Record<Section, React.FC<SectionProps>> = {
   [Section.likedBlogs]: Setting_LikedBlogs,
   [Section.savedBlogs]: Setting_SavedBlogs,
   [Section.favouriteTopics]: Setting_FavouriteTopics,
+  [Section.yourBlogs]: Setting_YourBlogs,
 };
 function getActivePage(categoryOfSettings: string): Section {
   switch (categoryOfSettings) {
@@ -220,7 +252,9 @@ function isPortraitDevice() {
   return viewportWidth < 810;
 }
 
-export default function Account({ selfDetails }: { selfDetails: object }) {
+export default function Account() {
+  const { selfDetails } = useUserDetails();
+
   // Syncing the active section with the URL
   const categoryOfSettings = useLocation().pathname.split("/")[3];
   const sec = getActivePage(categoryOfSettings);
@@ -237,6 +271,14 @@ export default function Account({ selfDetails }: { selfDetails: object }) {
       />
     );
   }
+
+  if (!selfDetails?.id)
+    return (
+      <UnAuthenticated>
+        <h1>You have not Loged In!</h1>
+        <p>Try Login/Signup to See your Account!</p>
+      </UnAuthenticated>
+    );
 
   return (
     <Container>
@@ -297,7 +339,7 @@ export default function Account({ selfDetails }: { selfDetails: object }) {
             <SettingSection>
               <header>CONTENT</header>
               <main>
-                {/* <Link to="/app/account/your-blogs">
+                <Link to="/app/account/your-blogs">
                   <Row
                     onClick={() => {
                       setActiveSection(Section.yourBlogs);
@@ -310,7 +352,7 @@ export default function Account({ selfDetails }: { selfDetails: object }) {
                       <ChevronRightIcon />
                     </span>
                   </Row>
-                </Link> */}
+                </Link>
                 <Link to="/app/account/liked-blogs">
                   <Row
                     onClick={() => {

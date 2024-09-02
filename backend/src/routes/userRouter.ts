@@ -317,7 +317,23 @@ userRouter.get("/details", async function (c) {
         createdAt: true,
 
         // Actions
-        blogs: true,
+        blogs: {
+          select: {
+            id: true,
+            title: true,
+            content: true,
+            authorId: true,
+            blogImageURL: true,
+            createdAt: true,
+            comments: true,
+            _count: {
+              select: {
+                likedByUsers: true,
+                savedByUsers: true,
+              },
+            },
+          },
+        },
         likedBlogs: {
           select: {
             id: true,

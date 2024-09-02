@@ -1,8 +1,17 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
+import { getSelfDetails } from "../apis/api";
 
 interface ContextType {
-  count: number;
-  setCount: (count: number) => void;
+  selfDetails: object;
+  notifications: string[];
+  setSelfDetails: React.Dispatch<React.SetStateAction<object>>;
+  setNotifications: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const UserDetailsContext = createContext<ContextType | undefined>(undefined);
@@ -15,10 +24,23 @@ interface AppProviderProps {
 export const UserDetailsProvider: React.FC<AppProviderProps> = ({
   children,
 }) => {
-  const [userDetails, setUserDetails] = useState();
+  const [selfDetails, setSelfDetails] = useState<object>({});
+  const [notifications, setNotifications] = useState<string[]>([]);
+
+  //   Fetch self details
+  useEffect(() => {
+    async function fetchSelfDetails() {
+      const details = await getSelfDetails();
+      setSelfDetails(details);
+      setNotifications(details?.notifications);
+    }
+    fetchSelfDetails();
+  }, []);
 
   return (
-    <UserDetailsContext.Provider value={{ userDetails, setUserDetails }}>
+    <UserDetailsContext.Provider
+      value={{ selfDetails, notifications, setSelfDetails, setNotifications }}
+    >
       {children}
     </UserDetailsContext.Provider>
   );
