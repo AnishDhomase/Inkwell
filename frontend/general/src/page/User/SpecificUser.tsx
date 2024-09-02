@@ -240,13 +240,19 @@ export default function SpecificUser() {
       <BackgroundBanner>
         <span>
           <BackBtn />
-          <>{userDetails.username}</>
+          <>{userDetails?.username}</>
         </span>
       </BackgroundBanner>
-      <UserProfilePhoto src={userDetails.profilePicURL} alt="profile" />
+      <UserProfilePhoto
+        src={
+          userDetails?.profilePicURL ||
+          "../../../public/placeholderBlogImage.webp"
+        }
+        alt="profile"
+      />
       <UserInfoCard>
         <header>
-          <h1>{userDetails.name}</h1>
+          <h1>{userDetails?.name}</h1>
           {selfDetails?.id !== Number(userId) ? (
             <button onClick={handleFollow}>
               {!loading ? (
@@ -283,12 +289,7 @@ export default function SpecificUser() {
             <span>Blogs</span>
           </StatCard>
         </main>
-        <section>
-          {userDetails.description} Lorem ipsum, dolor sit amet consectetur
-          adipisicing elit. Esse officia reprehenderit, quibusdam iure error
-          facere ipsam, facilis dolor velit earum odit, deserunt non reiciendis
-          a incidunt. Fugiat a repellendus officiis!
-        </section>
+        <section>{userDetails?.description}</section>
         <footer onClick={() => setContactInfoOpen(!isContactInfoOpen)}>
           <span>Contact Info</span>
           {!isContactInfoOpen ? (
@@ -301,7 +302,7 @@ export default function SpecificUser() {
           <ContactCard>
             <div>
               <MailOutlineIcon />
-              <span>{userDetails.email}</span>
+              <span>{userDetails?.email}</span>
             </div>
           </ContactCard>
         )}
@@ -312,7 +313,7 @@ export default function SpecificUser() {
             ? "you"
             : userDetails?.name?.split(" ")[0]}
         </Title>
-        <Blogs blogs={userDetails.blogs} userBlogs={userBlogs} />
+        <Blogs blogs={userDetails?.blogs} userBlogs={userBlogs} />
       </UserInfoCard>
     </Container>
   );

@@ -11,7 +11,7 @@ const ImageBox = styled.div`
   background-color: transparent;
 `;
 const UserProfilePhoto = styled.img`
-  background-color: #807c7c;
+  background-color: #e9e5e5;
 
   width: 180px;
   height: 180px;
@@ -135,7 +135,13 @@ export default function Setting_Home({
   return (
     <>
       <ImageBox>
-        <UserProfilePhoto src={selfDetails.profilePicURL} alt="profile" />
+        <UserProfilePhoto
+          src={
+            selfDetails?.profilePicURL ||
+            "../../../public/placeholderBlogImage.webp"
+          }
+          alt="profile"
+        />
       </ImageBox>
       <UserInfoCard>
         <header>

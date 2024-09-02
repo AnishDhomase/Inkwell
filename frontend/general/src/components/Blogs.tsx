@@ -167,7 +167,7 @@ export default function Blogs({
       if (blogs?.length === 0) setNoResults(() => true);
     }, 3000);
     return () => clearTimeout(timer);
-  }, [blogs.length]);
+  }, [blogs?.length]);
   return (
     <BlogBox>
       {blogs?.length ? (

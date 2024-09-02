@@ -204,7 +204,9 @@ export default function Setting_General({
   // Pre-fill the form with the name, description and profilePicURL
   useEffect(() => {
     setUploading(() => true);
-    setPreview(selfDetails?.profilePicURL);
+    setPreview(
+      selfDetails?.profilePicURL || "../../../public/placeholderBlogImage.webp"
+    );
     setName(selfDetails?.name);
     setDescription(selfDetails?.description);
     setUploading(() => false);
@@ -236,7 +238,10 @@ export default function Setting_General({
       <EditPhoto uploading={uploading}>
         <ProfilePhotoBox>
           {preview && (
-            <Img src={preview || "../../../public/user.png"} alt="preview" />
+            <Img
+              src={preview || "../../../public/placeholderBlogImage.webp"}
+              alt="preview"
+            />
           )}
         </ProfilePhotoBox>
         <FileInputBox onClick={() => ref?.current?.click()}>
