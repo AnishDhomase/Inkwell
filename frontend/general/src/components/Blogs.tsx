@@ -93,6 +93,7 @@ const RHS = styled.div`
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { CircularProgress } from "@mui/material";
 import toast from "react-hot-toast";
+import { Msg } from "../page/Account/Account";
 
 interface LeftBlogSecProps {
   imageURL: string;
@@ -160,6 +161,13 @@ export default function Blogs({
   blogs: Blog[];
   userBlogs: any;
 }) {
+  const [noResults, setNoResults] = useState<boolean>(false);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (blogs?.length === 0) setNoResults(() => true);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [blogs.length]);
   return (
     <BlogBox>
       {blogs?.length ? (
@@ -182,12 +190,21 @@ export default function Blogs({
           );
         })
       ) : (
-        <BlogCardSkeletonLoader />
+        <>
+          {noResults ? <Msg>No Blogs Found! </Msg> : <BlogCardSkeletonLoader />}
+        </>
       )}
     </BlogBox>
   );
 }
 export function BlogsLiked({ blogs }: { blogs: object[] }) {
+  const [noResults, setNoResults] = useState<boolean>(false);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (blogs?.length === 0) setNoResults(() => true);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [blogs.length]);
   return (
     <BlogBoxLiked>
       {blogs?.length ? (
@@ -195,7 +212,9 @@ export function BlogsLiked({ blogs }: { blogs: object[] }) {
           return <CardLiked key={blog.id} blog={blog} />;
         })
       ) : (
-        <BlogCardSkeletonLoader />
+        <>
+          {noResults ? <Msg>No Blogs Found! </Msg> : <BlogCardSkeletonLoader />}
+        </>
       )}
     </BlogBoxLiked>
   );
@@ -301,6 +320,13 @@ export function CardLiked({ blog }: { blog: Blog }) {
   );
 }
 export function BlogsSaved({ blogs }: { blogs: object[] }) {
+  const [noResults, setNoResults] = useState<boolean>(false);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (blogs?.length === 0) setNoResults(() => true);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [blogs.length]);
   return (
     <BlogBoxLiked>
       {blogs?.length ? (
@@ -308,7 +334,9 @@ export function BlogsSaved({ blogs }: { blogs: object[] }) {
           return <CardSaved key={blog.id} blog={blog} />;
         })
       ) : (
-        <BlogCardSkeletonLoader />
+        <>
+          {noResults ? <Msg>No Blogs Found! </Msg> : <BlogCardSkeletonLoader />}
+        </>
       )}
     </BlogBoxLiked>
   );
