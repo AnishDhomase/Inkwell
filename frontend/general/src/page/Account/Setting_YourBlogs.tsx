@@ -20,7 +20,6 @@ export default function Setting_YourBlogs({
   selfDetails,
   setActiveSection,
 }: SectionProps) {
-  console.log(selfDetails);
   return (
     <YourBlogs>
       {selfDetails?.blogs?.length > 0 ? (

@@ -1,5 +1,12 @@
 import styled from "styled-components";
-import { Blog, likeBlog, saveBlog, unlikeBlog, unsaveBlog } from "../apis/api";
+import {
+  Blog,
+  getSelfDetails,
+  likeBlog,
+  saveBlog,
+  unlikeBlog,
+  unsaveBlog,
+} from "../apis/api";
 import BlogCardSkeletonLoader from "./BlogCardSkeleton";
 import { useEffect, useState } from "react";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
@@ -58,7 +65,6 @@ const BlogCard = styled.div`
     text-decoration: underline;
   }
 `;
-
 const LHS = styled.div`
   display: flex;
   gap: 15px;
@@ -92,8 +98,9 @@ const RHS = styled.div`
 `;
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { CircularProgress } from "@mui/material";
-import toast from "react-hot-toast";
 import { Msg } from "../page/Account/Account";
+import { useUserDetails } from "../context/UserDetailContext";
+import { formatDate, getMinutesToRead } from "../utils/helpers";
 
 interface LeftBlogSecProps {
   imageURL: string;
@@ -221,6 +228,7 @@ export function BlogsLiked({ blogs }: { blogs: object[] }) {
 }
 export function CardLiked({ blog }: { blog: Blog }) {
   const [loading, setLoading] = useState<boolean>(false);
+  const { setSelfDetails, setNotifications } = useUserDetails();
 
   async function handleBlogLike(
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -228,40 +236,15 @@ export function CardLiked({ blog }: { blog: Blog }) {
     event.stopPropagation();
     event.preventDefault();
     setLoading(() => true);
-    // if (liked) {
-    // unlike
     const success = await unlikeBlog({ blogId: blog.id });
-    // if (success) {
-    //   setLiked(false);
-    // }
-    // } else {
-    // like
-    // const success = await likeBlog({ blogId: blog.id });
-    // if (success) {
-    //   setLiked(true);
-    // }
-    // }
-    setLoading(() => false);
+    if (success) {
+      // Fetch self details again to update self details
+      const details = await getSelfDetails();
+      setSelfDetails(details);
+      setNotifications(details?.notifications);
+      setLoading(() => false);
+    }
   }
-  // async function handleBlogSave(
-  //   event: React.MouseEvent<HTMLDivElement, MouseEvent>
-  // ) {
-  //   event.stopPropagation();
-  //   event.preventDefault();
-  //   if (saved) {
-  //     // unsave
-  //     const success = await unsaveBlog({ blogId: blog.id });
-  //     if (success) {
-  //       setSaved(false);
-  //     }
-  //   } else {
-  //     // save
-  //     const success = await saveBlog({ blogId: blog.id });
-  //     if (success) {
-  //       setSaved(true);
-  //     }
-  //   }
-  // }
   return (
     <Link to={`/app/blog/${blog.id}`}>
       <BlogCardLiked key={blog.id}>
@@ -343,6 +326,7 @@ export function BlogsSaved({ blogs }: { blogs: object[] }) {
 }
 export function CardSaved({ blog }: { blog: Blog }) {
   const [loading, setLoading] = useState<boolean>(false);
+  const { setSelfDetails, setNotifications } = useUserDetails();
 
   async function handleBlogSave(
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -350,7 +334,14 @@ export function CardSaved({ blog }: { blog: Blog }) {
     event.stopPropagation();
     event.preventDefault();
     setLoading(() => true);
-    await unsaveBlog({ blogId: blog.id });
+    const success = await unsaveBlog({ blogId: blog.id });
+    if (success) {
+      // Fetch self details again to update self details
+      const details = await getSelfDetails();
+      setSelfDetails(details);
+      setNotifications(details?.notifications);
+      setLoading(() => false);
+    }
     setLoading(() => false);
   }
   return (
@@ -495,16 +486,4 @@ export function Card({
       </BlogCard>
     </Link>
   );
-}
-export function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  const formatter = new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-  });
-  return formatter.format(date);
-}
-export function getMinutesToRead(content: string): number {
-  const words = content.split(" ");
-  return Math.ceil(words?.length / 200);
 }

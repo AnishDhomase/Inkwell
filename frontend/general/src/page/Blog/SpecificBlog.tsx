@@ -1,6 +1,5 @@
-import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import {
   Blog,
@@ -14,13 +13,17 @@ import {
   unlikeBlog,
   unsaveBlog,
 } from "../../apis/api";
-import { formatDate } from "../../components/Blogs";
+import { formatDate } from "../../utils/helpers";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import toast from "react-hot-toast";
 import { CircularProgress } from "@mui/material";
+import { useUserDetails } from "../../context/UserDetailContext";
+import BackBtn from "../../components/BackBtn";
+import Comment from "./Comment";
+import UserCard from "../../components/UserCard";
 
 const Container = styled.div`
   @media (min-width: 1000px) {
@@ -42,22 +45,6 @@ const Container = styled.div`
   flex-direction: column;
   align-items: start;
 `;
-const BackButton = styled.span`
-  align-items: start;
-  color: #ff7738;
-  border-radius: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 30px;
-  cursor: pointer;
-  &:hover {
-    scale: 1.05;
-  }
-`;
-// interface PhotoProps {
-//   imageURL: string;
-// }
 const ImageBox = styled.div`
   width: 100%;
   border-radius: 10px;
@@ -202,71 +189,12 @@ const Button = styled.button`
     scale: 1.02;
   }
 `;
-const ButtonSmall = styled.button`
-  padding: 2px 5px;
-  background-color: #ff7738;
-  color: #fff;
-  font-size: 16px;
-  border: none;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  &:hover {
-    cursor: pointer;
-    scale: 1.02;
-  }
-`;
 const PreviousComments = styled.div`
   margin-top: -20px;
   display: flex;
   flex-direction: column;
   margin-bottom: 100px;
   /* gap: 15px; */
-`;
-interface CommentContentProps {
-  overlay: boolean;
-}
-const CommentContent = styled.div<CommentContentProps>`
-  opacity: ${(props) => (props.overlay ? 0.5 : 1)};
-  border-bottom: 1px solid #dfdbdb;
-  padding: 25px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  font-size: 17px;
-  & header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-  }
-  & textarea {
-    font-size: 17px;
-    border: none;
-    outline: none;
-
-    resize: none;
-    min-height: 50px;
-  }
-`;
-const ToolBox = styled.div`
-  display: flex;
-  gap: 5px;
-  color: #c4b9b4;
-  cursor: pointer;
-`;
-const Tool = styled.button`
-  padding: 0 5px;
-  display: flex;
-  align-items: center;
-  background-color: transparent;
-  border: none;
-  color: #c4b9b4;
-  cursor: pointer;
-  &:hover {
-    color: #636161;
-  }
 `;
 
 export default function SpecificBlog() {
@@ -289,6 +217,7 @@ export default function SpecificBlog() {
     }
     fetchBlog();
   }, [blogId]);
+
   // Fetch author details
   useEffect(() => {
     if (!blogDetails.authorId) return;
@@ -460,6 +389,7 @@ export default function SpecificBlog() {
 
         <p>{blogDetails?.createdAt && formatDate(blogDetails?.createdAt)}</p>
       </Header>
+
       <Title>{blogDetails?.title}</Title>
       <Content>{blogDetails?.content}</Content>
       <Topics>
@@ -508,121 +438,5 @@ export default function SpecificBlog() {
         </PreviousComments>
       </CommentBox>
     </Container>
-  );
-}
-
-function getTimeAgo(dateString: string): string {
-  const now = new Date();
-  const past = new Date(dateString);
-  const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
-
-  const intervals = [
-    { label: "year", seconds: 31536000 },
-    { label: "month", seconds: 2592000 },
-    { label: "week", seconds: 604800 },
-    { label: "day", seconds: 86400 },
-    { label: "hour", seconds: 3600 },
-    { label: "minute", seconds: 60 },
-  ];
-
-  for (const interval of intervals) {
-    const count = Math.floor(diffInSeconds / interval.seconds);
-    if (count >= 1) {
-      return count === 1
-        ? `1 ${interval.label} ago`
-        : `${count} ${interval.label}s ago`;
-    }
-  }
-
-  return "just now";
-}
-
-import ModeEditIcon from "@mui/icons-material/ModeEdit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import UserCard from "../../components/UserCard";
-import BackBtn from "../../components/BackBtn";
-import { useUserDetails } from "../../context/UserDetailContext";
-function Comment({
-  comment,
-  myUserId,
-  handleDeleteComment,
-  handleEditComment,
-  editing,
-  setEditing,
-}: {
-  comment: object;
-  myUserId: number;
-  handleDeleteComment: (commentId: number) => Promise<void>;
-  handleEditComment: (commentId: number, content: string) => Promise<void>;
-  editing: number;
-  setEditing: (id: number) => void;
-}) {
-  const [authorDetails, setAuthorDetails] = useState<object>({});
-  const [loading, setLoading] = useState<boolean>(false);
-  const [commentContent, setCommentContent] = useState<string>(comment.content);
-
-  // Fetch comment author details
-  useEffect(() => {
-    async function fetchAuthor() {
-      const res = await getUser(Number(comment.authorId));
-      setAuthorDetails(res);
-    }
-    fetchAuthor();
-  }, []);
-  async function handleDeleteCmmt() {
-    if (!myUserId) {
-      toast.error("Login/Signup to delete the comment");
-      return;
-    }
-    setLoading(() => true);
-    await handleDeleteComment(comment.id);
-    setLoading(() => false);
-  }
-  async function handleEditCmmt() {
-    if (!myUserId) {
-      toast.error("Login/Signup to edit the comment");
-      return;
-    }
-    setLoading(() => true);
-    await handleEditComment(comment.id, commentContent);
-    setLoading(() => false);
-  }
-
-  return (
-    <CommentContent overlay={loading}>
-      <header>
-        <UserCard
-          userId={comment.authorId}
-          username={authorDetails?.username}
-          profilePicURL={authorDetails?.profilePicURL}
-        />
-        <p>{getTimeAgo(comment.createdAt)}</p>
-      </header>
-      {editing !== comment.id ? (
-        <footer>{comment.content}</footer>
-      ) : (
-        <textarea
-          value={commentContent}
-          onChange={(e) => setCommentContent(e.target.value)}
-          disabled={loading}
-        />
-      )}
-      {myUserId && myUserId === comment.authorId && (
-        <ToolBox>
-          {editing !== comment.id ? (
-            <Tool onClick={() => setEditing(comment.id)} disabled={loading}>
-              <ModeEditIcon />
-            </Tool>
-          ) : (
-            <ButtonSmall onClick={handleEditCmmt} disabled={loading}>
-              {!loading ? "Save" : "Saving..."}
-            </ButtonSmall>
-          )}
-          <Tool onClick={handleDeleteCmmt} disabled={loading}>
-            <DeleteIcon />
-          </Tool>
-        </ToolBox>
-      )}
-    </CommentContent>
   );
 }

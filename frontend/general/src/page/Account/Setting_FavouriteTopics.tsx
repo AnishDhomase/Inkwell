@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 import { SectionProps } from "./Account";
-import { getAllTopics, setFavouriteTopics, Topic } from "../../apis/api";
-import { useNavigate } from "react-router-dom";
+import {
+  getAllTopics,
+  getSelfDetails,
+  setFavouriteTopics,
+  Topic,
+} from "../../apis/api";
 import { TopicSelector } from "../Auth/FavTopic";
 import { CircularProgress } from "@mui/material";
 import styled from "styled-components";
+import { useUserDetails } from "../../context/UserDetailContext";
 
 const SelectorBox = styled.div`
   width: 100%;
@@ -44,6 +49,7 @@ export default function Setting_FavouriteTopics({
   const [topics, setTopics] = useState<Topic[]>([]);
   const [selectedTopics, setSelectedTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(false);
+  const { setSelfDetails, setNotifications } = useUserDetails();
 
   // Fetch topics and categories them into selected and not selected
   useEffect(() => {
@@ -58,7 +64,6 @@ export default function Setting_FavouriteTopics({
         }
         return true;
       });
-      console.log(favTopics, restTopicsArr);
       setTopics(restTopicsArr);
       setSelectedTopics(favTopics);
     }
@@ -71,6 +76,11 @@ export default function Setting_FavouriteTopics({
     const favoriteTopics = selectedTopics.map((topic) => topic.id);
     await setFavouriteTopics({ favoriteTopics });
     setLoading(() => false);
+
+    // Fetch self details again to update self details
+    const details = await getSelfDetails();
+    setSelfDetails(details);
+    setNotifications(details?.notifications);
   }
 
   return (

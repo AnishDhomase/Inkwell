@@ -275,7 +275,6 @@ const NavBar = styled.div`
   margin-bottom: 20px;
 `;
 
-// TODO: Clear post for new post
 export default function CreateBlog() {
   const { selfDetails } = useUserDetails();
   const [preview, setPreview] = useState<string | null>();

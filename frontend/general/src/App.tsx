@@ -1,11 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
 
-import { getSelfDetails } from "./apis/api";
-import {
-  UserDetailsProvider,
-  useUserDetails,
-} from "./context/UserDetailContext";
+import { UserDetailsProvider } from "./context/UserDetailContext";
 import Auth from "./page/Auth/Auth";
 import Home from "./page/Home/Home";
 import Layout from "./page/Layout/Layout";
@@ -16,19 +11,6 @@ import SpecificUser from "./page/User/SpecificUser";
 import Account from "./page/Account/Account";
 
 function App() {
-  // const [selfDetails, setSelfDetails] = useState<object>({});
-  // const [notifications, setNotifications] = useState<string[]>([]);
-
-  // //   Fetch self details
-  // useEffect(() => {
-  //   async function fetchSelfDetails() {
-  //     const details = await getSelfDetails();
-  //     setSelfDetails(details);
-  //     setNotifications(details?.notifications);
-  //   }
-  //   fetchSelfDetails();
-  // }, []);
-
   return (
     <UserDetailsProvider>
       <BrowserRouter>

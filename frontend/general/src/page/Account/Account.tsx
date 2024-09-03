@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"; //small
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import SettingsIcon from "@mui/icons-material/Settings";
 
@@ -15,6 +15,7 @@ import { IconButton } from "@mui/material";
 import Blogs from "../../components/Blogs";
 import { useUserDetails } from "../../context/UserDetailContext";
 import Setting_YourBlogs from "./Setting_YourBlogs";
+import { getSelfDetails } from "../../apis/api";
 
 const Container = styled.div`
   /* margin-top: -20px; */
@@ -253,7 +254,7 @@ function isPortraitDevice() {
 }
 
 export default function Account() {
-  const { selfDetails } = useUserDetails();
+  const { selfDetails, setSelfDetails, setNotifications } = useUserDetails();
 
   // Syncing the active section with the URL
   const categoryOfSettings = useLocation().pathname.split("/")[3];
@@ -272,6 +273,15 @@ export default function Account() {
     );
   }
 
+  // Fetch self details again to update self details
+  useEffect(() => {
+    async function fetchSelfDetails() {
+      const details = await getSelfDetails();
+      setSelfDetails(details);
+      setNotifications(details?.notifications);
+    }
+    fetchSelfDetails();
+  }, []);
   if (!selfDetails?.id)
     return (
       <UnAuthenticated>

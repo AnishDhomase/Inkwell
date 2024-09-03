@@ -16,7 +16,7 @@ interface ContextType {
 
 const UserDetailsContext = createContext<ContextType | undefined>(undefined);
 
-// Create a provider component
+// Provider component
 interface AppProviderProps {
   children: ReactNode;
 }
@@ -33,6 +33,7 @@ export const UserDetailsProvider: React.FC<AppProviderProps> = ({
       const details = await getSelfDetails();
       setSelfDetails(details);
       setNotifications(details?.notifications);
+      console.log(details);
     }
     fetchSelfDetails();
   }, []);
@@ -46,7 +47,7 @@ export const UserDetailsProvider: React.FC<AppProviderProps> = ({
   );
 };
 
-// Create a custom hook to use the context
+// Custom hook to use the context
 export const useUserDetails = () => {
   const context = useContext(UserDetailsContext);
   if (context === undefined) {

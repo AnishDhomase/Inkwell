@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Blog,
   getAllTopics,
@@ -189,7 +189,6 @@ export default function Search() {
   const [totalAvlBlogsCount, setTotalAvlBlogsCount] = useState<number>(0);
   const [users, setUsers] = useState([]);
   const [totalAvlUsersCount, setTotalAvlsetUsersCount] = useState<number>(0);
-  console.log(users, totalAvlUsersCount);
 
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [activePageNumber, setActivePageNumber] = useState<number>(1);
@@ -261,7 +260,7 @@ export default function Search() {
     }
   }
 
-  // Fetch result according to searchQuery
+  // Fetch result according to searchQuery parameter
   useEffect(() => {
     if (query.trim()) Search();
   }, [q, searchFor]);

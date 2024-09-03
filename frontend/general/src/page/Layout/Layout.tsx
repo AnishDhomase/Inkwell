@@ -117,25 +117,6 @@ const Row = styled.div`
   justify-content: space-between;
   align-items: center;
 `;
-const FollowButton = styled.button`
-  font-size: 17px;
-  padding: 2px 5px;
-  background-color: transparent;
-  border: 1px solid #3856ff;
-  color: #3856ff;
-  border-radius: 5px;
-  &:hover {
-    cursor: pointer;
-    scale: 1.015;
-
-    background-color: #3856ff;
-    border: 1px solid transparent;
-    color: white;
-  }
-  &:active {
-    opacity: 0.8;
-  }
-`;
 const TextBtn = styled.button`
   background-color: transparent;
   border: none;
