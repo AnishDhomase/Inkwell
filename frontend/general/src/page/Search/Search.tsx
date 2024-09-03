@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Blog,
   getAllTopics,
@@ -174,25 +174,30 @@ import { Link, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import UserSearchCard from "../../components/UserSearchCard";
 import { useUserDetails } from "../../context/UserDetailContext";
+import { useQuery } from "../../hooks";
 
 export default function Search() {
-  const { selfDetails, setSelfDetails, setNotifications } = useUserDetails();
+  const queryParam = useQuery();
+  const q = queryParam.get("q") || "";
+  const [query, setQuery] = useState<string>(q);
   const categoryOfSearch = useLocation().pathname.split("/")[3];
   const [searchFor, setSearchFor] = useState<string>(categoryOfSearch);
+
+  const { selfDetails, setSelfDetails, setNotifications } = useUserDetails();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
-  const [query, setQuery] = useState<string>("");
+  const [totalAvlBlogsCount, setTotalAvlBlogsCount] = useState<number>(0);
+  const [users, setUsers] = useState([]);
+  const [totalAvlUsersCount, setTotalAvlsetUsersCount] = useState<number>(0);
+  console.log(users, totalAvlUsersCount);
+
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [activePageNumber, setActivePageNumber] = useState<number>(1);
-  const [totalAvlBlogsCount, setTotalAvlBlogsCount] = useState<number>(0);
   const [mouseOnReadmore, setMouseOnReadmore] = useState<boolean>(false);
   const [loadingBlogs, setLoadingBlogs] = useState<boolean>(false);
   const [searchFeedback, setSearchFeedback] = useState<SearchStatus>(
     SearchStatus.noSearchYet
   );
-  const [users, setUsers] = useState([]);
-  const [totalAvlUsersCount, setTotalAvlsetUsersCount] = useState<number>(0);
-  console.log(users, totalAvlUsersCount);
 
   // Horizontal scroll when mouse wheel is used in ScrollContainer
   const scrollContainerRef1 = useRef<HTMLDivElement>(null);
@@ -218,8 +223,8 @@ export default function Search() {
     setSearchFeedback(SearchStatus.noSearchYet);
   }, [searchFor]);
 
-  // handle search
-  async function handleSearch() {
+  // search
+  async function Search() {
     if (!query.trim()) {
       toast.error("Please enter a search query");
       return;
@@ -230,7 +235,7 @@ export default function Search() {
       const { blogArr, totalBlogsCount } = await getQueriedBlogs({
         currentPage: 1,
         sortBy,
-        query,
+        query: query.trim(),
       });
       blogArray = blogArr;
       countOfAvlBlogs = totalBlogsCount;
@@ -244,7 +249,7 @@ export default function Search() {
         countOfAvlUsers = 0;
       const { userArr, totalUsersCount } = await getQueriedUsers({
         currentPage: 1,
-        query,
+        query: query.trim(),
       });
       userArray = userArr;
       countOfAvlUsers = totalUsersCount;
@@ -255,6 +260,12 @@ export default function Search() {
       setTotalAvlsetUsersCount(countOfAvlUsers);
     }
   }
+
+  // Fetch result according to searchQuery
+  useEffect(() => {
+    if (query.trim()) Search();
+  }, [q, searchFor]);
+
   useEffect(() => {
     if (searchFor === "blogs" && query === "" && blogs.length === 0)
       setSearchFeedback(SearchStatus.noSearchYet);
@@ -329,10 +340,16 @@ export default function Search() {
       <>
         <SearchForBox>
           <p>Search for</p>
-          <Link to="/app/search/blogs" onClick={() => setSearchFor("blogs")}>
+          <Link
+            to={`/app/search/blogs${q ? `?q=${q}` : ""}`}
+            onClick={() => setSearchFor("blogs")}
+          >
             <TextBtn active={searchFor === "blogs"}>Blogs</TextBtn>
           </Link>
-          <Link to="/app/search/users" onClick={() => setSearchFor("users")}>
+          <Link
+            to={`/app/search/users${q ? `?q=${q}` : ""}`}
+            onClick={() => setSearchFor("users")}
+          >
             <TextBtn active={searchFor === "users"}>Users</TextBtn>
           </Link>
         </SearchForBox>
@@ -343,9 +360,15 @@ export default function Search() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <SearchBtn onClick={handleSearch}>
-            <RiSearchLine />
-          </SearchBtn>
+          <Link
+            to={`/app/search/${searchFor}${
+              query.trim() ? `?q=${query.trim()}` : ""
+            }`}
+          >
+            <SearchBtn>
+              <RiSearchLine />
+            </SearchBtn>
+          </Link>
         </SearchBox>
         {searchFor === "blogs" && (
           <Sort>

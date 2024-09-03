@@ -13,6 +13,7 @@ import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrow
 import BlogCardSkeletonLoader from "../../components/BlogCardSkeleton";
 import Blogs from "../../components/Blogs";
 import { useUserDetails } from "../../context/UserDetailContext";
+import { SortOption } from "../../utils/types";
 
 const Explore = styled.div`
   user-select: none;
@@ -28,10 +29,6 @@ const Explore = styled.div`
     font-weight: 900;
     color: #333;
   }
-  /* main {
-    display: flex;
-    gap: 10px;
-  } */
 `;
 interface TopicBtnProps {
   active: boolean;
@@ -49,7 +46,8 @@ const TopicBtn = styled.button<TopicBtnProps>`
   border-radius: 50px;
   &:hover {
     cursor: pointer;
-    scale: 1.015;
+    /* scale: 1.015; */
+    border-color: #ff7738;
   }
   &:active {
     opacity: 0.8;
@@ -78,20 +76,24 @@ const Sort = styled.div`
   gap: 10px;
   /* background-color: #f9f9f9; */
 `;
-interface SortOptionProps {
+interface SortOptionTabProps {
   active: boolean;
 }
-const SortOption = styled.button<SortOptionProps>`
+const SortOptionTab = styled.button<SortOptionTabProps>`
   padding: 3px 10px;
-  background-color: #f9f9f9;
-  color: ${(props) => (props.active ? "#3856ff" : "#333")};
+  /* background-color: #f9f9f9; */
+  /* color: ${(props) => (props.active ? "#3856ff" : "#333")}; */
+  background-color: ${(props) => (props.active ? "#3856ff" : "#f9f9f9")};
+  color: ${(props) => (props.active ? "white" : "#333")};
   font-size: 18px;
   border: 1px solid ${(props) => (props.active ? "#3856ff" : "#333")};
   border-radius: 10px;
   margin-right: 10px;
   &:hover {
     cursor: pointer;
-    scale: 1.015;
+    /* color: white; */
+    border-color: #3856ff;
+    /* scale: 1.015; */
   }
   &:active {
     opacity: 0.8;
@@ -119,20 +121,21 @@ const TextButton = styled.button`
     transform: translateY(0px);
   }
 `;
-type SortOption = "newest" | "oldest" | "popular";
 
 export default function Home() {
   const { selfDetails } = useUserDetails();
+
   const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [totalAvlBlogsCount, setTotalAvlBlogsCount] = useState<number>(0);
   const [topics, setTopics] = useState<Topic[]>([]);
+
   const [activeTopic, setActiveTopic] = useState<number>(-1);
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [activePageNumber, setActivePageNumber] = useState<number>(1);
-  const [totalAvlBlogsCount, setTotalAvlBlogsCount] = useState<number>(0);
   const [mouseOnReadmore, setMouseOnReadmore] = useState<boolean>(false);
   const [loadingBlogs, setLoadingBlogs] = useState<boolean>(false);
 
-  // const sortBlogs = sortBlogsBy(sortBy, blogs);
+  // Check if there are more blogs to load for Read More button
   const isThereMoreBlogsToLoad = totalAvlBlogsCount > blogs?.length;
 
   // When sortBy/activeTopic changes, reset activePageNumber to 1
@@ -237,6 +240,7 @@ export default function Home() {
     setActivePageNumber((prev) => prev + 1);
   }
 
+  // User liked and saved blogs to pre-fill the like and save status
   const userBlogs = {
     liked: selfDetails?.likedBlogs?.map((blog: Blog) => blog.id) || [],
     saved: selfDetails?.savedBlogs?.map((blog: Blog) => blog.id) || [],
@@ -270,24 +274,24 @@ export default function Home() {
         <Sort>
           <ScrollContainer ref={scrollContainerRef1}>
             <TopicBtnWrapper>
-              <SortOption
+              <SortOptionTab
                 onClick={() => setSortBy("newest")}
                 active={sortBy === "newest"}
               >
                 Newest First
-              </SortOption>
-              <SortOption
+              </SortOptionTab>
+              <SortOptionTab
                 onClick={() => setSortBy("oldest")}
                 active={sortBy === "oldest"}
               >
                 Oldest First
-              </SortOption>
-              <SortOption
+              </SortOptionTab>
+              <SortOptionTab
                 onClick={() => setSortBy("popular")}
                 active={sortBy === "popular"}
               >
                 Most Popular
-              </SortOption>
+              </SortOptionTab>
             </TopicBtnWrapper>
           </ScrollContainer>
         </Sort>
