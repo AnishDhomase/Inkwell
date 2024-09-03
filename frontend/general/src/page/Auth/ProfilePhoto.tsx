@@ -55,24 +55,21 @@ const Button = styled.button<ButtonProps>`
   }
 `;
 const ProfilePhotoBox = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+const Img = styled.img`
   width: 120px;
   height: 120px;
   border-radius: 50%;
   border: 2px solid #ff7738;
   overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #e3dede;
 `;
-const Img = styled.img`
-  width: 100%;
-  /* height: 100%; */
-`;
-const PlaceholderImg = styled.img`
-  width: 70%;
-  height: 70%;
-`;
+// const PlaceholderImg = styled.img`
+//   width: 70%;
+//   height: 70%;
+// `;
 const FileInputBox = styled.div`
   border: 2px dashed #ff7738;
   display: flex;
@@ -85,7 +82,9 @@ const FileInputBox = styled.div`
 
 export default function ProfilePhoto({ setStep }: { setStep: any }) {
   const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>();
+  const [preview, setPreview] = useState<string | null>(
+    "../../../public/placeholderBlogImage.webp"
+  );
   const [uploading, setUploading] = useState(false);
   const ref = useRef(null);
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,10 +105,15 @@ export default function ProfilePhoto({ setStep }: { setStep: any }) {
         Select Profile Photo
       </Heading>
       <ProfilePhotoBox>
-        {preview && <Img src={preview} alt="preview" />}
-        {!preview && (
-          <PlaceholderImg src="../../../public/user.png" alt="preview" />
+        {preview && (
+          <Img
+            src={preview || "../../../public/placeholderBlogImage.webp"}
+            alt="preview"
+          />
         )}
+        {/* {!preview && (
+          <PlaceholderImg src="../../../public/user.png" alt="preview" />
+        )} */}
       </ProfilePhotoBox>
       <Heading align="center" sz="20px" color="#ff7738">
         username

@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { LoginSignup } from "./LoginSignup";
-import { Description } from "./Description";
-import FavTopic from "./FavTopic";
-import ProfilePhoto from "./ProfilePhoto";
+
 import { useUserDetails } from "../../context/UserDetailContext";
 import { getSelfDetails } from "../../apis/api";
+import PageLoader from "../../components/PageLoader";
+const LoginSignup = lazy(() => import("./LoginSignup"));
+const Description = lazy(() => import("./Description"));
+const FavTopic = lazy(() => import("./FavTopic"));
+const ProfilePhoto = lazy(() => import("./ProfilePhoto"));
 
 const OuterBox = styled.div`
   min-height: 100vh;
@@ -358,53 +360,55 @@ export default function Auth() {
     return "#ff7738";
   }
   return (
-    <OuterBox>
-      <LeftBox>
-        <Row>
-          <Logo width="60px" alt="logo" src="../../public/logoWhite.png" />
-        </Row>
+    <Suspense fallback={<PageLoader />}>
+      <OuterBox>
+        <LeftBox>
+          <Row>
+            <Logo width="60px" alt="logo" src="../../public/logoWhite.png" />
+          </Row>
 
-        <Heading mt="30px">Start Your Learning Journey With Inkwell.</Heading>
-        <Text fontSz="20px">
-          Discover the world's best community of freelancers and phylosophers
-        </Text>
-        <Button width="1000px" onClick={() => navigate("/")}>
-          Skip
-        </Button>
-      </LeftBox>
-      <RightBox>
-        <StepperBox heightAdjust={step === 4}>
-          <Stepper>
-            {pageMap.map((_, index) => (
-              <StepBox
-                key={index}
-                bgClr={getBgClr(index)}
-                txtClr={getTxtClr(index)}
-                borderClr={getBorderClr(index)}
-              >
-                {index + 1}
-              </StepBox>
-            ))}
+          <Heading mt="30px">Start Your Learning Journey With Inkwell.</Heading>
+          <Text fontSz="20px">
+            Discover the world's best community of freelancers and phylosophers
+          </Text>
+          <Button width="1000px" onClick={() => navigate("/")}>
+            Skip
+          </Button>
+        </LeftBox>
+        <RightBox>
+          <StepperBox heightAdjust={step === 4}>
+            <Stepper>
+              {pageMap.map((_, index) => (
+                <StepBox
+                  key={index}
+                  bgClr={getBgClr(index)}
+                  txtClr={getTxtClr(index)}
+                  borderClr={getBorderClr(index)}
+                >
+                  {index + 1}
+                </StepBox>
+              ))}
 
-            <ProgressBar>
-              <Progress width={getProgressWidth()} />
-            </ProgressBar>
-          </Stepper>
-        </StepperBox>
-        {/* {step === 1 && (
+              <ProgressBar>
+                <Progress width={getProgressWidth()} />
+              </ProgressBar>
+            </Stepper>
+          </StepperBox>
+          {/* {step === 1 && (
           <Row>
             <Logo width="45px" alt="logo" src="../../public/logoWhite.png" />
           </Row>
         )} */}
 
-        {pageMap[step - 1].Component}
+          {pageMap[step - 1].Component}
 
-        <Skip heightAdjust={step === 4}>
-          <Button width="400px" mt="10px" onClick={() => navigate("/")}>
-            Skip
-          </Button>
-        </Skip>
-      </RightBox>
-    </OuterBox>
+          <Skip heightAdjust={step === 4}>
+            <Button width="400px" mt="10px" onClick={() => navigate("/")}>
+              Skip
+            </Button>
+          </Skip>
+        </RightBox>
+      </OuterBox>
+    </Suspense>
   );
 }

@@ -81,7 +81,7 @@ const TextArea = styled.textarea`
   }
 `;
 
-export function Description({ setStep }: { setStep: any }) {
+export default function Description({ setStep }: { setStep: any }) {
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 

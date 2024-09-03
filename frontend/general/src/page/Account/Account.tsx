@@ -1,21 +1,28 @@
 import styled from "styled-components";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"; //small
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import SettingsIcon from "@mui/icons-material/Settings";
-
-import Setting_General from "./Setting_General";
-import Setting_Home from "./Setting_Home";
-import Setting_Password from "./Setting_Password";
-import Setting_LikedBlogs from "./Setting_LikedBlogs";
-import Setting_SavedBlogs from "./Setting_SavedBlogs";
-import Setting_FavouriteTopics from "./Setting_FavouriteTopics";
-import { ToggleButton } from "../../components/ToggleBtn";
 import { IconButton } from "@mui/material";
-import Blogs from "../../components/Blogs";
+
 import { useUserDetails } from "../../context/UserDetailContext";
-import Setting_YourBlogs from "./Setting_YourBlogs";
 import { getSelfDetails } from "../../apis/api";
+import PageLoader from "../../components/PageLoader";
+
+// import Setting_General from "./Setting_General";
+// import Setting_Home from "./Setting_Home";
+// import Setting_Password from "./Setting_Password";
+// import Setting_LikedBlogs from "./Setting_LikedBlogs";
+// import Setting_SavedBlogs from "./Setting_SavedBlogs";
+// import Setting_FavouriteTopics from "./Setting_FavouriteTopics";
+// import Setting_YourBlogs from "./Setting_YourBlogs";
+const Setting_General = lazy(() => import("./Setting_General"));
+const Setting_Home = lazy(() => import("./Setting_Home"));
+const Setting_Password = lazy(() => import("./Setting_Password"));
+const Setting_LikedBlogs = lazy(() => import("./Setting_LikedBlogs"));
+const Setting_SavedBlogs = lazy(() => import("./Setting_SavedBlogs"));
+const Setting_FavouriteTopics = lazy(() => import("./Setting_FavouriteTopics"));
+const Setting_YourBlogs = lazy(() => import("./Setting_YourBlogs"));
 
 const Container = styled.div`
   /* margin-top: -20px; */
@@ -291,154 +298,156 @@ export default function Account() {
     );
 
   return (
-    <Container>
-      <NavPanelToggler
-        onClick={() => setIsNavPanelOpen(!isNavPanelOpen)}
-        open={isNavPanelOpen}
-      >
-        <IconButton aria-label="delete">
-          <SettingsIcon />
-        </IconButton>
-      </NavPanelToggler>
-      {isNavPanelOpen && (
-        <NavigationPanel>
-          <Link to="/app/account/home">
-            <h1
-              onClick={() => {
-                setActiveSection(Section.home);
-                if (isPortraitDevice()) setIsNavPanelOpen(false);
-              }}
-            >
-              Settings
-            </h1>
-          </Link>
-          <div>
-            <SettingSection>
-              <header>EDIT PROFILE</header>
-              <main>
-                <Link to="/app/account/general">
-                  <Row
-                    onClick={() => {
-                      setActiveSection(Section.general);
-                      if (isPortraitDevice()) setIsNavPanelOpen(false);
-                    }}
-                    active={activeSection === Section.general}
-                  >
-                    <p>General</p>
-                    <span>
-                      <ChevronRightIcon />
-                    </span>
-                  </Row>
-                </Link>
-                <Link to="/app/account/password">
-                  <Row
-                    onClick={() => {
-                      setActiveSection(Section.password);
-                      if (isPortraitDevice()) setIsNavPanelOpen(false);
-                    }}
-                    active={activeSection === Section.password}
-                  >
-                    <p>Password</p>
-                    <span>
-                      <ChevronRightIcon />
-                    </span>
-                  </Row>
-                </Link>
-              </main>
-            </SettingSection>
-            <SettingSection>
-              <header>CONTENT</header>
-              <main>
-                <Link to="/app/account/your-blogs">
-                  <Row
-                    onClick={() => {
-                      setActiveSection(Section.yourBlogs);
-                      if (isPortraitDevice()) setIsNavPanelOpen(false);
-                    }}
-                    active={activeSection === Section.yourBlogs}
-                  >
-                    <p>Your Blogs</p>
-                    <span>
-                      <ChevronRightIcon />
-                    </span>
-                  </Row>
-                </Link>
-                <Link to="/app/account/liked-blogs">
-                  <Row
-                    onClick={() => {
-                      setActiveSection(Section.likedBlogs);
-                      if (isPortraitDevice()) setIsNavPanelOpen(false);
-                    }}
-                    active={activeSection === Section.likedBlogs}
-                  >
-                    <p>Liked Blogs</p>
-                    <span>
-                      <ChevronRightIcon />
-                    </span>
-                  </Row>
-                </Link>
-                <Link to="/app/account/saved-blogs">
-                  <Row
-                    onClick={() => {
-                      setActiveSection(Section.savedBlogs);
-                      if (isPortraitDevice()) setIsNavPanelOpen(false);
-                    }}
-                    active={activeSection === Section.savedBlogs}
-                  >
-                    <p>Saved Blogs</p>
-                    <span>
-                      <ChevronRightIcon />
-                    </span>
-                  </Row>
-                </Link>
-              </main>
-            </SettingSection>
-            <SettingSection>
-              <header>PREFERENCES</header>
-              <main>
-                {/* <Row>
+    <Suspense fallback={<PageLoader />}>
+      <Container>
+        <NavPanelToggler
+          onClick={() => setIsNavPanelOpen(!isNavPanelOpen)}
+          open={isNavPanelOpen}
+        >
+          <IconButton aria-label="delete">
+            <SettingsIcon />
+          </IconButton>
+        </NavPanelToggler>
+        {isNavPanelOpen && (
+          <NavigationPanel>
+            <Link to="/app/account/home">
+              <h1
+                onClick={() => {
+                  setActiveSection(Section.home);
+                  if (isPortraitDevice()) setIsNavPanelOpen(false);
+                }}
+              >
+                Settings
+              </h1>
+            </Link>
+            <div>
+              <SettingSection>
+                <header>EDIT PROFILE</header>
+                <main>
+                  <Link to="/app/account/general">
+                    <Row
+                      onClick={() => {
+                        setActiveSection(Section.general);
+                        if (isPortraitDevice()) setIsNavPanelOpen(false);
+                      }}
+                      active={activeSection === Section.general}
+                    >
+                      <p>General</p>
+                      <span>
+                        <ChevronRightIcon />
+                      </span>
+                    </Row>
+                  </Link>
+                  <Link to="/app/account/password">
+                    <Row
+                      onClick={() => {
+                        setActiveSection(Section.password);
+                        if (isPortraitDevice()) setIsNavPanelOpen(false);
+                      }}
+                      active={activeSection === Section.password}
+                    >
+                      <p>Password</p>
+                      <span>
+                        <ChevronRightIcon />
+                      </span>
+                    </Row>
+                  </Link>
+                </main>
+              </SettingSection>
+              <SettingSection>
+                <header>CONTENT</header>
+                <main>
+                  <Link to="/app/account/your-blogs">
+                    <Row
+                      onClick={() => {
+                        setActiveSection(Section.yourBlogs);
+                        if (isPortraitDevice()) setIsNavPanelOpen(false);
+                      }}
+                      active={activeSection === Section.yourBlogs}
+                    >
+                      <p>Your Blogs</p>
+                      <span>
+                        <ChevronRightIcon />
+                      </span>
+                    </Row>
+                  </Link>
+                  <Link to="/app/account/liked-blogs">
+                    <Row
+                      onClick={() => {
+                        setActiveSection(Section.likedBlogs);
+                        if (isPortraitDevice()) setIsNavPanelOpen(false);
+                      }}
+                      active={activeSection === Section.likedBlogs}
+                    >
+                      <p>Liked Blogs</p>
+                      <span>
+                        <ChevronRightIcon />
+                      </span>
+                    </Row>
+                  </Link>
+                  <Link to="/app/account/saved-blogs">
+                    <Row
+                      onClick={() => {
+                        setActiveSection(Section.savedBlogs);
+                        if (isPortraitDevice()) setIsNavPanelOpen(false);
+                      }}
+                      active={activeSection === Section.savedBlogs}
+                    >
+                      <p>Saved Blogs</p>
+                      <span>
+                        <ChevronRightIcon />
+                      </span>
+                    </Row>
+                  </Link>
+                </main>
+              </SettingSection>
+              <SettingSection>
+                <header>PREFERENCES</header>
+                <main>
+                  {/* <Row>
                   <p>Dark Mode</p>
                   <StyledToggleButton>
                     <ToggleButton />
                   </StyledToggleButton>
                 </Row> */}
-                <Link to="/app/account/favourite-topics">
-                  <Row
-                    onClick={() => {
-                      setActiveSection(Section.favouriteTopics);
-                      if (isPortraitDevice()) setIsNavPanelOpen(false);
-                    }}
-                    active={activeSection === Section.favouriteTopics}
-                  >
-                    <p>Favourite Topics</p>
-                    <span>
-                      <ChevronRightIcon />
-                    </span>
-                  </Row>
-                </Link>
-              </main>
-            </SettingSection>
-          </div>
-        </NavigationPanel>
-      )}
-      <OutputPanel>
-        <PagePath>
-          <span
-            onClick={() => setActiveSection(Section.home)}
-            style={{ cursor: "pointer" }}
-          >
-            Settings
-          </span>
-          <ChevronRightIcon
-            style={{
-              color: "#9baaff",
-            }}
-          />
-          {SectionArr[activeSection]}
-        </PagePath>
-        {renderActiveSection()}
-        {/* {SectionComponent[activeSection]({ selfDetails, setActiveSection })} */}
-      </OutputPanel>
-    </Container>
+                  <Link to="/app/account/favourite-topics">
+                    <Row
+                      onClick={() => {
+                        setActiveSection(Section.favouriteTopics);
+                        if (isPortraitDevice()) setIsNavPanelOpen(false);
+                      }}
+                      active={activeSection === Section.favouriteTopics}
+                    >
+                      <p>Favourite Topics</p>
+                      <span>
+                        <ChevronRightIcon />
+                      </span>
+                    </Row>
+                  </Link>
+                </main>
+              </SettingSection>
+            </div>
+          </NavigationPanel>
+        )}
+        <OutputPanel>
+          <PagePath>
+            <span
+              onClick={() => setActiveSection(Section.home)}
+              style={{ cursor: "pointer" }}
+            >
+              Settings
+            </span>
+            <ChevronRightIcon
+              style={{
+                color: "#9baaff",
+              }}
+            />
+            {SectionArr[activeSection]}
+          </PagePath>
+          {renderActiveSection()}
+          {/* {SectionComponent[activeSection]({ selfDetails, setActiveSection })} */}
+        </OutputPanel>
+      </Container>
+    </Suspense>
   );
 }

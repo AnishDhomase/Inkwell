@@ -153,7 +153,7 @@ const EyeIcon = styled.div`
   color: gray;
 `;
 
-export function LoginSignup({ setStep }: { setStep: any }) {
+export default function LoginSignup({ setStep }: { setStep: any }) {
   const [loading, setLoading] = useState(false);
   const [login, setLogin] = useState(true);
   const [seePassword, setSeePassword] = useState(false);
