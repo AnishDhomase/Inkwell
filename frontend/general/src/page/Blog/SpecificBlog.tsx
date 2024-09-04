@@ -26,6 +26,7 @@ import Comment from "./Comment";
 import UserCard from "../../components/UserCard";
 
 const Container = styled.div`
+  color: ${({ theme }) => theme.text};
   @media (min-width: 1000px) {
     padding: 0 20%;
   }
@@ -47,7 +48,7 @@ const Container = styled.div`
 `;
 const ImageBox = styled.div`
   width: 100%;
-  border-radius: 10px;
+  border-radius: 20px;
   position: relative;
   border: 1px solid #333;
   background-color: #ffffff;
@@ -64,7 +65,8 @@ const ImageBox = styled.div`
     padding: 5px;
     display: flex;
     cursor: pointer;
-    background-color: #f9f9f9;
+    /* background-color: #f9f9f9; */
+    background-color: ${({ theme }) => theme.likeSaveBtnBg};
     border: 1px solid #333;
     bottom: 10px;
   }
@@ -84,13 +86,15 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #333;
+  /* color: #333; */
+  color: ${({ theme }) => theme.rightPanelTitle};
 `;
 
 const Title = styled.h1`
   font-size: 30px;
   font-weight: 700;
-  color: #333;
+  /* color: #333; */
+  color: ${({ theme }) => theme.rightPanelTitle};
   margin-top: 30px;
   @media (max-width: 550px) {
     font-size: 25px;
@@ -98,8 +102,9 @@ const Title = styled.h1`
 `;
 const Content = styled.p`
   font-size: 20px;
-  font-weight: 400;
+  font-weight: 300;
   color: #333;
+  color: ${({ theme }) => theme.rightPanelTitle};
   margin-top: 15px;
   line-height: 1.5;
   white-space: pre-wrap;
@@ -138,7 +143,8 @@ const WriteComment = styled.div`
   flex-direction: column;
   align-items: end;
   gap: 10px;
-  border: 1px solid #333;
+  /* border: 1px solid #333; */
+  border: 1px solid ${({ theme }) => theme.rightPanelTitle};
   border-radius: 15px;
   overflow: hidden;
   padding: 15px;
@@ -154,8 +160,10 @@ const WriteComment = styled.div`
     width: 100%;
     height: 100px;
     font-size: 18px;
-    color: #333;
+    /* color: #333; */
+    color: ${({ theme }) => theme.rightPanelTitle};
     outline: none;
+    background-color: transparent;
   }
   textarea:disabled {
     background-color: transparent;

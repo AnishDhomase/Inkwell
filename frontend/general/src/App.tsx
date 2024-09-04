@@ -1,8 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 
-import { UserDetailsProvider } from "./context/UserDetailContext";
+import {
+  Theme,
+  UserDetailsProvider,
+  useUserDetails,
+} from "./context/UserDetailContext";
 import PageLoader from "./components/PageLoader";
+import { ThemeProvider } from "styled-components";
+import GlobalStyles, { darkTheme, lightTheme } from "./utils/GlobalStyle";
 
 const Auth = lazy(() => import("./page/Auth/Auth"));
 const Home = lazy(() => import("./page/Home/Home"));
@@ -14,9 +20,10 @@ const SpecificUser = lazy(() => import("./page/User/SpecificUser"));
 const Account = lazy(() => import("./page/Account/Account"));
 
 function App() {
+  const { theme } = useUserDetails();
   return (
-    <Suspense fallback={<PageLoader />}>
-      <UserDetailsProvider>
+    <ThemeProvider theme={theme === Theme.LIGHT ? lightTheme : darkTheme}>
+      <Suspense fallback={<PageLoader />}>
         <BrowserRouter>
           <Routes>
             <Route index element={<Navigate replace to="app" />} />
@@ -58,8 +65,8 @@ function App() {
             <Route path="*" element={<Navigate replace to="app" />} />
           </Routes>
         </BrowserRouter>
-      </UserDetailsProvider>
-    </Suspense>
+      </Suspense>
+    </ThemeProvider>
   );
 }
 

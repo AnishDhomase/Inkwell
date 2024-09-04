@@ -27,7 +27,8 @@ const Explore = styled.div`
   h1 {
     font-size: 25px;
     font-weight: 900;
-    color: #333;
+    /* color: #333; */
+    color: ${({ theme }) => theme.text};
   }
 `;
 interface TopicBtnProps {
@@ -39,8 +40,13 @@ const TopicBtn = styled.button<TopicBtnProps>`
   margin-bottom: 10px;
   padding: 8px 15px;
   white-space: nowrap;
-  background-color: ${(props) => (props.active ? "#ff7738" : "#f9f9f9")};
-  color: ${(props) => (props.active ? "white" : "#333")};
+  /* background-color: ${(props) => (props.active ? "#ff7738" : "#f9f9f9")}; */
+  background-color: ${({ theme }) => theme.bodySecondary};
+  background-color: ${(props) => props.active && "#ff7738"};
+  /* color: ${(props) => (props.active ? "white" : "#333")}; */
+  color: ${({ theme }) => theme.text};
+  color: ${(props) => props.active && "white"};
+
   font-size: 18px;
   border: 1px solid ${(props) => (props.active ? "#ff7738" : "#333")};
   border-radius: 50px;
@@ -83,8 +89,14 @@ const SortOptionTab = styled.button<SortOptionTabProps>`
   padding: 3px 10px;
   /* background-color: #f9f9f9; */
   /* color: ${(props) => (props.active ? "#3856ff" : "#333")}; */
-  background-color: ${(props) => (props.active ? "#3856ff" : "#f9f9f9")};
-  color: ${(props) => (props.active ? "white" : "#333")};
+  /* background-color: ${(props) => (props.active ? "#3856ff" : "#f9f9f9")}; */
+  background-color: ${({ theme }) => theme.bodySecondary};
+  background-color: ${(props) => props.active && "#3856ff"};
+
+  /* color: ${(props) => (props.active ? "white" : "#333")}; */
+  color: ${({ theme }) => theme.text};
+  color: ${(props) => props.active && "white"};
+
   font-size: 18px;
   border: 1px solid ${(props) => (props.active ? "#3856ff" : "#333")};
   border-radius: 10px;

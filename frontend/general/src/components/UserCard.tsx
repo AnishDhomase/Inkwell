@@ -28,13 +28,15 @@ const UserBox = styled.div`
   }
 `;
 const UserDetails = styled.div`
+  color: ${({ theme }) => theme.rightPanelTitle};
   display: flex;
   flex-direction: column;
   gap: 2px;
   span {
     font-size: 12px;
     font-weight: 500;
-    color: #909090;
+    /* color: #989494; */
+    color: ${({ theme }) => theme.userCardPartialTxt};
   }
 `;
 

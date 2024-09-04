@@ -46,8 +46,14 @@ const Input = styled.input`
   padding: 12px 18px;
   padding-right: 60px;
   width: 100%;
-  background-color: transparent;
-  background-color: #f5f2f2;
+  /* background-color: transparent; */
+  /* background-color: #f5f2f2;*/
+  background-color: ${({ theme }) => theme.bodySecondary};
+  color: ${({ theme }) => theme.rightPanelTitle};
+
+  ::placeholder {
+    color: ${({ theme }) => theme.rightPanelTitle};
+  }
 
   border: 1px solid gray;
   outline: none;
@@ -94,12 +100,19 @@ interface SortOptionProps {
 }
 const SortOption = styled.button<SortOptionProps>`
   padding: 3px 10px;
-  background-color: #f9f9f9;
-  color: ${(props) => (props.active ? "#3856ff" : "#333")};
+  /* background-color: #f9f9f9; */
+  background-color: ${({ theme }) => theme.bodySecondary};
+  /* color: ${(props) => (props.active ? "#3856ff" : "#333")}; */
+  color: ${({ theme }) => theme.text};
+  color: ${(props) => props.active && "#506bff"};
+
+  /* border: 1px solid ${(props) => (props.active ? "#3856ff" : "#333")}; */
+  border: 1px solid ${({ theme }) => theme.bodySecondary};
+  border: 1px solid ${(props) => props.active && "#506bff"};
   font-size: 18px;
-  border: 1px solid ${(props) => (props.active ? "#3856ff" : "#333")};
   border-radius: 10px;
   margin-right: 10px;
+
   &:hover {
     cursor: pointer;
   }
@@ -134,14 +147,18 @@ const SearchForBox = styled.div`
   justify-content: center;
   gap: 8px;
   font-size: 16px;
-  color: #7b7a7a;
+  /* color: #7b7a7a; */
+  color: ${({ theme }) => theme.rightPanelTitle};
   margin-bottom: 25px;
 `;
 interface TopicBtnProps {
   active?: boolean;
 }
 const TextBtn = styled.button<TopicBtnProps>`
-  color: ${(props) => (props.active ? "#3856ff" : "#2c2828")};
+  /* color: ${(props) => (props.active ? "#3856ff" : "#2c2828")}; */
+
+  color: ${({ theme }) => theme.rightPanelTitle};
+  color: ${(props) => props.active && "#3856ff"};
   text-decoration: ${(props) => (props.active ? "underline" : "none")};
   border: none;
   background-color: transparent;

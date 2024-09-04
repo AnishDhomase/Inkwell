@@ -7,11 +7,17 @@ import React, {
 } from "react";
 import { getSelfDetails } from "../apis/api";
 
+export enum Theme {
+  LIGHT = "light",
+  DARK = "dark",
+}
 interface ContextType {
   selfDetails: object;
   notifications: string[];
   setSelfDetails: React.Dispatch<React.SetStateAction<object>>;
   setNotifications: React.Dispatch<React.SetStateAction<string[]>>;
+  theme: Theme;
+  setTheme: React.Dispatch<React.SetStateAction<Theme>>;
 }
 
 const UserDetailsContext = createContext<ContextType | undefined>(undefined);
@@ -26,6 +32,7 @@ export const UserDetailsProvider: React.FC<AppProviderProps> = ({
 }) => {
   const [selfDetails, setSelfDetails] = useState<object>({});
   const [notifications, setNotifications] = useState<string[]>([]);
+  const [theme, setTheme] = useState<Theme>(Theme.LIGHT);
 
   //   Fetch self details
   useEffect(() => {
@@ -33,14 +40,20 @@ export const UserDetailsProvider: React.FC<AppProviderProps> = ({
       const details = await getSelfDetails();
       setSelfDetails(details);
       setNotifications(details?.notifications);
-      console.log(details);
     }
     fetchSelfDetails();
   }, []);
 
   return (
     <UserDetailsContext.Provider
-      value={{ selfDetails, notifications, setSelfDetails, setNotifications }}
+      value={{
+        selfDetails,
+        notifications,
+        theme,
+        setSelfDetails,
+        setNotifications,
+        setTheme,
+      }}
     >
       {children}
     </UserDetailsContext.Provider>

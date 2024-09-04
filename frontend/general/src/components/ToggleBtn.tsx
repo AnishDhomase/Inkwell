@@ -1,5 +1,6 @@
 import { useState } from "react";
 import styled from "styled-components";
+import { Theme, useUserDetails } from "../context/UserDetailContext";
 
 interface BallProps {
   on: boolean;
@@ -22,9 +23,16 @@ const Ball = styled.span`
   display: inline-block;
 `;
 export function ToggleButton() {
-  const [darkModeOn, setDarkModeOn] = useState(false);
+  const { theme, setTheme } = useUserDetails();
+  const [darkModeOn, setDarkModeOn] = useState<boolean>(theme === Theme.DARK);
   return (
-    <Toggle on={darkModeOn} onClick={() => setDarkModeOn(!darkModeOn)}>
+    <Toggle
+      on={darkModeOn}
+      onClick={() => {
+        setDarkModeOn(!darkModeOn);
+        setTheme(darkModeOn ? Theme.LIGHT : Theme.DARK);
+      }}
+    >
       <Ball />
     </Toggle>
   );

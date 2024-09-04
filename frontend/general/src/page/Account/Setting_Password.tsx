@@ -24,7 +24,8 @@ const InputBox = styled.div`
     label {
       font-size: 18px;
       font-weight: 500;
-      color: #3856ff;
+      /* color: #3856ff; */
+      color: ${({ theme }) => theme.rightPanelTxtBtn};
     }
   }
   input,
@@ -33,6 +34,8 @@ const InputBox = styled.div`
     padding: 10px 0;
     border: none;
     border-bottom: 2px solid #e9e5e5;
+    background-color: transparent;
+    color: ${({ theme }) => theme.text};
     font-size: 18px;
     outline: none;
     /* resize: none; */

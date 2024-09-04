@@ -27,7 +27,9 @@ interface CommentContentProps {
 }
 const CommentContent = styled.div<CommentContentProps>`
   opacity: ${(props) => (props.overlay ? 0.5 : 1)};
-  border-bottom: 1px solid #dfdbdb;
+  /* border-bottom: 1px solid #dfdbdb; */
+  color: ${(props) => props.theme.text};
+  border-bottom: 1px solid ${(props) => props.theme.bottomBorder};
   padding: 25px 0;
   display: flex;
   flex-direction: column;
@@ -40,10 +42,11 @@ const CommentContent = styled.div<CommentContentProps>`
     gap: 10px;
   }
   & textarea {
+    color: ${(props) => props.theme.text};
     font-size: 17px;
     border: none;
     outline: none;
-
+    background-color: transparent;
     resize: none;
     min-height: 50px;
   }

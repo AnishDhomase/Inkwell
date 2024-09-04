@@ -1,7 +1,8 @@
-import { Comment, Discuss } from "react-loader-spinner";
+import { Comment } from "react-loader-spinner";
 import styled from "styled-components";
 
 const Container = styled.div`
+  background-color: ${({ theme }) => theme.bodyPrimary};
   display: flex;
   justify-content: center;
   align-items: center;

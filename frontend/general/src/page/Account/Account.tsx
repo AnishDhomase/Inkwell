@@ -8,6 +8,7 @@ import { IconButton } from "@mui/material";
 import { useUserDetails } from "../../context/UserDetailContext";
 import { getSelfDetails } from "../../apis/api";
 import PageLoader from "../../components/PageLoader";
+import { ToggleButton } from "../../components/ToggleBtn";
 
 // import Setting_General from "./Setting_General";
 // import Setting_Home from "./Setting_Home";
@@ -34,7 +35,9 @@ const Container = styled.div`
 const NavigationPanel = styled.nav`
   margin-top: -20px;
   width: 25%;
-  background-color: #f6f5f5;
+  color: ${({ theme }) => theme.text};
+  /* background-color: #f6f5f5; */
+  background-color: ${({ theme }) => theme.bodySecondary};
   /* height: 100vh; */
   /* padding: 0 20px; */
   & > a {
@@ -87,7 +90,9 @@ const SettingSection = styled.section`
     font-size: 18px;
     font-weight: 500;
     padding: 5px 20px;
-    background-color: #b7b6b6;
+    /* background-color: #3f3d3d; */
+    background-color: ${({ theme }) => theme.accountNavPanelSecBg};
+
     color: white;
   }
   main {
@@ -119,7 +124,9 @@ const Row = styled.div<RowProps>`
     content: "";
     width: 20px;
     height: 20px;
-    background-color: ${(props) => (props.active ? "#f6f5f5" : "transparent")};
+
+    background-color: ${(props) =>
+      props.active ? props.theme.bodySecondary : "transparent"};
     //rotate  by 45deg
     clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
   }
@@ -134,7 +141,8 @@ const StyledToggleButton = styled.div`
 const PagePath = styled.div`
   font-size: 20px;
   font-weight: 700;
-  color: #3856ff;
+  /* color: #3856ff; */
+  color: ${({ theme }) => theme.rightPanelTxtBtn};
   margin-bottom: 20px;
   display: flex;
   align-items: center;
@@ -174,7 +182,7 @@ const NavPanelToggler = styled.button<NavPanelTogglerProps>`
   }
 `;
 const UnAuthenticated = styled.div`
-  min-height: 85vh;
+  min-height: 100vh;
   /* color my orange */
   color: #ff8848;
   display: flex;
@@ -404,12 +412,12 @@ export default function Account() {
               <SettingSection>
                 <header>PREFERENCES</header>
                 <main>
-                  {/* <Row>
-                  <p>Dark Mode</p>
-                  <StyledToggleButton>
-                    <ToggleButton />
-                  </StyledToggleButton>
-                </Row> */}
+                  <Row>
+                    <p>Dark Mode</p>
+                    <StyledToggleButton>
+                      <ToggleButton />
+                    </StyledToggleButton>
+                  </Row>
                   <Link to="/app/account/favourite-topics">
                     <Row
                       onClick={() => {

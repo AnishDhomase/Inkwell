@@ -26,12 +26,14 @@ const OuterBox = styled.div`
   }
 `;
 const InnerBox = styled.div`
-  background-color: #fbfafa;
+  /* background-color: #fbfafa; */
+  background-color: ${({ theme }) => theme.bodySecondary};
   width: 100%;
   max-width: 1000px;
   padding: 40px;
   border-radius: 10px;
-  border: 1px solid #ff7738;
+  /* border: 1px solid #ff7738; */
+  border: 1px solid ${({ theme }) => theme.borderColor};
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -83,9 +85,10 @@ const Input = styled.input`
   border-radius: 10px;
   padding: 12px 18px;
   width: 100%;
-  background-color: transparent;
-  background-color: #f5f2f2;
-
+  /* background-color: transparent; */
+  /* background-color: #f5f2f2; */
+  background-color: ${({ theme }) => theme.bodyPrimary};
+  color: ${({ theme }) => theme.text};
   border: 1px solid gray;
   outline: none;
 
@@ -100,13 +103,16 @@ const Input = styled.input`
   }
 `;
 const TextArea = styled.textarea`
-  background-color: #f5f2f2;
+  /* background-color: #f5f2f2; */
+  /* background-color: transparent; */
+  background-color: ${({ theme }) => theme.bodyPrimary};
+
+  color: ${({ theme }) => theme.text};
 
   border-radius: 10px;
   padding: 12px 18px;
   width: 100%;
   min-height: 300px;
-  /* background-color: transparent; */
   border: 1px solid gray;
   outline: none;
   resize: none;
@@ -137,6 +143,8 @@ const Img = styled.img`
 `;
 const FileInputBox = styled.div`
   border: 2px dashed #ff7738;
+  background-color: ${({ theme }) => theme.bodySecondary};
+
   display: flex;
   justify-content: center;
   padding: 10px;
@@ -162,7 +170,9 @@ const LeftBox = styled.div`
   border: 1px solid gray;
 
   padding: 10px;
-  background-color: #f5f2f2;
+  /* background-color: #f5f2f2; */
+  background-color: ${({ theme }) => theme.bodyPrimary};
+
   border-radius: 20px;
   width: 50%;
   display: flex;
@@ -183,7 +193,8 @@ const RightBox = styled.div`
 
   border-radius: 20px;
   padding: 10px;
-  background-color: #f5f2f2;
+  /* background-color: #f5f2f2; */
+  background-color: ${({ theme }) => theme.bodyPrimary};
 
   width: 50%;
   & div {

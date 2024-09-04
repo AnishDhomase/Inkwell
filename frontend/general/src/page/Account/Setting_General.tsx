@@ -17,7 +17,8 @@ const ProfilePhotoBox = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #e3dede;
+  /* background-color: #e3dede; */
+  background-color: ${({ theme }) => theme.bodySecondary};
   margin: 0 auto;
   @media (max-width: 450px) {
     width: 200px;
@@ -105,7 +106,8 @@ const InputBox = styled.div`
     label {
       font-size: 18px;
       font-weight: 500;
-      color: #3856ff;
+      /* color: #3856ff; */
+      color: ${({ theme }) => theme.rightPanelTxtBtn};
     }
   }
   input,
@@ -116,7 +118,9 @@ const InputBox = styled.div`
     border-bottom: 2px solid #e9e5e5;
     font-size: 18px;
     outline: none;
+    background-color: transparent;
     /* resize: none; */
+    color: ${({ theme }) => theme.text};
     &:focus {
       border-bottom: 2px solid #a2b0ff;
     }
@@ -154,7 +158,8 @@ const FollowTab = styled.button<FollowTabProps>`
   font-weight: 600;
   padding: 5px 0px;
   background-color: transparent;
-  color: ${(props) => (props.active ? "#3856ff" : "#a09d9d")};
+  color: ${(props) =>
+    props.active ? props.theme.rightPanelTxtBtn : "#a09d9d"};
   border: none;
   border-bottom: 2px solid transparent;
   cursor: pointer;

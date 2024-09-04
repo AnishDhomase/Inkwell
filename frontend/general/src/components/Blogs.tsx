@@ -36,7 +36,7 @@ const BlogBoxLiked = styled.div`
 `;
 const BlogCardLiked = styled.div`
   position: relative;
-  border-bottom: 1px solid #efe9e9;
+  border-bottom: 1px solid ${({ theme }) => theme.bottomBorder};
   padding-bottom: 30px;
   width: 100%;
   display: flex;
@@ -55,13 +55,15 @@ const BlogCard = styled.div`
   /* border-radius: 10px; */
   display: flex;
   gap: 15px;
-  border-bottom: 1px solid #efe9e9;
+  /* border-bottom: 1px solid #626161; */
+  border-bottom: 1px solid ${({ theme }) => theme.bottomBorder};
   padding-bottom: 35px;
   &:hover {
     cursor: pointer;
   }
   &:hover h3 {
-    color: #0c1a6b;
+    color: #5079da;
+    /* color: ${({ theme }) => theme.blogCardHoverTxt}; */
     text-decoration: underline;
   }
 `;
@@ -69,6 +71,7 @@ const LHS = styled.div`
   display: flex;
   gap: 15px;
   width: 100%;
+  background-color: "red";
 `;
 const RHS = styled.div`
   display: flex;
@@ -84,7 +87,8 @@ const RHS = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: white;
+    /* background-color: white; */
+    background-color: ${({ theme }) => theme.likeSaveBtnBg};
   }
   button:hover {
     background-color: red;
@@ -110,6 +114,7 @@ const LeftBlogSec = styled.div<LeftBlogSecProps>`
   min-height: 160px;
   border-radius: 10px;
   position: relative;
+  background-color: ${({ theme }) => theme.text};
   background-image: url(${(props) => props.imageURL});
   background-size: cover;
   background-position: center;
@@ -122,12 +127,13 @@ const LeftBlogSec = styled.div<LeftBlogSecProps>`
     padding: 5px;
     display: flex;
     cursor: pointer;
-    background-color: #f9f9f9;
+    background-color: ${({ theme }) => theme.likeSaveBtnBg};
     border: 1px solid #333;
   }
 `;
 const Like = styled.span`
   top: 10px;
+  background-color: #ffffff;
 `;
 const Save = styled.span`
   top: 50px;
@@ -141,18 +147,21 @@ const RightBlogSec = styled.div`
   h3 {
     font-size: 20px;
     font-weight: 700;
-    color: #333;
+    /* color: #333; */
+    color: ${({ theme }) => theme.rightPanelTitle};
   }
   section {
     display: flex;
     align-items: center;
     gap: 10px;
     font-size: 18px;
-    color: #a38d8d;
+    /* color: #a38d8d; */
+    color: ${({ theme }) => theme.userCardPartialTxt};
   }
 `;
 const StatChip = styled.div`
-  color: #000000;
+  /* color: #000000; */
+  color: ${({ theme }) => theme.text};
   display: flex;
   align-items: center;
   gap: 5px;
@@ -253,23 +262,7 @@ export function CardLiked({ blog }: { blog: Blog }) {
             imageURL={
               blog.blogImageURL || "../../../public/placeholderBlogImage.webp"
             }
-          >
-            {/* <img src={blog.blogImageURL} alt="blog" /> */}
-            {/* <Like onClick={handleBlogLike}>
-            {!liked ? (
-              <FavoriteBorderIcon color="action" />
-            ) : (
-              <FavoriteIcon color="error" />
-            )}
-          </Like> */}
-            {/* <Save onClick={handleBlogSave}>
-            {!saved ? (
-              <BookmarkBorderIcon color="action" />
-            ) : (
-              <BookmarkIcon color="primary" />
-            )}
-          </Save> */}
-          </LeftBlogSec>
+          ></LeftBlogSec>
           <RightBlogSec>
             <section>
               <span>{getMinutesToRead(blog.content)} min</span>

@@ -70,6 +70,7 @@ const UserInfoCard = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
+    color: ${({ theme }) => theme.rightPanelTitle};
     @media (max-width: 600px) {
       flex-direction: column;
       text-align: center;
@@ -101,6 +102,7 @@ const UserInfoCard = styled.div`
   }
   & > section {
     margin-top: 30px;
+    color: ${({ theme }) => theme.rightPanelTitle};
   }
   footer {
     user-select: none;
@@ -110,7 +112,8 @@ const UserInfoCard = styled.div`
     display: flex;
     align-items: center;
     gap: 5px;
-    color: #a09d9d;
+    /* color: #a09d9d; */
+    color: ${({ theme }) => theme.rightPanelTitle};
   }
   footer:hover {
     text-decoration: underline;
@@ -123,7 +126,9 @@ const StatCard = styled.div`
   flex-direction: column;
   /* align-items: center; */
   border-radius: 10px;
-  border: 1px solid #e3e0e0;
+  /* border: 1px solid #e3e0e0; */
+  border: 1px solid ${({ theme }) => theme.borderColor};
+
   padding: 10px;
   @media (max-width: 335px) {
     padding: 5px;
@@ -132,32 +137,33 @@ const StatCard = styled.div`
   h2 {
     font-size: 20px;
     font-weight: 700;
+    color: ${({ theme }) => theme.rightPanelTitle};
   }
   span {
     font-size: 18px;
     font-weight: 500;
     color: #a09d9d;
   }
-  &:hover h2 {
-    color: #3856ff;
-  }
 `;
 const ContactCard = styled.div`
   margin-top: 5px;
+
   div {
     display: flex;
     align-items: center;
     gap: 10px;
     font-size: 18px;
-    font-weight: 500;
-    color: #333;
+    font-weight: 300;
+    /* color: #333; */
+    color: ${({ theme }) => theme.rightPanelTitle};
   }
 `;
 
 const Title = styled.h1`
   font-size: 22px;
   font-weight: 700;
-  color: #333;
+  /* color: #333; */
+  color: ${({ theme }) => theme.rightPanelTitle};
   margin-top: 50px;
   margin-bottom: -15px;
   @media (max-width: 550px) {

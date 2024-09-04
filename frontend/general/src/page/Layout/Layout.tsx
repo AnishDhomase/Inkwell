@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import CircularProgress from "@mui/material/CircularProgress";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"; //small
+import { Theme } from "../../context/UserDetailContext";
 
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
@@ -18,7 +19,8 @@ const Nav = styled.nav`
   padding: 10px 20px;
   display: flex;
   justify-content: space-between;
-  background-color: #f9f9f9;
+  /* background-color: #5f5f5f; */
+  background-color: ${({ theme }) => theme.bodySecondary};
   @media (max-width: 480px) {
     padding: 10px 10px;
   }
@@ -27,6 +29,7 @@ const Logo = styled.h1`
   font-size: 30px;
   font-weight: 800;
   color: #ff7738;
+  background-color: ${({ theme }) => theme.body};
   font-family: cursive;
 `;
 const RightBox = styled.div`
@@ -38,10 +41,16 @@ const CircleBorder = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid #dcdbdb;
+  border: 1px solid ${({ theme }) => theme.borderColor};
+  /* border: 1px solid #898686; */
   border-radius: 50%;
 `;
 const Main = styled.main`
+  min-height: 100vh;
+
+  /* background-color: #454444; */
+  background-color: ${({ theme }) => theme.bodyPrimary};
+  color: ${({ theme }) => theme.text};
   display: flex;
   justify-content: space-between;
   padding-bottom: 0;
@@ -57,6 +66,7 @@ const LeftSec = styled.div<LeftSecProps>`
   /* padding: 20px ${(props) => (props.fullWidth ? "0" : "20px")}; */
   padding: 0 ${(props) => (props.fullWidth ? "0" : "20px")};
   padding-top: 20px;
+  color: ${({ theme }) => theme.text};
   @media (max-width: 1020px) {
     width: 100%;
   }
@@ -69,7 +79,7 @@ const RightSec = styled.div`
   overflow-x: hidden;
   overflow-y: auto; */
   position: sticky;
-  max-height: 103vh;
+  max-height: 115vh;
   top: 0;
   display: flex;
   flex-direction: column;
@@ -81,7 +91,8 @@ const RightSec = styled.div`
   h4 {
     font-size: 20px;
     font-weight: 700;
-    color: #333;
+    /* color: #f4eeee; */
+    color: ${({ theme }) => theme.rightPanelTitle};
   }
   @media (max-width: 1020px) {
     display: none;
@@ -95,13 +106,16 @@ const Banner = styled.div`
   align-items: center;
   border-radius: 10px;
   font-size: 20px;
-  background: #f0f1f3;
+  /* background: #515152; */
+  background-color: ${({ theme }) => theme.rightPanelAddBg};
+  color: ${({ theme }) => theme.text};
 `;
 const Info = styled.div`
   p {
     margin-top: 10px;
     font-size: 15px;
-    color: #908e8e;
+    /* color: #908e8e; */
+    color: ${({ theme }) => theme.text};
   }
 `;
 const FollowSuggestions = styled.div``;
@@ -112,6 +126,7 @@ const Users = styled.div`
   gap: 10px;
 `;
 const Row = styled.div`
+  color: ${({ theme }) => theme.text};
   gap: 10px;
   display: flex;
   justify-content: space-between;
@@ -123,7 +138,8 @@ const TextBtn = styled.button`
   margin-top: 15px;
   font-weight: 400;
   font-size: 15px;
-  color: #3856ff;
+  /* color: #5997f4; */
+  color: ${({ theme }) => theme.rightPanelTxtBtn};
   &:hover {
     cursor: pointer;
     text-decoration: underline;
@@ -145,11 +161,14 @@ const NotificationPanel = styled(motion.div)<NotificationPanelProps>`
   overflow-x: hidden;
   overflow-y: auto;
   position: absolute;
-  border: 1px solid #c4bfbf;
   right: 20px;
   border-radius: 10px;
   padding: 10px;
-  background-color: #f9f9f9;
+  border: 1px solid ${({ theme }) => theme.borderColor};
+  background-color: ${({ theme }) => theme.bodySecondary};
+  color: ${({ theme }) => theme.text};
+  /* border: 1px solid #c4bfbf;
+  background-color: #f9f9f9; */
   display: flex;
   flex-direction: column;
   align-items: ${(props) => (props.noNotifactions ? "center" : "flex-start")};
@@ -191,8 +210,13 @@ const Notification = styled.div`
 type activePage = "home" | "search" | "add" | "account";
 
 export default function Layout() {
-  const { selfDetails, notifications, setSelfDetails, setNotifications } =
-    useUserDetails();
+  const {
+    selfDetails,
+    notifications,
+    setSelfDetails,
+    setNotifications,
+    theme,
+  } = useUserDetails();
   const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [activePage, setActivePage] = useState<activePage>("home");
@@ -267,7 +291,13 @@ export default function Layout() {
                   <IconButton aria-label="delete">
                     <Badge badgeContent={0} max={9} color="primary">
                       {!loading ? (
-                        <LogoutIcon color="action" />
+                        <LogoutIcon
+                          sx={{
+                            color: `${
+                              theme === Theme.LIGHT ? "#7d7979" : "#bdb9b9"
+                            }`,
+                          }}
+                        />
                       ) : (
                         <CircularProgress size={20} thickness={6} />
                       )}
@@ -285,7 +315,13 @@ export default function Layout() {
                     max={9}
                     color="primary"
                   >
-                    <NotificationsIcon color="action" />
+                    <NotificationsIcon
+                      sx={{
+                        color: `${
+                          theme === Theme.LIGHT ? "#7d7979" : "#cfc3c3"
+                        }`,
+                      }}
+                    />
                   </Badge>
                 </IconButton>
               </CircleBorder>
@@ -391,7 +427,7 @@ export default function Layout() {
                 <Info>
                   <h4>Reading list</h4>
                   <p>
-                    Click the
+                    Click the{" "}
                     <BookmarkBorderIcon
                       style={{
                         verticalAlign: "middle",

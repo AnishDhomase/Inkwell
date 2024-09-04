@@ -6,13 +6,17 @@ const BlogCard = styled.div`
   /* border-radius: 10px; */
   display: flex;
   gap: 15px;
-  border-bottom: 1px solid #efe9e9;
+
+  /* border-bottom: 1px solid #efe9e9; */
+  border-bottom: 1px solid ${({ theme }) => theme.bottomBorder};
+
   padding-bottom: 35px;
   &:hover {
     cursor: pointer;
   }
   &:hover h3 {
-    color: #0c1a6b;
+    /* color: #0c1a6b; */
+    color: ${({ theme }) => theme.blogCardHoverTxt};
     text-decoration: underline;
   }
 `;
@@ -28,14 +32,16 @@ const RightBlogSec = styled.div`
   h3 {
     font-size: 20px;
     font-weight: 700;
-    color: #333;
+    /* color: #333; */
+    color: ${({ theme }) => theme.rightPanelTitle};
   }
   section {
     display: flex;
     align-items: center;
     gap: 10px;
     font-size: 18px;
-    color: #a38d8d;
+    /* color: #a38d8d; */
+    color: ${({ theme }) => theme.userCardPartialTxt};
   }
 `;
 
@@ -50,13 +56,18 @@ const shimmer = keyframes`
 const ThickRowSkeleton = styled.div`
   height: 24px;
   width: 80%;
-  background: #f6f7f8;
+  /* background: #f6f7f8; */
+  background: ${({ theme }) => theme.bodySecondary};
   background-image: linear-gradient(
     to right,
-    #f6f7f8 0%,
+    /* #f6f7f8 0%,
     #edeef1 20%,
     #f6f7f8 40%,
-    #f6f7f8 100%
+    #f6f7f8 100% */
+      ${({ theme }) => theme.bodySecondary} 0%,
+    ${({ theme }) => theme.rightPanelAddBg} 20%,
+    ${({ theme }) => theme.bodySecondary} 40%,
+    ${({ theme }) => theme.bodySecondary} 100%
   );
   background-repeat: no-repeat;
   background-size: 800px 104px;
@@ -65,13 +76,18 @@ const ThickRowSkeleton = styled.div`
 const RowSkeleton = styled.div`
   height: 16px;
   width: 100%;
-  background: #f6f7f8;
+  /* background: #f6f7f8; */
+  background: ${({ theme }) => theme.bodySecondary};
   background-image: linear-gradient(
     to right,
-    #f6f7f8 0%,
+    /* #f6f7f8 0%,
     #edeef1 20%,
     #f6f7f8 40%,
-    #f6f7f8 100%
+    #f6f7f8 100% */
+      ${({ theme }) => theme.bodySecondary} 0%,
+    ${({ theme }) => theme.rightPanelAddBg} 20%,
+    ${({ theme }) => theme.bodySecondary} 40%,
+    ${({ theme }) => theme.bodySecondary} 100%
   );
   background-repeat: no-repeat;
   background-size: 800px 104px;
@@ -84,10 +100,14 @@ const LeftBlogSecSkeleton = styled.div<LeftBlogSecProps>`
   position: relative;
   background-image: linear-gradient(
     to right,
-    #f6f7f8 0%,
+    /* #f6f7f8 0%,
     #edeef1 20%,
     #f6f7f8 40%,
-    #f6f7f8 100%
+    #f6f7f8 100% */
+      ${({ theme }) => theme.bodySecondary} 0%,
+    ${({ theme }) => theme.rightPanelAddBg} 20%,
+    ${({ theme }) => theme.bodySecondary} 40%,
+    ${({ theme }) => theme.bodySecondary} 100%
   );
   background-size: cover;
   background-position: center;
@@ -99,8 +119,10 @@ const LeftBlogSecSkeleton = styled.div<LeftBlogSecProps>`
     padding: 5px;
     display: flex;
     cursor: pointer;
-    background-color: #f9f9f9;
-    border: 1px solid #333;
+    /* background-color: #f9f9f9;
+    border: 1px solid #333; */
+    background-color: ${({ theme }) => theme.likeSaveBtnBg};
+    border: 1px solid ${({ theme }) => theme.rightPanelTitle};
   }
 `;
 

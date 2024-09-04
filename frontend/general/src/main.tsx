@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App";
 import { Toaster } from "react-hot-toast";
 import GlobalStyles from "./utils/GlobalStyle";
+import { UserDetailsProvider } from "./context/UserDetailContext";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -15,7 +16,9 @@ createRoot(document.getElementById("root")!).render(
         error: { duration: 5000 },
       }}
     />
-    <GlobalStyles />
-    <App />
+    <UserDetailsProvider>
+      <GlobalStyles />
+      <App />
+    </UserDetailsProvider>
   </StrictMode>
 );

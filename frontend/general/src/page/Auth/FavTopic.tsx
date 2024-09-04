@@ -25,8 +25,11 @@ const Heading = styled.h1<HeadingProps>`
 `;
 const TopicBox = styled.span`
   padding: 12px 18px;
-  background-color: #c3b5b5;
-  color: white;
+  /* background-color: #c3b5b5; */
+  background-color: ${({ theme }) => theme.bodySecondary};
+  /* color: white; */
+  color: ${({ theme }) => theme.text};
+  border: 1px solid ${({ theme }) => theme.borderColor};
   font-size: 18px;
   border-radius: 50px;
   &:hover {
