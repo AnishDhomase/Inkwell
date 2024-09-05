@@ -4,7 +4,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { signIn, signUp } from "../../apis/api";
+import { getSelfDetails, signIn, signUp } from "../../apis/api";
+import { useUserDetails } from "../../context/UserDetailContext";
 
 interface RowProps {
   fontSz?: string;
@@ -154,6 +155,7 @@ const EyeIcon = styled.div`
 `;
 
 export default function LoginSignup({ setStep }: { setStep: any }) {
+  const { setSelfDetails, setNotifications } = useUserDetails();
   const [loading, setLoading] = useState(false);
   const [login, setLogin] = useState(true);
   const [seePassword, setSeePassword] = useState(false);
@@ -172,7 +174,13 @@ export default function LoginSignup({ setStep }: { setStep: any }) {
         email: formData.email,
         password: formData.password,
       });
-      if (success) navigate("/app");
+      if (success) {
+        // Fetch self details again to update self details
+        const details = await getSelfDetails();
+        setSelfDetails(details);
+        setNotifications(details?.notifications);
+        navigate("/app");
+      }
     } else {
       // signup
       const success = await signUp({
