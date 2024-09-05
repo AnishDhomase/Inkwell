@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Theme, useUserDetails } from "../context/UserDetailContext";
 
@@ -25,14 +25,17 @@ const Ball = styled.span`
 export function ToggleButton() {
   const { theme, setTheme } = useUserDetails();
   const [darkModeOn, setDarkModeOn] = useState<boolean>(theme === Theme.DARK);
+
+  function toggleTheme() {
+    localStorage.setItem(
+      "themeInkwell",
+      theme === Theme.LIGHT ? Theme.DARK : Theme.LIGHT
+    );
+    setDarkModeOn(!darkModeOn);
+    setTheme(darkModeOn ? Theme.LIGHT : Theme.DARK);
+  }
   return (
-    <Toggle
-      on={darkModeOn}
-      onClick={() => {
-        setDarkModeOn(!darkModeOn);
-        setTheme(darkModeOn ? Theme.LIGHT : Theme.DARK);
-      }}
-    >
+    <Toggle on={darkModeOn} onClick={toggleTheme}>
       <Ball />
     </Toggle>
   );

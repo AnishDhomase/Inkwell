@@ -32,7 +32,12 @@ export const UserDetailsProvider: React.FC<AppProviderProps> = ({
 }) => {
   const [selfDetails, setSelfDetails] = useState<object>({});
   const [notifications, setNotifications] = useState<string[]>([]);
+
   const [theme, setTheme] = useState<Theme>(Theme.LIGHT);
+  useEffect(() => {
+    const themeFromLocalStorage = localStorage.getItem("themeInkwell");
+    setTheme(themeFromLocalStorage === Theme.DARK ? Theme.DARK : Theme.LIGHT);
+  }, [theme]);
 
   //   Fetch self details
   useEffect(() => {
