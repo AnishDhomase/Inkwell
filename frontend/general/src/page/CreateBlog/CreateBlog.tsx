@@ -1,17 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { TopicSelector } from "../Auth/FavTopic";
-import {
-  createPost,
-  getAllTopics,
-  getCloudinaryFileURL,
-  Topic,
-} from "../../apis/api";
+import { createPost, getAllTopics, getCloudinaryFileURL } from "../../apis/api";
 import CircularProgress from "@mui/material/CircularProgress";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { useUserDetails } from "../../context/UserDetailContext";
+import { useUserDetails } from "../../hooks";
+import { Topic } from "../../utils/types";
 
 const OuterBox = styled.div`
   min-height: 100vh;
@@ -296,7 +292,7 @@ export default function CreateBlog() {
   const [content, setContent] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const ref = useRef(null);
+  const ref = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -340,6 +336,9 @@ export default function CreateBlog() {
     }
     setLoading(() => false);
   }
+  const handleFileInputBtnClick = () => {
+    ref.current?.click();
+  };
   return (
     <OuterBox>
       <InnerBox>
@@ -357,7 +356,8 @@ export default function CreateBlog() {
                 alt="preview"
               />
             </ProfilePhotoBox>
-            <FileInputBox onClick={() => ref?.current?.click()}>
+
+            <FileInputBox onClick={handleFileInputBtnClick}>
               <input
                 ref={ref}
                 type="file"

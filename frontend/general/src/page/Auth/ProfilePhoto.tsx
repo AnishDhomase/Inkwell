@@ -80,13 +80,17 @@ const FileInputBox = styled.div`
   margin-bottom: 30px;
 `;
 
-export default function ProfilePhoto({ setStep }: { setStep: any }) {
+export default function ProfilePhoto({
+  setStep,
+}: {
+  setStep: (step: number) => void;
+}) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(
     "../../../public/placeholderBlogImage.webp"
   );
   const [uploading, setUploading] = useState(false);
-  const ref = useRef(null);
+  const ref = useRef<HTMLInputElement>(null);
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setFile(e.target.files[0]);
@@ -96,6 +100,7 @@ export default function ProfilePhoto({ setStep }: { setStep: any }) {
   async function handleUpload() {
     setUploading(true);
     const success = await setProfilePhoto(file);
+    // @ts-expect-error number/function input error
     if (success) setStep((step: number) => step + 1);
     setUploading(false);
   }

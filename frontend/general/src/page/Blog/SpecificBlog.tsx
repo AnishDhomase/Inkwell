@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import {
-  Blog,
   commentOnBlog,
   deleteCommentOnBlog,
   editCommentOnBlog,
@@ -20,10 +19,11 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import toast from "react-hot-toast";
 import { CircularProgress } from "@mui/material";
-import { useUserDetails } from "../../context/UserDetailContext";
 import BackBtn from "../../components/BackBtn";
 import Comment from "./Comment";
 import UserCard from "../../components/UserCard";
+import { useUserDetails } from "../../hooks";
+import { AuthorCardType, Blog, BlogDetailsType } from "../../utils/types";
 
 const Container = styled.div`
   color: ${({ theme }) => theme.text};
@@ -209,8 +209,8 @@ export default function SpecificBlog() {
   const { selfDetails } = useUserDetails();
 
   const { blogId } = useParams();
-  const [blogDetails, setBlogDetails] = useState<object>({});
-  const [authorDetails, setAuthorDetails] = useState<object>({});
+  const [blogDetails, setBlogDetails] = useState<BlogDetailsType>();
+  const [authorDetails, setAuthorDetails] = useState<AuthorCardType>();
   const [commentText, setCommentText] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [editing, setEditing] = useState<number>(-1);
@@ -228,9 +228,9 @@ export default function SpecificBlog() {
 
   // Fetch author details
   useEffect(() => {
-    if (!blogDetails.authorId) return;
+    if (!blogDetails?.authorId) return;
     async function fetchAuthor() {
-      const res = await getUser(Number(blogDetails.authorId));
+      const res = await getUser(Number(blogDetails?.authorId));
       setAuthorDetails(res);
     }
     fetchAuthor();
@@ -254,10 +254,10 @@ export default function SpecificBlog() {
     if (!selfDetails?.id) return;
     let liked = false;
     let saved = false;
-    if (userBlogs?.liked?.includes(blogDetails?.id)) {
+    if (blogDetails && userBlogs?.liked?.includes(blogDetails?.id)) {
       liked = true;
     }
-    if (userBlogs?.saved?.includes(blogDetails?.id)) {
+    if (blogDetails && userBlogs?.saved?.includes(blogDetails?.id)) {
       saved = true;
     }
     setLiked(liked);
@@ -273,6 +273,7 @@ export default function SpecificBlog() {
       toast.error("Login/Signup to like the blog");
       return;
     }
+    if (!blogDetails?.id) return;
     if (liked) {
       // unlike
       const success = await unlikeBlog({ blogId: blogDetails.id });
@@ -295,6 +296,7 @@ export default function SpecificBlog() {
       toast.error("Login/Signup to save the blog");
       return;
     }
+    if (!blogDetails?.id) return;
     if (saved) {
       // unsave
       const success = await unsaveBlog({ blogId: blogDetails.id });
@@ -316,6 +318,7 @@ export default function SpecificBlog() {
       toast.error("Login/Signup to comment on the blog");
       return;
     }
+    if (!blogDetails?.id) return;
     if (!commentText) {
       toast.error("Comment cannot be empty");
       return;
@@ -401,7 +404,7 @@ export default function SpecificBlog() {
       <Title>{blogDetails?.title}</Title>
       <Content>{blogDetails?.content}</Content>
       <Topics>
-        {blogDetails?.topics?.map((topic: any) => (
+        {blogDetails?.topics?.map((topic) => (
           <Topic key={topic.id}>{topic.name}</Topic>
         ))}
       </Topics>

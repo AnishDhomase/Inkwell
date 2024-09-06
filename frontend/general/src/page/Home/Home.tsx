@@ -1,19 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  Blog,
-  getAllBlogs,
-  getAllTopics,
-  getBlogsOfTopic,
-  Topic,
-} from "../../apis/api";
+import { getAllBlogs, getAllTopics, getBlogsOfTopic } from "../../apis/api";
 import styled from "styled-components";
 
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
 import BlogCardSkeletonLoader from "../../components/BlogCardSkeleton";
 import Blogs from "../../components/Blogs";
-import { useUserDetails } from "../../context/UserDetailContext";
-import { SortOption } from "../../utils/types";
+import { Blog, SortOption, Topic } from "../../utils/types";
+import { useUserDetails } from "../../hooks";
 
 const Explore = styled.div`
   user-select: none;

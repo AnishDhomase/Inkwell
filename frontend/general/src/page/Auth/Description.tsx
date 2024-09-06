@@ -81,14 +81,19 @@ const TextArea = styled.textarea`
   }
 `;
 
-export default function Description({ setStep }: { setStep: any }) {
+export default function Description({
+  setStep,
+}: {
+  setStep: (step: number) => void;
+}) {
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleBioSubmit() {
     setLoading(() => true);
     const success = await postSelfBio({ description });
-    if (success) setStep((step: number) => step + 1);
+    //@ts-expect-error number/function input problem
+    if (success) setStep((step) => step + 1);
     setLoading(() => false);
   }
   return (

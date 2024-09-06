@@ -3,6 +3,7 @@ import { Section, SectionProps } from "./Account";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"; //small
 import { Link } from "react-router-dom";
 
+/* eslint-disable react-refresh/only-export-components */
 const ImageBox = styled.div`
   width: 100%;
   display: flex;
@@ -145,20 +146,20 @@ export default function Setting_Home({
       </ImageBox>
       <UserInfoCard>
         <header>
-          <h1>{selfDetails.name}</h1>
-          <p>{selfDetails.username}</p>
+          <h1>{selfDetails?.name}</h1>
+          <p>{selfDetails?.username}</p>
         </header>
         <main>
           <StatCard>
-            <h2>{selfDetails.followers?.length}</h2>
+            <h2>{selfDetails?.followers?.length}</h2>
             <span>Followers</span>
           </StatCard>
           <StatCard>
-            <h2>{selfDetails.following?.length}</h2>
+            <h2>{selfDetails?.following?.length}</h2>
             <span>Following</span>
           </StatCard>
           <StatCard>
-            <h2>{selfDetails.blogs?.length}</h2>
+            <h2>{selfDetails?.blogs?.length}</h2>
             <span>Blogs</span>
           </StatCard>
         </main>

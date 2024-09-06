@@ -2,6 +2,7 @@ import styled from "styled-components";
 import Blogs from "../../components/Blogs";
 import { Msg, SectionProps } from "./Account";
 
+/* eslint-disable react-refresh/only-export-components */
 const YourBlogs = styled.div`
   width: 70%;
   min-width: 500px;
@@ -16,13 +17,10 @@ const YourBlogs = styled.div`
     margin-top: -50px;
   }
 `;
-export default function Setting_YourBlogs({
-  selfDetails,
-  setActiveSection,
-}: SectionProps) {
+export default function Setting_YourBlogs({ selfDetails }: SectionProps) {
   return (
     <YourBlogs>
-      {selfDetails?.blogs?.length > 0 ? (
+      {selfDetails && selfDetails?.blogs && selfDetails?.blogs?.length > 0 ? (
         <Blogs
           blogs={selfDetails?.blogs}
           userBlogs={{

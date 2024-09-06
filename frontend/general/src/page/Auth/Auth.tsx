@@ -1,10 +1,9 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-
-import { useUserDetails } from "../../context/UserDetailContext";
 import { getSelfDetails } from "../../apis/api";
 import PageLoader from "../../components/PageLoader";
+import { useUserDetails } from "../../hooks";
 const LoginSignup = lazy(() => import("./LoginSignup"));
 const Description = lazy(() => import("./Description"));
 const FavTopic = lazy(() => import("./FavTopic"));
@@ -324,21 +323,22 @@ const Skip = styled.div<SkipProps>`
 
 export default function Auth() {
   const { setSelfDetails, setNotifications } = useUserDetails();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState<number>(1);
   const pageMap = [
     { Component: <LoginSignup setStep={setStep} /> },
     { Component: <ProfilePhoto setStep={setStep} /> },
     { Component: <Description setStep={setStep} /> },
-    { Component: <FavTopic setStep={setStep} /> },
+    { Component: <FavTopic /> },
   ];
   const navigate = useNavigate();
 
-  //  Re fetch self details on every step change
+  //  Refetch self details on every step change
   useEffect(() => {
+    if (step === 1) return;
     async function fetchSelfDetails() {
       const details = await getSelfDetails();
       setSelfDetails(details);
-      setNotifications(details?.notifications);
+      setNotifications(details?.notifications || []);
     }
     fetchSelfDetails();
   }, [step, setSelfDetails, setNotifications]);
@@ -394,11 +394,6 @@ export default function Auth() {
               </ProgressBar>
             </Stepper>
           </StepperBox>
-          {/* {step === 1 && (
-          <Row>
-            <Logo width="45px" alt="logo" src="../../public/logoWhite.png" />
-          </Row>
-        )} */}
 
           {pageMap[step - 1].Component}
 

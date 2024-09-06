@@ -47,9 +47,9 @@ export default function UserCard({
   profilePicURL,
 }: {
   children?: React.ReactNode;
-  userId: number;
-  username: string;
-  profilePicURL: string;
+  userId: number | undefined;
+  username: string | undefined;
+  profilePicURL: string | undefined;
 }) {
   return (
     <Link to={`/app/user/${userId}`}>

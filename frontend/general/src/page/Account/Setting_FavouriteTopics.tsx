@@ -4,13 +4,13 @@ import {
   getAllTopics,
   getSelfDetails,
   setFavouriteTopics,
-  Topic,
 } from "../../apis/api";
 import { TopicSelector } from "../Auth/FavTopic";
 import { CircularProgress } from "@mui/material";
 import styled from "styled-components";
-import { useUserDetails } from "../../context/UserDetailContext";
-
+import { Topic } from "../../utils/types";
+import { useUserDetails } from "../../hooks";
+/* eslint-disable react-refresh/only-export-components */
 const SelectorBox = styled.div`
   width: 100%;
   margin-top: 40px;
@@ -42,10 +42,7 @@ const Button = styled.button`
   }
 `;
 
-export default function Setting_FavouriteTopics({
-  selfDetails,
-  setActiveSection,
-}: SectionProps) {
+export default function Setting_FavouriteTopics({ selfDetails }: SectionProps) {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [selectedTopics, setSelectedTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(false);
@@ -55,8 +52,9 @@ export default function Setting_FavouriteTopics({
   useEffect(() => {
     async function fetchTopics() {
       const topicsArr = await getAllTopics();
-      const favTopics = selfDetails.favoriteTopics;
+      const favTopics = selfDetails?.favoriteTopics;
       const restTopicsArr = topicsArr.filter((topic) => {
+        if (!favTopics) return true;
         for (const favTopic of favTopics) {
           if (favTopic.id === topic.id) {
             return false;
@@ -65,7 +63,7 @@ export default function Setting_FavouriteTopics({
         return true;
       });
       setTopics(restTopicsArr);
-      setSelectedTopics(favTopics);
+      setSelectedTopics(favTopics || []);
     }
     fetchTopics();
   }, [selfDetails]);
@@ -80,7 +78,7 @@ export default function Setting_FavouriteTopics({
     // Fetch self details again to update self details
     const details = await getSelfDetails();
     setSelfDetails(details);
-    setNotifications(details?.notifications);
+    setNotifications(details?.notifications || []);
   }
 
   return (

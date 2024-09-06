@@ -1,13 +1,12 @@
 import { BlogsLiked } from "../../components/Blogs";
 import { Msg, SectionProps } from "./Account";
 
-export default function Setting_LikedBlogs({
-  selfDetails,
-  setActiveSection,
-}: SectionProps) {
+export default function Setting_LikedBlogs({ selfDetails }: SectionProps) {
   return (
     <>
-      {selfDetails?.likedBlogs?.length > 0 ? (
+      {selfDetails &&
+      selfDetails.likedBlogs &&
+      selfDetails?.likedBlogs?.length > 0 ? (
         <BlogsLiked blogs={selfDetails.likedBlogs} />
       ) : (
         <Msg>No liked blogs found!</Msg>

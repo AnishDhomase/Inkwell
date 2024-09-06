@@ -4,6 +4,7 @@ import { updateUserPasswordInfo } from "../../apis/api";
 import styled from "styled-components";
 import { CircularProgress } from "@mui/material";
 
+/* eslint-disable react-refresh/only-export-components */
 const InputBox = styled.div`
   width: 60%;
   min-width: 400px;
@@ -63,16 +64,13 @@ const SaveAll = styled.button`
   }
 `;
 
-export default function Setting_Password({
-  selfDetails,
-  setActiveSection,
-}: SectionProps) {
-  const [password, setPassword] = useState("");
+export default function Setting_Password({ selfDetails }: SectionProps) {
+  const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
   // Pre-fill the form with the password
   useEffect(() => {
-    setPassword(selfDetails?.password);
+    setPassword(selfDetails?.password || "");
   }, [selfDetails]);
 
   // Save changes

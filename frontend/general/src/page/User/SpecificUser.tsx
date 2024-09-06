@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import styled from "styled-components";
 import {
-  Blog,
   followUser,
   getSelfDetails,
   getUserDetails,
@@ -174,7 +173,7 @@ const Title = styled.h1`
 export default function SpecificUser() {
   const { selfDetails, setSelfDetails, setNotifications } = useUserDetails();
   const { userId } = useParams();
-  const [userDetails, setUserDetails] = useState<object>({});
+  const [userDetails, setUserDetails] = useState<UserDetailsType>();
   const [follow, setFollow] = useState<boolean>(false);
   const [isContactInfoOpen, setContactInfoOpen] = useState<boolean>(false);
 
@@ -195,9 +194,9 @@ export default function SpecificUser() {
       return;
     }
     const result = selfDetails.following?.some(
-      (user: object) => user.id === Number(userId)
+      (user) => user.id === Number(userId)
     );
-    setFollow(result);
+    setFollow(result || false);
   }, [userId, selfDetails]);
 
   // Handle Follow and Unfollow
@@ -217,7 +216,7 @@ export default function SpecificUser() {
         // Fetch self details again to update follow status
         const details = await getSelfDetails();
         setSelfDetails(details);
-        setNotifications(details?.notifications);
+        setNotifications(details?.notifications || []);
       }
     } else {
       // Follow
@@ -230,13 +229,13 @@ export default function SpecificUser() {
         // Fetch self details again to update follow status
         const details = await getSelfDetails();
         setSelfDetails(details);
-        setNotifications(details?.notifications);
+        setNotifications(details?.notifications || []);
       }
     }
     setLoading(false);
   }
 
-  const userBlogs = {
+  const userBlogs: UserBlogsType = {
     liked: selfDetails?.likedBlogs?.map((blog: Blog) => blog.id) || [],
     saved: selfDetails?.savedBlogs?.map((blog: Blog) => blog.id) || [],
   };
@@ -283,15 +282,15 @@ export default function SpecificUser() {
         </header>
         <main>
           <StatCard>
-            <h2>{userDetails._count?.followers}</h2>
+            <h2>{userDetails?._count?.followers}</h2>
             <span>Followers</span>
           </StatCard>
           <StatCard>
-            <h2>{userDetails._count?.following}</h2>
+            <h2>{userDetails?._count?.following}</h2>
             <span>Following</span>
           </StatCard>
           <StatCard>
-            <h2>{userDetails.blogs?.length}</h2>
+            <h2>{userDetails?.blogs?.length}</h2>
             <span>Blogs</span>
           </StatCard>
         </main>
@@ -325,34 +324,8 @@ export default function SpecificUser() {
   );
 }
 
-function getTimeAgo(dateString: string): string {
-  const now = new Date();
-  const past = new Date(dateString);
-  const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
-
-  const intervals = [
-    { label: "year", seconds: 31536000 },
-    { label: "month", seconds: 2592000 },
-    { label: "week", seconds: 604800 },
-    { label: "day", seconds: 86400 },
-    { label: "hour", seconds: 3600 },
-    { label: "minute", seconds: 60 },
-  ];
-
-  for (const interval of intervals) {
-    const count = Math.floor(diffInSeconds / interval.seconds);
-    if (count >= 1) {
-      return count === 1
-        ? `1 ${interval.label} ago`
-        : `${count} ${interval.label}s ago`;
-    }
-  }
-
-  return "just now";
-}
-
-import UserCard from "../../components/UserCard";
 import BackBtn from "../../components/BackBtn";
 import toast from "react-hot-toast";
-import { useUserDetails } from "../../context/UserDetailContext";
 import { CircularProgress } from "@mui/material";
+import { useUserDetails } from "../../hooks";
+import { Blog, UserBlogsType, UserDetailsType } from "../../utils/types";

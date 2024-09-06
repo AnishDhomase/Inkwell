@@ -2,7 +2,8 @@ import styled from "styled-components";
 import UserCard from "./UserCard";
 import { useEffect, useState } from "react";
 import { followUser, getSelfDetails, unfollowUser } from "../apis/api";
-import { useUserDetails } from "../context/UserDetailContext";
+import { useUserDetails } from "../hooks";
+import { AuthorCardType, SelfDetailsType } from "../utils/types";
 
 const Row = styled.div`
   display: flex;
@@ -23,8 +24,8 @@ export default function UserCardWithFollowBtn({
   user,
   selfDetails,
 }: {
-  user: object;
-  selfDetails: object;
+  user: AuthorCardType;
+  selfDetails: SelfDetailsType;
 }) {
   const { setSelfDetails, setNotifications } = useUserDetails();
   const [follow, setFollow] = useState<boolean>(false);
@@ -33,17 +34,19 @@ export default function UserCardWithFollowBtn({
   // Pre-fill Follow and Unfollow status
   useEffect(() => {
     const result = selfDetails?.following?.some(
-      (aUser: object) => aUser.id === user.id
+      (aUser) => aUser.id === user.id
     );
-    setFollow(result);
+    setFollow(result || false);
   }, [selfDetails, user]);
 
   // Handle Follow and Unfollow
   async function handleFollow(
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+    event: React.MouseEvent<HTMLDivElement | HTMLButtonElement, MouseEvent>
   ) {
     event.preventDefault();
+    if (!user?.id) return;
     setLoading(true);
+
     if (follow) {
       // Unfollow
       const res = await unfollowUser({ followId: user.id });
@@ -52,7 +55,7 @@ export default function UserCardWithFollowBtn({
         // Fetch self details again to update following list
         const details = await getSelfDetails();
         setSelfDetails(details);
-        setNotifications(details?.notifications);
+        setNotifications(details?.notifications || []);
       }
     } else {
       // Follow
@@ -62,7 +65,7 @@ export default function UserCardWithFollowBtn({
         // Fetch self details again to update following list
         const details = await getSelfDetails();
         setSelfDetails(details);
-        setNotifications(details?.notifications);
+        setNotifications(details?.notifications || []);
       }
     }
     setLoading(false);

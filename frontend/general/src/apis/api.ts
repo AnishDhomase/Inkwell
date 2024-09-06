@@ -18,6 +18,13 @@ import {
 } from "@anishdhomase/blog_app";
 import axios from "axios";
 import toast from "react-hot-toast";
+import {
+  AuthorCardType,
+  MostfollowedUser,
+  SelfDetailsType,
+  Topic,
+  UserDetailsType,
+} from "../utils/types";
 
 // const BASE_URL = "http://127.0.0.1:8787";
 const BASE_URL = "https://backend.anishdhomase.workers.dev";
@@ -29,24 +36,6 @@ function getHeaders() {
   };
 }
 
-export interface Topic {
-  id: number;
-  name: string;
-}
-export interface Blog {
-  id: number;
-  title: string;
-  content: string;
-  authorId: number;
-  blogImageURL: string;
-  createdAt: string;
-  active: boolean;
-  _count: {
-    likedByUsers: number;
-  };
-}
-
-// Auth
 export async function signIn(payload: SigninType) {
   try {
     const res = await axios.post(`${BASE_URL}/user/signin`, payload);
@@ -460,7 +449,7 @@ export async function clearNotifications() {
     return false;
   }
 }
-export async function getSelfDetails(): Promise<object> {
+export async function getSelfDetails(): Promise<SelfDetailsType> {
   try {
     const res = await axios.get(`${BASE_URL}/user/details`, {
       headers: getHeaders(),
@@ -471,7 +460,7 @@ export async function getSelfDetails(): Promise<object> {
       // toast.error("Something went wrong, Try Again 1");
       return {};
     }
-  } catch (e) {
+  } catch {
     // if (!axios.isAxiosError(e))
     // toast.error("Something went wrong, Try Again 2");
     // else toast.error(e.response?.data?.error);
@@ -480,7 +469,7 @@ export async function getSelfDetails(): Promise<object> {
 }
 
 // Get User
-export async function getUser(payload: number): Promise<object> {
+export async function getUser(payload: number): Promise<AuthorCardType> {
   try {
     const res = await axios.get(`${BASE_URL}/user/userDetails/${payload}`);
     if (res.data.success) {
@@ -495,7 +484,9 @@ export async function getUser(payload: number): Promise<object> {
     return {};
   }
 }
-export async function getUserDetails(payload: number): Promise<object> {
+export async function getUserDetails(
+  payload: number
+): Promise<UserDetailsType> {
   try {
     const res = await axios.get(`${BASE_URL}/user/details/${payload}`);
     if (res.data.success) {
@@ -510,7 +501,7 @@ export async function getUserDetails(payload: number): Promise<object> {
     return {};
   }
 }
-export async function getMostFollowedUsers(): Promise<object[]> {
+export async function getMostFollowedUsers(): Promise<MostfollowedUser[]> {
   try {
     const res = await axios.get(`${BASE_URL}/user/mostFollowed`, {
       headers: getHeaders(),

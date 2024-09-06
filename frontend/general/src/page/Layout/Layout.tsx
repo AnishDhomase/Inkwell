@@ -11,7 +11,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import CircularProgress from "@mui/material/CircularProgress";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"; //small
-import { Theme } from "../../context/UserDetailContext";
 
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
@@ -206,7 +205,6 @@ const Notification = styled.div`
   border-bottom: 1px solid #e9e2e2;
 `;
 
-// type activePage = "home" | "search" | "add" | "liked" | "saved";
 type activePage = "home" | "search" | "add" | "account";
 
 export default function Layout() {
@@ -220,7 +218,9 @@ export default function Layout() {
   const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [activePage, setActivePage] = useState<activePage>("home");
-  const [mostFollowedUsers, setMostFollowedUsers] = useState<object[]>([]);
+  const [mostFollowedUsers, setMostFollowedUsers] = useState<
+    MostfollowedUser[]
+  >([]);
   const [notificationsState, setNotificationsState] =
     useState<string[]>(notifications);
 
@@ -358,7 +358,7 @@ export default function Layout() {
               >
                 {notificationsState?.length ? (
                   <>
-                    {notificationsState?.map((content, ind) => (
+                    {notificationsState?.map((content) => (
                       <Notification>{content}</Notification>
                     ))}
                     <Button
@@ -511,7 +511,8 @@ import PermIdentityOutlinedIcon from "@mui/icons-material/PermIdentityOutlined";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import UserCard from "../../components/UserCard";
-import { useUserDetails } from "../../context/UserDetailContext";
+import { MostfollowedUser, Theme } from "../../utils/types";
+import { useUserDetails } from "../../hooks";
 
 function Navbar({
   activePage,
@@ -611,49 +612,6 @@ function Navbar({
                   )}
                 </IconButton>
               </Link>
-              {/* <Link to="/app/create">
-                <AddButton
-                  active={activePage == "add"}
-                  onClick={() => {
-                    setActivePage("add");
-                    setShowNav(false);
-                  }}
-                >
-                  <IoAddOutline />
-                </AddButton>
-              </Link> */}
-              {/* <Link to="/app/liked-Blogs">
-                <IconButton
-                  aria-label="delete"
-                  sx={{ color: "white" }}
-                  onClick={() => {
-                    setActivePage("liked");
-                    setShowNav(false);
-                  }}
-                >
-                  {activePage === "liked" ? (
-                    <FavoriteIcon />
-                  ) : (
-                    <FavoriteBorderIcon />
-                  )}
-                </IconButton>
-              </Link>
-              <Link to="/app/saved-Blogs">
-                <IconButton
-                  aria-label="delete"
-                  sx={{ color: "white" }}
-                  onClick={() => {
-                    setActivePage("saved");
-                    setShowNav(false);
-                  }}
-                >
-                  {activePage === "saved" ? (
-                    <BookmarkIcon />
-                  ) : (
-                    <BookmarkBorderIcon />
-                  )}
-                </IconButton>
-              </Link> */}
             </StyledNav>
           </motion.span>
         </AnimatePresence>

@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
-import { Theme, useUserDetails } from "../context/UserDetailContext";
+import { useUserDetails } from "../hooks";
+import { Theme } from "../utils/types";
 
 interface BallProps {
   on: boolean;

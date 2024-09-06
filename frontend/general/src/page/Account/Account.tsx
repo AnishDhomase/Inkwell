@@ -5,18 +5,12 @@ import { Link, useLocation } from "react-router-dom";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { IconButton } from "@mui/material";
 
-import { useUserDetails } from "../../context/UserDetailContext";
 import { getSelfDetails } from "../../apis/api";
 import PageLoader from "../../components/PageLoader";
 import { ToggleButton } from "../../components/ToggleBtn";
+import { useUserDetails } from "../../hooks";
+import { SelfDetailsType } from "../../utils/types";
 
-// import Setting_General from "./Setting_General";
-// import Setting_Home from "./Setting_Home";
-// import Setting_Password from "./Setting_Password";
-// import Setting_LikedBlogs from "./Setting_LikedBlogs";
-// import Setting_SavedBlogs from "./Setting_SavedBlogs";
-// import Setting_FavouriteTopics from "./Setting_FavouriteTopics";
-// import Setting_YourBlogs from "./Setting_YourBlogs";
 const Setting_General = lazy(() => import("./Setting_General"));
 const Setting_Home = lazy(() => import("./Setting_Home"));
 const Setting_Password = lazy(() => import("./Setting_Password"));
@@ -259,7 +253,7 @@ function getActivePage(categoryOfSettings: string): Section {
   }
 }
 export interface SectionProps {
-  selfDetails: object;
+  selfDetails: SelfDetailsType | undefined;
   setActiveSection: (section: Section) => void;
 }
 
@@ -293,7 +287,7 @@ export default function Account() {
     async function fetchSelfDetails() {
       const details = await getSelfDetails();
       setSelfDetails(details);
-      setNotifications(details?.notifications);
+      setNotifications(details?.notifications || []);
     }
     fetchSelfDetails();
   }, []);

@@ -1,14 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 
-import {
-  Theme,
-  UserDetailsProvider,
-  useUserDetails,
-} from "./context/UserDetailContext";
 import PageLoader from "./components/PageLoader";
 import { ThemeProvider } from "styled-components";
-import GlobalStyles, { darkTheme, lightTheme } from "./utils/GlobalStyle";
+import { darkTheme, lightTheme } from "./utils/GlobalStyle";
+import { Theme } from "./utils/types";
+import { useUserDetails } from "./hooks";
 
 const Auth = lazy(() => import("./page/Auth/Auth"));
 const Home = lazy(() => import("./page/Home/Home"));

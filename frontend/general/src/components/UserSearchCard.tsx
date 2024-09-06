@@ -8,6 +8,7 @@ import {
   unfollowUser,
 } from "../apis/api";
 import toast from "react-hot-toast";
+import { SelfDetailsType } from "../utils/types";
 
 interface UserBoxProps {
   imageURL: string;
@@ -123,7 +124,7 @@ export default function UserSearchCard({
   setNotifications,
 }: {
   user: object;
-  selfDetails: object;
+  selfDetails: SelfDetailsType | undefined;
   setSelfDetails: (details: object) => void;
   setNotifications: (notifications: string[]) => void;
 }) {

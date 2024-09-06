@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import {
-  Blog,
   getSelfDetails,
   likeBlog,
   saveBlog,
@@ -103,8 +102,9 @@ const RHS = styled.div`
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { CircularProgress } from "@mui/material";
 import { Msg } from "../page/Account/Account";
-import { useUserDetails } from "../context/UserDetailContext";
 import { formatDate, getMinutesToRead } from "../utils/helpers";
+import { useUserDetails } from "../hooks";
+import { Blog, UserBlogsType } from "../utils/types";
 
 interface LeftBlogSecProps {
   imageURL: string;
@@ -174,8 +174,8 @@ export default function Blogs({
   blogs,
   userBlogs,
 }: {
-  blogs: Blog[];
-  userBlogs: any;
+  blogs: Blog[] | undefined;
+  userBlogs: UserBlogsType;
 }) {
   const [noResults, setNoResults] = useState<boolean>(false);
   useEffect(() => {
@@ -213,7 +213,7 @@ export default function Blogs({
     </BlogBox>
   );
 }
-export function BlogsLiked({ blogs }: { blogs: object[] }) {
+export function BlogsLiked({ blogs }: { blogs: Blog[] }) {
   const [noResults, setNoResults] = useState<boolean>(false);
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -240,7 +240,7 @@ export function CardLiked({ blog }: { blog: Blog }) {
   const { setSelfDetails, setNotifications } = useUserDetails();
 
   async function handleBlogLike(
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+    event: React.MouseEvent<HTMLDivElement | HTMLButtonElement, MouseEvent>
   ) {
     event.stopPropagation();
     event.preventDefault();
@@ -250,7 +250,7 @@ export function CardLiked({ blog }: { blog: Blog }) {
       // Fetch self details again to update self details
       const details = await getSelfDetails();
       setSelfDetails(details);
-      setNotifications(details?.notifications);
+      setNotifications(details?.notifications || []);
       setLoading(() => false);
     }
   }
@@ -295,7 +295,7 @@ export function CardLiked({ blog }: { blog: Blog }) {
     </Link>
   );
 }
-export function BlogsSaved({ blogs }: { blogs: object[] }) {
+export function BlogsSaved({ blogs }: { blogs: Blog[] }) {
   const [noResults, setNoResults] = useState<boolean>(false);
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -322,7 +322,7 @@ export function CardSaved({ blog }: { blog: Blog }) {
   const { setSelfDetails, setNotifications } = useUserDetails();
 
   async function handleBlogSave(
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+    event: React.MouseEvent<HTMLDivElement | HTMLButtonElement, MouseEvent>
   ) {
     event.stopPropagation();
     event.preventDefault();
@@ -332,7 +332,7 @@ export function CardSaved({ blog }: { blog: Blog }) {
       // Fetch self details again to update self details
       const details = await getSelfDetails();
       setSelfDetails(details);
-      setNotifications(details?.notifications);
+      setNotifications(details?.notifications || []);
       setLoading(() => false);
     }
     setLoading(() => false);

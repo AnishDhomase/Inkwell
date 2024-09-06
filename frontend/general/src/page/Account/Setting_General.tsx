@@ -7,6 +7,7 @@ import styled from "styled-components";
 import { CircularProgress } from "@mui/material";
 import { AutoResizingTextarea } from "../../components/AutoResizingTextarea";
 
+/* eslint-disable react-refresh/only-export-components */
 const ProfilePhotoBox = styled.div`
   width: 150px;
   height: 150px;
@@ -184,10 +185,7 @@ const SaveAll = styled.button`
   }
 `;
 
-export default function Setting_General({
-  selfDetails,
-  setActiveSection,
-}: SectionProps) {
+export default function Setting_General({ selfDetails }: SectionProps) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(true);
@@ -196,7 +194,7 @@ export default function Setting_General({
   const [followTab, setFollowTab] = useState<"following" | "followers">(
     "following"
   );
-  const ref = useRef(null);
+  const ref = useRef<HTMLInputElement>(null);
 
   // Handle file change
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -218,7 +216,7 @@ export default function Setting_General({
   }, [selfDetails]);
 
   // Auto resize the textarea
-  const textareaRef = useRef(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -282,7 +280,7 @@ export default function Setting_General({
           <label>Description</label>
 
           <AutoResizingTextarea
-            value={description}
+            value={description || ""}
             handleOnChange={(e) => setDescription(e.target.value)}
           />
         </div>
@@ -303,9 +301,10 @@ export default function Setting_General({
           </FollowTab>
         </header>
         <main>
-          {selfDetails[followTab]?.map((user: object) => (
-            <UserCardWithFollowBtn user={user} selfDetails={selfDetails} />
-          ))}
+          {selfDetails &&
+            selfDetails[followTab]?.map((user) => (
+              <UserCardWithFollowBtn user={user} selfDetails={selfDetails} />
+            ))}
         </main>
       </FollowBox>
 

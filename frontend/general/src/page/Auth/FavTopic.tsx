@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { getAllTopics, setFavouriteTopics, Topic } from "../../apis/api";
+import { getAllTopics, setFavouriteTopics } from "../../apis/api";
 import styled from "styled-components";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useNavigate } from "react-router-dom";
+import { Topic } from "../../utils/types";
 
 interface HeadingProps {
   wt?: string;
@@ -122,7 +123,7 @@ const Button = styled.button<ButtonProps>`
   }
 `;
 
-export default function FavTopic({ setStep }: { setStep: any }) {
+export default function FavTopic() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [selectedTopics, setSelectedTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(false);
@@ -161,21 +162,6 @@ export default function FavTopic({ setStep }: { setStep: any }) {
           style={{ margin: "50px 0" }}
         />
       )}
-      {/* <TopicsWrapper>
-        {selectedTopics.map((topic) => (
-          <SelectedTopicBox key={topic.name} onClick={() => removeTopic(topic)}>
-            <span>{topic.name}</span>
-            <CancelIcon />
-          </SelectedTopicBox>
-        ))}
-      </TopicsWrapper>
-      <TopicsWrapper>
-        {topics.map((topic) => (
-          <TopicBox key={topic.name} onClick={() => addTopic(topic)}>
-            {topic.name}
-          </TopicBox>
-        ))}
-      </TopicsWrapper> */}
       <Button
         color="#ff7738"
         textColor="white"
@@ -196,10 +182,10 @@ export function TopicSelector({
   setTopics,
   blog,
 }: {
-  setSelectedTopics: any;
+  setSelectedTopics: (topics: Topic[]) => void;
   selectedTopics: Topic[];
   topics: Topic[];
-  setTopics: any;
+  setTopics: (topics: Topic[]) => void;
   blog?: boolean;
 }) {
   function addTopic(topic: Topic) {

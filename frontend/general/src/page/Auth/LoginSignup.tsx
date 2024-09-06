@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { getSelfDetails, signIn, signUp } from "../../apis/api";
-import { useUserDetails } from "../../context/UserDetailContext";
+import { useUserDetails } from "../../hooks";
 
 interface RowProps {
   fontSz?: string;
@@ -154,7 +154,11 @@ const EyeIcon = styled.div`
   color: gray;
 `;
 
-export default function LoginSignup({ setStep }: { setStep: any }) {
+export default function LoginSignup({
+  setStep,
+}: {
+  setStep: (step: number) => void;
+}) {
   const { setSelfDetails, setNotifications } = useUserDetails();
   const [loading, setLoading] = useState(false);
   const [login, setLogin] = useState(true);
@@ -178,7 +182,7 @@ export default function LoginSignup({ setStep }: { setStep: any }) {
         // Fetch self details again to update self details
         const details = await getSelfDetails();
         setSelfDetails(details);
-        setNotifications(details?.notifications);
+        setNotifications(details?.notifications || []);
         navigate("/app");
       }
     } else {
@@ -189,7 +193,7 @@ export default function LoginSignup({ setStep }: { setStep: any }) {
         name: formData.name,
         username: formData.username,
       });
-
+      //@ts-expect-error number/function input error
       if (success) setStep((step: number) => step + 1);
     }
     setLoading(() => false);

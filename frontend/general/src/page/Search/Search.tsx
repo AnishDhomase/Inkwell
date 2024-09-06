@@ -1,11 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  Blog,
-  getAllTopics,
-  getQueriedBlogs,
-  getQueriedUsers,
-  Topic,
-} from "../../apis/api";
+import { getAllTopics, getQueriedBlogs, getQueriedUsers } from "../../apis/api";
 import styled from "styled-components";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
@@ -190,8 +184,8 @@ import Blogs from "../../components/Blogs";
 import { Link, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import UserSearchCard from "../../components/UserSearchCard";
-import { useUserDetails } from "../../context/UserDetailContext";
-import { useQuery } from "../../hooks";
+import { useQuery, useUserDetails } from "../../hooks";
+import { Blog, Topic } from "../../utils/types";
 
 export default function Search() {
   const queryParam = useQuery();
@@ -202,15 +196,15 @@ export default function Search() {
 
   const { selfDetails, setSelfDetails, setNotifications } = useUserDetails();
   const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [topics, setTopics] = useState<Topic[]>([]);
+  const [, setTopics] = useState<Topic[]>([]);
   const [totalAvlBlogsCount, setTotalAvlBlogsCount] = useState<number>(0);
   const [users, setUsers] = useState([]);
-  const [totalAvlUsersCount, setTotalAvlsetUsersCount] = useState<number>(0);
+  const [, setTotalAvlsetUsersCount] = useState<number>(0);
 
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [activePageNumber, setActivePageNumber] = useState<number>(1);
   const [mouseOnReadmore, setMouseOnReadmore] = useState<boolean>(false);
-  const [loadingBlogs, setLoadingBlogs] = useState<boolean>(false);
+  const [, setLoadingBlogs] = useState<boolean>(false);
   const [searchFeedback, setSearchFeedback] = useState<SearchStatus>(
     SearchStatus.noSearchYet
   );

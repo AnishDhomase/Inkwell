@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { getTimeAgo } from "../../utils/helpers";
 import styled from "styled-components";
 import { getUser } from "../../apis/api";
+import { AuthorCardType, CommentType } from "../../utils/types";
 
 const ButtonSmall = styled.button`
   padding: 2px 5px;
@@ -78,14 +79,14 @@ export default function Comment({
   editing,
   setEditing,
 }: {
-  comment: object;
-  myUserId: number;
+  comment: CommentType;
+  myUserId: number | undefined;
   handleDeleteComment: (commentId: number) => Promise<void>;
   handleEditComment: (commentId: number, content: string) => Promise<void>;
   editing: number;
   setEditing: (id: number) => void;
 }) {
-  const [authorDetails, setAuthorDetails] = useState<object>({});
+  const [authorDetails, setAuthorDetails] = useState<AuthorCardType>({});
   const [loading, setLoading] = useState<boolean>(false);
   const [commentContent, setCommentContent] = useState<string>(comment.content);
 

@@ -13,7 +13,7 @@ export function AutoResizingTextarea({
   value: string;
   handleOnChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }) {
-  const textareaRef = useRef(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const textarea = textareaRef.current;
