@@ -72,7 +72,6 @@ export type UserDetailsType = {
   };
   blogs?: Blog[];
 };
-
 export type CommentType = {
   active: boolean;
   authorId: number;
@@ -86,8 +85,17 @@ export type AuthorCardType = {
   username?: string;
   profilePicURL?: string;
 };
-
 export type UserBlogsType = {
   liked: number[];
   saved: number[];
+};
+export type UserSearchCardType = {
+  id: number;
+  username: string;
+  name: string;
+  profilePicURL: string;
+  _count: {
+    followers: number;
+    blogs: number;
+  };
 };

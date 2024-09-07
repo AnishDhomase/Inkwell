@@ -24,8 +24,8 @@ export default function Setting_YourBlogs({ selfDetails }: SectionProps) {
         <Blogs
           blogs={selfDetails?.blogs}
           userBlogs={{
-            likedBlogs: [],
-            savedBlogs: [],
+            liked: [],
+            saved: [],
           }}
         />
       ) : (

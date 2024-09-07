@@ -1,14 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import {
-  followUser,
-  getSelfDetails,
-  getUserDetails,
-  unfollowUser,
-} from "../apis/api";
+import { followUser, getSelfDetails, unfollowUser } from "../apis/api";
 import toast from "react-hot-toast";
-import { SelfDetailsType } from "../utils/types";
+import { SelfDetailsType, UserSearchCardType } from "../utils/types";
 
 interface UserBoxProps {
   imageURL: string;
@@ -123,7 +118,7 @@ export default function UserSearchCard({
   setSelfDetails,
   setNotifications,
 }: {
-  user: object;
+  user: UserSearchCardType;
   selfDetails: SelfDetailsType | undefined;
   setSelfDetails: (details: object) => void;
   setNotifications: (notifications: string[]) => void;
@@ -136,15 +131,13 @@ export default function UserSearchCard({
   // Pre-fill Follow and Unfollow status
   useEffect(() => {
     if (!selfDetails?.id) return;
-    const result = selfDetails.following?.some(
-      (aUser: object) => aUser.id === user.id
-    );
-    setFollow(result);
+    const result = selfDetails.following?.some((aUser) => aUser.id === user.id);
+    setFollow(result || false);
   }, [selfDetails, user]);
 
   // Handle Follow and Unfollow
   async function handleFollow(
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) {
     event.preventDefault();
     if (!selfDetails?.id) {
@@ -162,7 +155,7 @@ export default function UserSearchCard({
         // Fetch self details again to update following list
         const details = await getSelfDetails();
         setSelfDetails(details);
-        setNotifications(details?.notifications);
+        setNotifications(details?.notifications || []);
       }
     } else {
       // Follow
@@ -174,7 +167,7 @@ export default function UserSearchCard({
         // Fetch self details again to update following list
         const details = await getSelfDetails();
         setSelfDetails(details);
-        setNotifications(details?.notifications);
+        setNotifications(details?.notifications || []);
       }
     }
     setLoading(false);

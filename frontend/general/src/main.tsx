@@ -9,7 +9,7 @@ import { UserDetailsProvider } from "./context/UserDetailContext";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Toaster
-      position="top center"
+      position="top-center"
       gutter={12}
       toastOptions={{
         success: { duration: 3000 },
