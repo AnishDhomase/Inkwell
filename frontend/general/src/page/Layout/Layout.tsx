@@ -46,6 +46,8 @@ const CircleBorder = styled.div`
 `;
 const Main = styled.main`
   min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
 
   /* background-color: #454444; */
   background-color: ${({ theme }) => theme.bodyPrimary};
@@ -59,6 +61,7 @@ const Main = styled.main`
 `;
 interface LeftSecProps {
   fullWidth: boolean;
+  pad?: boolean;
 }
 const LeftSec = styled.div<LeftSecProps>`
   width: ${(props) => (props.fullWidth ? "100%" : "70%")};
@@ -70,7 +73,7 @@ const LeftSec = styled.div<LeftSecProps>`
     width: 100%;
   }
   @media (max-width: 480px) {
-    padding: 20px 10px;
+    padding: 20px ${(props) => (props.pad ? "0" : "10px")};
   }
 `;
 const RightSec = styled.div`
@@ -388,6 +391,7 @@ export default function Layout() {
               location.pathname === "/app"
             )
           }
+          pad={location.pathname === "/app/create"}
         >
           <Outlet />
         </LeftSec>

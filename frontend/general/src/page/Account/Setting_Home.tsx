@@ -139,7 +139,7 @@ export default function Setting_Home({
         <UserProfilePhoto
           src={
             selfDetails?.profilePicURL ||
-            "../../../public/placeholderBlogImage.webp"
+            "https://res.cloudinary.com/dwfvgrn9g/image/upload/v1725806791/placeholderBlogImage_iugz3d.webp"
           }
           alt="profile"
         />

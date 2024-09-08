@@ -123,7 +123,10 @@ export default function Comment({
         <UserCard
           userId={comment.authorId}
           username={authorDetails?.username}
-          profilePicURL={authorDetails?.profilePicURL}
+          profilePicURL={
+            authorDetails?.profilePicURL ||
+            "https://res.cloudinary.com/dwfvgrn9g/image/upload/v1725806791/placeholderBlogImage_iugz3d.webp"
+          }
         />
         <p>{getTimeAgo(comment.createdAt)}</p>
       </header>

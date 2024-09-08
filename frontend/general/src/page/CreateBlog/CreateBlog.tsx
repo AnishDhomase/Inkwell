@@ -25,6 +25,7 @@ const InnerBox = styled.div`
   /* background-color: #fbfafa; */
   background-color: ${({ theme }) => theme.bodySecondary};
   width: 100%;
+  overflow-x: hidden;
   max-width: 1000px;
   padding: 40px;
   border-radius: 10px;
@@ -126,6 +127,7 @@ const TextArea = styled.textarea`
 
 const ProfilePhotoBox = styled.div`
   width: 100%;
+  overflow-x: hidden;
   border-radius: 10px;
   border: 2px solid #2c1a12;
   overflow: hidden;
@@ -136,6 +138,7 @@ const ProfilePhotoBox = styled.div`
 `;
 const Img = styled.img`
   width: 100%;
+  overflow-x: hidden;
 `;
 const FileInputBox = styled.div`
   border: 2px dashed #ff7738;
@@ -179,6 +182,7 @@ const LeftBox = styled.div`
     width: 100%;
   }
   @media (max-width: 480px) {
+    width: 100%;
     border-radius: 15px;
     padding: 5px;
     gap: 10px;
@@ -352,7 +356,10 @@ export default function CreateBlog() {
           <LeftBox>
             <ProfilePhotoBox>
               <Img
-                src={preview || "../../../public/placeholderBlogImage.webp"}
+                src={
+                  preview ||
+                  "https://res.cloudinary.com/dwfvgrn9g/image/upload/v1725806791/placeholderBlogImage_iugz3d.webp"
+                }
                 alt="preview"
               />
             </ProfilePhotoBox>

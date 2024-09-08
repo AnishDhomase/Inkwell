@@ -260,7 +260,8 @@ export function CardLiked({ blog }: { blog: Blog }) {
         <LHS>
           <LeftBlogSec
             imageURL={
-              blog.blogImageURL || "../../../public/placeholderBlogImage.webp"
+              blog.blogImageURL ||
+              "https://res.cloudinary.com/dwfvgrn9g/image/upload/v1725806791/placeholderBlogImage_iugz3d.webp"
             }
           ></LeftBlogSec>
           <RightBlogSec>
@@ -343,7 +344,8 @@ export function CardSaved({ blog }: { blog: Blog }) {
         <LHS>
           <LeftBlogSec
             imageURL={
-              blog.blogImageURL || "../../../public/placeholderBlogImage.webp"
+              blog.blogImageURL ||
+              "https://res.cloudinary.com/dwfvgrn9g/image/upload/v1725806791/placeholderBlogImage_iugz3d.webp"
             }
           ></LeftBlogSec>
           <RightBlogSec>
@@ -439,7 +441,8 @@ export function Card({
       <BlogCard key={blog.id}>
         <LeftBlogSec
           imageURL={
-            blog.blogImageURL || "../../../public/placeholderBlogImage.webp"
+            blog.blogImageURL ||
+            "https://res.cloudinary.com/dwfvgrn9g/image/upload/v1725806791/placeholderBlogImage_iugz3d.webp"
           }
         >
           {/* <img src={blog.blogImageURL} alt="blog" /> */}

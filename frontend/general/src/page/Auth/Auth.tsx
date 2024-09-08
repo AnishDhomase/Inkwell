@@ -364,7 +364,11 @@ export default function Auth() {
       <OuterBox>
         <LeftBox>
           <Row>
-            <Logo width="60px" alt="logo" src="../../public/logoWhite.png" />
+            <Logo
+              width="60px"
+              alt="logo"
+              src="https://res.cloudinary.com/dwfvgrn9g/image/upload/v1725807341/logoWhite_vnzsqg.png"
+            />
           </Row>
 
           <Heading mt="30px">Start Your Learning Journey With Inkwell.</Heading>

@@ -178,7 +178,8 @@ export default function UserSearchCard({
         <Left>
           <UserProfile
             imageURL={
-              user.profilePicURL || "../../../public/placeholderBlogImage.webp"
+              user.profilePicURL ||
+              "https://res.cloudinary.com/dwfvgrn9g/image/upload/v1725806791/placeholderBlogImage_iugz3d.webp"
             }
           />
           <UserDetails>

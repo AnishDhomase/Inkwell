@@ -371,7 +371,7 @@ export default function SpecificBlog() {
         <img
           src={
             blogDetails?.blogImageURL ||
-            "../../../public/placeholderBlogImage.webp"
+            "https://res.cloudinary.com/dwfvgrn9g/image/upload/v1725806791/placeholderBlogImage_iugz3d.webp"
           }
           alt="blog"
         />

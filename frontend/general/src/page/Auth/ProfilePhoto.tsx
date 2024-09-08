@@ -87,7 +87,7 @@ export default function ProfilePhoto({
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(
-    "../../../public/placeholderBlogImage.webp"
+    "https://res.cloudinary.com/dwfvgrn9g/image/upload/v1725806791/placeholderBlogImage_iugz3d.webp"
   );
   const [uploading, setUploading] = useState(false);
   const ref = useRef<HTMLInputElement>(null);
@@ -112,7 +112,10 @@ export default function ProfilePhoto({
       <ProfilePhotoBox>
         {preview && (
           <Img
-            src={preview || "../../../public/placeholderBlogImage.webp"}
+            src={
+              preview ||
+              "https://res.cloudinary.com/dwfvgrn9g/image/upload/v1725806791/placeholderBlogImage_iugz3d.webp"
+            }
             alt="preview"
           />
         )}

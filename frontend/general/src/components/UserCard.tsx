@@ -56,7 +56,8 @@ export default function UserCard({
       <UserBox>
         <UserProfile
           imageURL={
-            profilePicURL || "../../../public/placeholderBlogImage.webp"
+            profilePicURL ||
+            "https://res.cloudinary.com/dwfvgrn9g/image/upload/v1725806791/placeholderBlogImage_iugz3d.webp"
           }
         />
         <UserDetails>

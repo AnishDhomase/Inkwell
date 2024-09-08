@@ -208,7 +208,8 @@ export default function Setting_General({ selfDetails }: SectionProps) {
   useEffect(() => {
     setUploading(() => true);
     setPreview(
-      selfDetails?.profilePicURL || "../../../public/placeholderBlogImage.webp"
+      selfDetails?.profilePicURL ||
+        "https://res.cloudinary.com/dwfvgrn9g/image/upload/v1725806791/placeholderBlogImage_iugz3d.webp"
     );
     setName(selfDetails?.name);
     setDescription(selfDetails?.description);
@@ -242,7 +243,10 @@ export default function Setting_General({ selfDetails }: SectionProps) {
         <ProfilePhotoBox>
           {preview && (
             <Img
-              src={preview || "../../../public/placeholderBlogImage.webp"}
+              src={
+                preview ||
+                "https://res.cloudinary.com/dwfvgrn9g/image/upload/v1725806791/placeholderBlogImage_iugz3d.webp"
+              }
               alt="preview"
             />
           )}
