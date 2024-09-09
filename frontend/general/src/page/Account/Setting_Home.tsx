@@ -164,9 +164,12 @@ export default function Setting_Home({
           </StatCard>
         </main>
       </UserInfoCard>
-      <Link to="/app/account/general">
+      <Link
+        to="/app/account/general"
+        onClick={() => setActiveSection(Section.general)}
+      >
         <Button>
-          <p onClick={() => setActiveSection(Section.general)}>Edit Profile</p>
+          <p>Edit Profile</p>
           <span>
             <ChevronRightIcon />
           </span>

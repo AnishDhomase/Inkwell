@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { getAllBlogs, getAllTopics, getBlogsOfTopic } from "../../apis/api";
+import {
+  getAllBlogs,
+  getAllTopics,
+  getBlogsOfTopic,
+  getSelfDetails,
+} from "../../apis/api";
 import styled from "styled-components";
 
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -129,7 +134,7 @@ const TextButton = styled.button`
 `;
 
 export default function Home() {
-  const { selfDetails } = useUserDetails();
+  const { selfDetails, setSelfDetails, setNotifications } = useUserDetails();
 
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [totalAvlBlogsCount, setTotalAvlBlogsCount] = useState<number>(0);
@@ -219,6 +224,16 @@ export default function Home() {
         container.removeEventListener("wheel", handleWheel);
       };
     }
+  }, []);
+
+  // Reset selfDetails when page change
+  useEffect(() => {
+    async function fetchSelfDetails() {
+      const details = await getSelfDetails();
+      setSelfDetails(details);
+      setNotifications(details?.notifications || []);
+    }
+    fetchSelfDetails();
   }, []);
 
   //  Read more button

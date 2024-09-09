@@ -6,6 +6,7 @@ import {
   deleteCommentOnBlog,
   editCommentOnBlog,
   getBlog,
+  getSelfDetails,
   getUser,
   likeBlog,
   saveBlog,
@@ -206,7 +207,7 @@ const PreviousComments = styled.div`
 `;
 
 export default function SpecificBlog() {
-  const { selfDetails } = useUserDetails();
+  const { selfDetails, setSelfDetails, setNotifications } = useUserDetails();
 
   const { blogId } = useParams();
   const [blogDetails, setBlogDetails] = useState<BlogDetailsType>();
@@ -263,6 +264,16 @@ export default function SpecificBlog() {
     setLiked(liked);
     setSaved(saved);
   }, [userBlogs, blogDetails, selfDetails]);
+
+  // Reset selfDetails when page change
+  useEffect(() => {
+    async function fetchSelfDetails() {
+      const details = await getSelfDetails();
+      setSelfDetails(details);
+      setNotifications(details?.notifications || []);
+    }
+    fetchSelfDetails();
+  }, []);
 
   // Handle like and save
   async function handleBlogLike(
