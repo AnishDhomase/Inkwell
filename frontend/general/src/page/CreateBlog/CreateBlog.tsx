@@ -337,6 +337,8 @@ export default function CreateBlog() {
       setSelectedTopics([]);
       setPreview(null);
       setFile(null);
+      const topicsArr = await getAllTopics();
+      setTopics(topicsArr);
     }
     setLoading(() => false);
   }
